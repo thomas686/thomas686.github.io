@@ -272,7 +272,7 @@ function draw() {
     foot('A DO IT', 'B BACK'); say.push('Contact. Email thomas.s686@gmail.com. LinkedIn in slash ts0kolowski.');
   }
   if (!sound && view !== 'project') txt('MUTED', 532, 60, C.dim, 12);
-  scanlines(); screenTex.needsUpdate = true; srText.textContent = say.join(' ');
+  scanlines(); screenTex.needsUpdate = true; srText.textContent = say.join(' ') + (sound ? '' : ' Sound is muted.');
 }
 setInterval(() => { blink = !blink; if (on && view !== 'boot') draw(); }, 500);
 
