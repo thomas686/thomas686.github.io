@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 700" font-family="Geist, Segoe UI, Helvetica, Arial, sans-serif">
+<defs><filter id="sh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#1c2320" flood-opacity=".14"/></filter></defs>
+<rect width="1120" height="700" fill="#e3e8f6"/>
+
+<g filter="url(#sh)"><rect x="150" y="90" width="820" height="520" rx="22" fill="#fff"/></g>
+<text x="200" y="158" font-size="30" font-weight="600" fill="#1c2320" >Review queue</text><text x="200" y="192" font-size="18" font-weight="400" fill="#8a938e" >Drafted over the weekend, waiting for a person</text>
+<g transform="translate(200,230)"><rect width="220" height="320" rx="16" fill="#f6f7f4" stroke="#e6eae5"/>
+<rect x="14" y="14" width="192" height="130" rx="10" fill="#c9d3f0"/>
+<circle cx="60" cy="80" r="26" fill="#fff" opacity=".7"/>
+<rect x="14" y="162" width="170" height="12" rx="6" fill="#d5dad4"/><rect x="14" y="184" width="140" height="12" rx="6" fill="#e6eae5"/><rect x="14" y="206" width="156" height="12" rx="6" fill="#e6eae5"/>
+<rect x="14" y="252" width="92" height="40" rx="10" fill="#2f6f5e"/><text x="32" y="278" font-size="16" font-weight="600" fill="#fff" >Approve</text>
+<rect x="114" y="252" width="92" height="40" rx="10" fill="#fff" stroke="#e6eae5"/><text x="142" y="278" font-size="16" font-weight="500" fill="#1c2320" >Edit</text></g><g transform="translate(450,230)"><rect width="220" height="320" rx="16" fill="#f6f7f4" stroke="#e6eae5"/>
+<rect x="14" y="14" width="192" height="130" rx="10" fill="#d7e9df"/>
+<circle cx="90" cy="80" r="22" fill="#fff" opacity=".7"/>
+<rect x="14" y="162" width="170" height="12" rx="6" fill="#d5dad4"/><rect x="14" y="184" width="140" height="12" rx="6" fill="#e6eae5"/><rect x="14" y="206" width="156" height="12" rx="6" fill="#e6eae5"/>
+<rect x="14" y="252" width="92" height="40" rx="10" fill="#2f6f5e"/><text x="32" y="278" font-size="16" font-weight="600" fill="#fff" >Approve</text>
+<rect x="114" y="252" width="92" height="40" rx="10" fill="#fff" stroke="#e6eae5"/><text x="142" y="278" font-size="16" font-weight="500" fill="#1c2320" >Edit</text></g><g transform="translate(700,230)"><rect width="220" height="320" rx="16" fill="#f6f7f4" stroke="#e6eae5"/>
+<rect x="14" y="14" width="192" height="130" rx="10" fill="#f1dccf"/>
+<circle cx="120" cy="80" r="18" fill="#fff" opacity=".7"/>
+<rect x="14" y="162" width="170" height="12" rx="6" fill="#d5dad4"/><rect x="14" y="184" width="140" height="12" rx="6" fill="#e6eae5"/><rect x="14" y="206" width="156" height="12" rx="6" fill="#e6eae5"/>
+<rect x="14" y="252" width="92" height="40" rx="10" fill="#2f6f5e"/><text x="32" y="278" font-size="16" font-weight="600" fill="#fff" >Approve</text>
+<rect x="114" y="252" width="92" height="40" rx="10" fill="#fff" stroke="#e6eae5"/><text x="142" y="278" font-size="16" font-weight="500" fill="#1c2320" >Edit</text></g>
+
+</svg>

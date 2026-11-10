@@ -80,6 +80,11 @@ h1{font:500 clamp(44px,7vw,84px)/1 var(--sans);letter-spacing:-.045em;margin:0;t
 .card{position:relative;display:flex;flex-direction:column;gap:10px;text-align:left;padding:26px;border-radius:20px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease,border-color .25s ease;min-width:0}
 .card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c) 45%,var(--line));box-shadow:0 18px 40px -22px color-mix(in srgb,var(--c) 70%,transparent)}
 @media (min-width:1000px){.card.wide{grid-column:span 2}.card.wide h3{font-size:26px}.card.wide p{font-size:17px;max-width:54ch}}
+.thumb{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:12px;border:1px solid var(--line);margin-bottom:6px;background:var(--soft);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.card:hover .thumb{transform:scale(1.015)}
+.d-img{width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top;border-radius:14px;border:1px solid var(--line);margin:8px 0 4px}
+.d-imgnote{font-size:13px;color:var(--muted);margin:0 0 6px!important}
+.d-imgnote:empty{display:none}
 .card .tag{display:inline-flex;align-items:center;gap:8px;font:500 12px var(--mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 .card .tag::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
 .card h3{font:500 21px/1.25 var(--sans);letter-spacing:-.015em;margin:4px 0 0;text-wrap:balance}

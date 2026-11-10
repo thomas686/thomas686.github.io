@@ -16,7 +16,9 @@
       "HTML/CSS"
     ],
     "demo": "explorer/",
-    "featured": true
+    "featured": true,
+    "image": "img/explorer.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "alphacrm-integrations",
@@ -32,7 +34,9 @@
       "React",
       "Supabase",
       "Claude Code"
-    ]
+    ],
+    "image": "img/integrations.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "alphacrm-english",
@@ -47,7 +51,9 @@
       "React",
       "i18n",
       "Claude Code"
-    ]
+    ],
+    "image": "img/english.svg",
+    "imageKind": "illustration"
   },
   {
     "id": "alphacrm-help",
@@ -63,7 +69,9 @@
       "Remotion",
       "Cloudflare Pages",
       "Claude Code"
-    ]
+    ],
+    "image": "img/help.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "alphacrm-deck",
@@ -78,7 +86,9 @@
       "HTML/CSS/JS",
       "Cloudflare Pages",
       "Claude Code"
-    ]
+    ],
+    "image": "img/deck.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "post-generator",
@@ -95,7 +105,9 @@
       "Scheduled agents",
       "Lovable"
     ],
-    "featured": true
+    "featured": true,
+    "image": "img/post-generator.svg",
+    "imageKind": "illustration"
   },
   {
     "id": "tyre-agent",
@@ -110,7 +122,9 @@
       "Claude",
       "Cloudflare",
       "Claude Code"
-    ]
+    ],
+    "image": "img/tyre-agent.svg",
+    "imageKind": "illustration"
   },
   {
     "id": "weekend-agents",
@@ -126,7 +140,9 @@
       "Scheduled agents",
       "Slack",
       "Klaviyo"
-    ]
+    ],
+    "image": "img/weekend-agents.svg",
+    "imageKind": "illustration"
   },
   {
     "id": "jewellery-email",
@@ -142,7 +158,9 @@
       "HTML email",
       "Playwright",
       "Claude"
-    ]
+    ],
+    "image": "img/jewellery-email.svg",
+    "imageKind": "illustration"
   },
   {
     "id": "own-email",
@@ -157,7 +175,9 @@
       "Klaviyo",
       "Claude Code",
       "Scheduled agents"
-    ]
+    ],
+    "image": "img/own-email.svg",
+    "imageKind": "illustration"
   },
   {
     "id": "preflight",
@@ -172,7 +192,9 @@
       "React",
       "Vite",
       "Cloudflare Pages"
-    ]
+    ],
+    "image": "img/preflight.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "thai-app",
@@ -188,7 +210,9 @@
       "TypeScript",
       "Vite",
       "Claude API"
-    ]
+    ],
+    "image": "img/thai-app.svg",
+    "imageKind": "illustration"
   },
   {
     "id": "research-journal",
@@ -203,6 +227,8 @@
       "Qualitative research",
       "Gioia method",
       "Claude"
-    ]
+    ],
+    "image": "img/research-journal.svg",
+    "imageKind": "illustration"
   }
 ]

@@ -7,6 +7,7 @@ function renderCards(cat) {
   const list = cat === 'all' ? projects : projects.filter(p => p.category === cat);
   $('cards').innerHTML = list.map(p => `
     <button type="button" class="card c-${p.category}${cat === 'all' && p.featured ? ' wide' : ''}" data-id="${p.id}">
+      ${p.image ? `<img class="thumb" src="${p.image}" alt="" loading="lazy" width="1120" height="700">` : ''}
       <span class="tag">${CATS[p.category]}</span>
       <h3>${esc(p.title)}</h3>
       <p>${esc(p.summary)}</p>
@@ -21,6 +22,10 @@ function openProject(id) {
   d.className = `c-${p.category}`;
   $('d-cat').textContent = `${CATS[p.category]} · ${p.year}`;
   $('d-title').textContent = p.title;
+  const img = $('d-img');
+  img.hidden = !p.image;
+  if (p.image) { img.src = p.image; img.alt = p.imageKind === 'screenshot' ? `Screenshot: ${p.title}` : `Illustration: ${p.title}`; }
+  $('d-imgnote').textContent = p.imageKind === 'illustration' ? 'Illustration. Client work is shown without client data.' : '';
   $('d-summary').textContent = p.summary;
   $('d-problem').textContent = p.problem;
   $('d-built').textContent = p.built;
@@ -32,6 +37,9 @@ function openProject(id) {
   d.showModal();
   d.scrollTop = 0;
 }
+
+window.openProject = openProject;
+window.portfolioData = () => projects;
 
 function renderTimeline(id, items) {
   $(id).innerHTML = items.map(i => `

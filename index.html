@@ -11,13 +11,41 @@
 <link rel="icon" href="img/thomas.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Press+Start+2P&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/console.css">
 </head>
 <body>
-<a class="skip" href="#work">Skip to projects</a>
+<a class="skip" href="#about">Skip to the normal portfolio</a>
 
-<header class="hero wrap">
+<section class="play" id="play" aria-label="Interactive portfolio console">
+  <p class="play-title">Thomas Sokolowski &middot; pocket portfolio</p>
+  <div class="stage" id="stage">
+    <div class="device" id="device">
+      <div class="face"></div>
+      <span class="shoulder l" aria-hidden="true"></span><span class="shoulder r" aria-hidden="true"></span>
+      <span class="power-label" aria-hidden="true">POWER</span>
+      <button type="button" class="power" id="power" aria-label="Power switch"><span></span></button>
+      <span class="pled" aria-hidden="true"></span><span class="pled-label" aria-hidden="true">ON</span>
+      <div class="bezel"><div class="screen" id="screen" aria-live="polite"></div><div class="brand">TS-26<small>POCKET PORTFOLIO</small></div></div>
+      <div class="dpad" aria-label="Direction pad">
+        <button type="button" class="ctl up" data-k="up" aria-label="Up"></button>
+        <button type="button" class="ctl dn" data-k="down" aria-label="Down"></button>
+        <button type="button" class="ctl lt" data-k="left" aria-label="Left"></button>
+        <button type="button" class="ctl rt" data-k="right" aria-label="Right"></button>
+        <span class="mid" aria-hidden="true"></span>
+      </div>
+      <div class="ab"><button type="button" class="ctl b" data-k="b" aria-label="B, back">B</button><button type="button" class="ctl a" data-k="a" aria-label="A, select">A</button></div>
+      <div class="sys"><div style="position:relative"><button type="button" class="ctl" data-k="select" aria-label="Select, sound on or off"></button><span class="sys-label">SELECT</span></div><div style="position:relative"><button type="button" class="ctl" data-k="start" aria-label="Start"></button><span class="sys-label">START</span></div></div>
+      <div class="grille" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="shadow" aria-hidden="true"></div>
+    </div>
+  </div>
+  <p class="play-hint" id="play-hint">Flip the power switch, or press any key</p>
+  <a class="skip-view" href="#about">Skip to normal view &darr;</a>
+</section>
+
+<header class="hero wrap" id="about">
   <div class="hero-text">
     <p class="status"><span class="dot" aria-hidden="true"></span>Currently building AI agents at Alpha Agency</p>
     <h1>Thomas Sokolowski</h1>
@@ -106,6 +134,8 @@
   <button type="button" class="close" id="d-close" aria-label="Close">&times;</button>
   <p class="d-cat" id="d-cat"></p>
   <h2 id="d-title"></h2>
+  <img id="d-img" class="d-img" alt="" hidden>
+  <p class="d-imgnote" id="d-imgnote"></p>
   <p class="d-summary" id="d-summary"></p>
   <h3>The problem</h3><p id="d-problem"></p>
   <h3>What I built</h3><p id="d-built"></p>
@@ -115,5 +145,6 @@
 </dialog>
 
 <script src="assets/app.js"></script>
+<script src="assets/console.js"></script>
 </body>
 </html>

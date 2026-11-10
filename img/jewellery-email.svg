@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 700" font-family="Geist, Segoe UI, Helvetica, Arial, sans-serif">
+<defs><filter id="sh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#1c2320" flood-opacity=".14"/></filter></defs>
+<rect width="1120" height="700" fill="#f3e2d8"/>
+
+<g filter="url(#sh)"><rect x="340" y="50" width="440" height="600" rx="18" fill="#fff"/></g>
+<text x="560" y="108" font-size="22" font-weight="600" fill="#6c6252" text-anchor="middle" letter-spacing="8">ATELIER</text>
+<rect x="380" y="128" width="360" height="2" fill="#bbc492"/>
+<rect x="380" y="150" width="360" height="200" rx="10" fill="#faf6ec"/>
+<circle cx="560" cy="255" r="52" fill="none" stroke="#c9a96a" stroke-width="12"/><path d="M548 196 l12 -16 l12 16 l-12 10 z" fill="#e8d9b5" stroke="#c9a96a" stroke-width="3"/>
+<text x="560" y="400" font-size="21" font-weight="600" fill="#6c6252" text-anchor="middle">Welcome. Here is where we begin.</text>
+<rect x="410" y="425" width="300" height="12" rx="6" fill="#ece5d8"/><rect x="440" y="447" width="240" height="12" rx="6" fill="#ece5d8"/>
+<rect x="470" y="485" width="180" height="50" rx="6" fill="#bbc492"/><text x="560" y="517" font-size="17" font-weight="600" fill="#6c6252" text-anchor="middle">See the collection</text>
+<rect x="340" y="570" width="440" height="80" rx="0" fill="#bbc492"/><rect x="340" y="632" width="440" height="18" rx="18" fill="#bbc492"/>
+<rect x="470" y="598" width="180" height="10" rx="5" fill="#d4dab6"/><rect x="500" y="616" width="120" height="10" rx="5" fill="#d4dab6"/>
+
+</svg>
