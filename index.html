@@ -19,27 +19,14 @@
 <a class="skip" href="#about">Skip to the normal portfolio</a>
 
 <section class="play" id="play" aria-label="Interactive portfolio console">
-  <p class="play-title">Thomas Sokolowski &middot; pocket portfolio</p>
-  <div class="stage" id="stage">
-    <div class="device" id="device">
-      <div class="face"></div>
-      <span class="power-label" aria-hidden="true">POWER</span>
-      <button type="button" class="power" id="power" aria-label="Power switch"><span></span></button>
-      <div class="bezel"><span class="pled" aria-hidden="true"></span><div class="screen" id="screen" aria-live="polite"></div><div class="brand">TS-26<small>POCKET PORTFOLIO</small></div></div>
-      <div class="dpad" aria-label="Direction pad">
-        <button type="button" class="ctl up" data-k="up" aria-label="Up"></button>
-        <button type="button" class="ctl dn" data-k="down" aria-label="Down"></button>
-        <button type="button" class="ctl lt" data-k="left" aria-label="Left"></button>
-        <button type="button" class="ctl rt" data-k="right" aria-label="Right"></button>
-        <span class="mid" aria-hidden="true"></span>
-      </div>
-      <div class="ab"><button type="button" class="ctl b" data-k="b" aria-label="B, back">B</button><button type="button" class="ctl a" data-k="a" aria-label="A, open">A</button></div>
-      <div class="grille" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="shadow" aria-hidden="true"></div>
-    </div>
+  <div class="stage3d" id="stage3d" role="application" aria-label="TS-26 console. Arrow keys move, Enter opens, Backspace goes back, M mutes.">
+    <div id="screen-text" class="sr-only" aria-live="polite"></div>
   </div>
-  <p class="play-hint" id="play-hint">Flip the power switch, or press any key</p>
-  <a class="skip-view" href="#about">Skip to normal view &darr;</a>
+  <div class="play-top"><p class="play-title">Thomas Sokolowski &middot; pocket portfolio</p></div>
+  <div class="play-bottom">
+    <p class="play-hint" id="play-hint">Flip the power switch, or press any key</p>
+    <a class="skip-view" href="#about">Skip to normal view &darr;</a>
+  </div>
 </section>
 
 <header class="hero wrap" id="about">
@@ -142,6 +129,7 @@
 </dialog>
 
 <script src="assets/app.js"></script>
-<script src="assets/console.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="module" src="assets/console3d.js"></script>
 </body>
 </html>
