@@ -44,8 +44,8 @@ const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
 
 scene.add(new THREE.HemisphereLight(0xdff2e8, 0x0d1714, 0.5));
 const key = new THREE.DirectionalLight(0xffffff, 1.6);
-key.position.set(-3, 5, 8); key.intensity = 2.3; key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+key.position.set(-6, 7, 4.5); key.intensity = 2.5; key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.008;
 Object.assign(key.shadow.camera, { left: -3.5, right: 3.5, top: 4, bottom: -4, near: 1, far: 20 });
 scene.add(key);
 const rim = new THREE.DirectionalLight(0xdff5ea, 0.7); rim.position.set(-5, 2, -4); scene.add(rim);
@@ -184,10 +184,47 @@ knob.userData.k = 'power';
 add(new RoundedBoxGeometry(0.06, 0.42, 0.22, 2, 0.025), mat(0x1f2427, 0.6), -W / 2 + 0.01, 1.35, 0);
 { const jack = add(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 20), mat(0x1f2427, 0.6), 0.9, -H / 2 + 0.01, 0); }
 add(new RoundedBoxGeometry(0.5, 0.05, 0.18, 2, 0.02), mat(0x4d6b5a, 0.7), -0.6, -H / 2 + 0.005, 0);
-// Battery cover with grip lines on the back
-{ const s = rr(new THREE.Shape(), 2.4, 1.5, 0.12); add(new THREE.ExtrudeGeometry(s, { depth: 0.015, ...bevel, bevelThickness: 0.01, bevelSize: 0.01 }), mat(0x7fa38e, 0.65), 0, -1.4, -D / 2 - 0.03).rotation.y = Math.PI;
-  for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(0.5, 0.025, 0.02), mat(0x6c8f7b, 0.7), 0, -0.9 - i * 0.08, -D / 2 - 0.05); }
+// ---- Back: stepped plateau, embossed panel, ribbed grip, battery door with latch
+const BZ = -D / 2; // back face
+const backMat = shell(0x8db29d, 0.42, { clearcoat: 0.35 });
+const ribMat = shell(0x86ab96, 0.4, { clearcoat: 0.35 });
+{ // raised plateau on the upper back
+  const s = rr(new THREE.Shape(), 2.7, 2.3, 0.16);
+  const m = add(new THREE.ExtrudeGeometry(s, { depth: 0.06, ...bevel }), backMat, 0, 1.15, BZ + 0.01); m.rotation.y = Math.PI; }
+{ // recessed text panel
+  const s = rr(new THREE.Shape(), 1.9, 0.9, 0.06);
+  add(new THREE.ExtrudeGeometry(s, { depth: 0.01, ...bevel, bevelThickness: 0.006, bevelSize: 0.006 }), shell(0x82a690, 0.5), 0, 1.25, BZ - 0.075).rotation.y = Math.PI;
+  const c = document.createElement('canvas'); c.width = 1140; c.height = 540; const x = c.getContext('2d');
+  x.fillStyle = 'rgba(40,64,52,.75)'; x.font = '700 64px Geist, Arial, sans-serif'; x.fillText('TS-26', 40, 110);
+  x.font = '500 34px Geist, Arial, sans-serif';
+  ['POCKET PORTFOLIO', 'DESIGNED IN BANGKOK', 'BY THOMAS SOKOLOWSKI', 'BUILT WITH AI  ·  2026'].forEach((l, i) => x.fillText(l, 40, 190 + i * 70));
+  x.strokeStyle = 'rgba(40,64,52,.6)'; x.lineWidth = 4; x.strokeRect(860, 60, 220, 120); x.font = '600 30px Geist, Arial'; x.fillText('MODEL', 905, 108); x.fillText('TS-26', 905, 152);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.85), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.6 }));
+  p.position.set(0, 1.25, BZ - 0.098); p.rotation.y = Math.PI; dev.add(p); }
+{ // ribbed grip across the lower back
+  for (let i = 0; i < 14; i++) add(new RoundedBoxGeometry(2.9, 0.055, 0.05, 2, 0.02), ribMat, 0, -0.15 - i * 0.13, BZ - 0.02);
+}
+{ // battery door over the ribs, with its own ribs and a latch
+  const s = rr(new THREE.Shape(), 2.2, 1.55, 0.1);
+  add(new THREE.ExtrudeGeometry(s, { depth: 0.04, ...bevel }), backMat, 0, -1.3, BZ - 0.02).rotation.y = Math.PI;
+  for (let i = 0; i < 9; i++) add(new RoundedBoxGeometry(1.9, 0.04, 0.03, 2, 0.012), ribMat, 0, -0.75 - i * 0.14, BZ - 0.09);
+  add(new RoundedBoxGeometry(0.42, 0.2, 0.06, 2, 0.03), shell(0x7a9e89, 0.4), 0, -0.47, BZ - 0.1);
+  add(new THREE.BoxGeometry(0.22, 0.06, 0.03), mat(0x1f2427, 0.6), 0, -0.47, BZ - 0.13);
+}
+// ribbed side grips near the bottom
+for (const sx of [-1, 1]) for (let i = 0; i < 10; i++) add(new RoundedBoxGeometry(0.04, 0.05, 0.42, 2, 0.015), ribMat, sx * (W / 2 + 0.005), -0.6 - i * 0.16, 0);
+// card slot on the top edge
+add(new RoundedBoxGeometry(0.9, 0.04, 0.08, 2, 0.015), mat(0x161a1c, 0.7), 0.55, H / 2 + 0.002, -0.08);
+// LINK label and frame around the side port
+{ const c = document.createElement('canvas'); c.width = 256; c.height = 64; const x = c.getContext('2d');
+  x.fillStyle = 'rgba(40,64,52,.8)'; x.font = '700 40px Geist, Arial'; x.fillText('LINK', 70, 46);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.125), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
+  p.position.set(-W / 2 - 0.006, 1.8, 0); p.rotation.y = -Math.PI / 2; p.rotation.z = Math.PI / 2; dev.add(p);
+  add(new RoundedBoxGeometry(0.03, 0.56, 0.3, 2, 0.04), shell(0x9cc0ab, 0.4), -W / 2 - 0.002, 1.35, 0); }
 // Screws on the back
+for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) add(new THREE.CylinderGeometry(0.11, 0.11, 0.02, 24), mat(0x2a3530, 0.8), x, y, -D / 2 - 0.002).rotation.x = Math.PI / 2;
 for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) add(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 16), mat(0x9aa39e, 0.3, { metalness: 0.8 }), x, y, -D / 2 - 0.005).rotation.x = Math.PI / 2;
 
 const clickables = [screen, dpad, bA, bB, knob, muteBtn];
@@ -448,7 +485,7 @@ function press(k) {
 
 // ---------- Pointer: tilt, hover, click ----------
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
-let tiltX = 0.12, tiltY = -0.25;
+let tiltX = 0.12, tiltY = -0.25, spin = 0, dragging = null;
 function pick(e) {
   const r = renderer.domElement.getBoundingClientRect();
   ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
@@ -458,13 +495,17 @@ function pick(e) {
   let o = hit.object; while (o && !o.userData.k) o = o.parent;
   return o ? { k: o.userData.k, hit } : null;
 }
+renderer.domElement.addEventListener('pointerup', () => { dragging = null; });
+renderer.domElement.addEventListener('pointercancel', () => { dragging = null; });
 addEventListener('pointermove', e => {
+  if (dragging) { spin = dragging.spin + (e.clientX - dragging.x) * 0.012; renderer.domElement.style.cursor = 'grabbing'; return; }
   if (!inView) return;
   if (!still) { tiltY = ((e.clientX / innerWidth) - 0.5) * 0.7; tiltX = (e.clientY / innerHeight - 0.5) * 0.4 + 0.08; }
-  if (e.target === renderer.domElement) renderer.domElement.style.cursor = pick(e) ? 'pointer' : 'default';
+  if (e.target === renderer.domElement) renderer.domElement.style.cursor = pick(e) ? 'pointer' : 'grab';
 });
 renderer.domElement.addEventListener('pointerdown', e => {
-  const p = pick(e); if (!p) return;
+  const p = pick(e);
+  if (!p || Math.abs(Math.sin(spin / 2)) > 0.5) { dragging = { x: e.clientX, spin }; renderer.domElement.setPointerCapture(e.pointerId); return; }
   e.preventDefault();
   if (p.k === 'power') { setPower(!on); return; }
   if (p.k === 'dpad') {
@@ -508,7 +549,8 @@ function frame() {
   const z = ease(Math.min(1, Math.max(0, zoom)));
   const rx = THREE.MathUtils.lerp(tiltX + 0.28, tiltX * 0.35, z), ry = THREE.MathUtils.lerp(tiltY - 0.35, tiltY * 0.35, z);
   dev.rotation.x += (rx - dev.rotation.x) * Math.min(1, dt * 5);
-  dev.rotation.y += (ry - dev.rotation.y) * Math.min(1, dt * 5);
+  if (on && !dragging) spin += (Math.round(spin / (Math.PI * 2)) * Math.PI * 2 - spin) * Math.min(1, dt * 3);
+  dev.rotation.y += (ry + spin - dev.rotation.y) * Math.min(1, dt * 5);
   dev.position.y = still ? 0 : Math.sin(t * 1.1) * 0.06;
   if (!still) {
     for (const c of cubes) { c.rotation.x += c.userData.spin * dt; c.rotation.y += c.userData.spin * 0.7 * dt; c.position.y = c.userData.y + Math.sin(t * 0.6 + c.userData.bob) * 0.3; }
