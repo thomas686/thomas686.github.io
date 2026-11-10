@@ -95,9 +95,9 @@ const mat = (color, rough = 0.55, extra = {}) => new THREE.MeshStandardMaterial(
 const add = (geo, m, x = 0, y = 0, z = 0, parent = dev) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); parent.add(o); return o; };
 
 // Two shells with a seam between them
-add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 3, 0.085), shell(0xd3cfc7, 0.36, { clearcoat: 0.45, clearcoatRoughness: 0.35 }), 0, 0, D / 4 + 0.005);
-add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 3, 0.085), shell(0xc6c2ba, 0.45), 0, 0, -D / 4 - 0.005);
-add(new RoundedBoxGeometry(W - 0.08, H - 0.08, 0.03, 2, 0.12), mat(0x8e8a82, 0.8), 0, 0, 0);
+add(new RoundedBoxGeometry(W, H, D / 2 - 0.004, 3, 0.085), shell(0xd3cfc7, 0.36, { clearcoat: 0.45, clearcoatRoughness: 0.35 }), 0, 0, D / 4 + 0.002);
+add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.004, 3, 0.085), shell(0xc6c2ba, 0.45), 0, 0, -D / 4 - 0.002);
+add(new RoundedBoxGeometry(W - 0.03, H - 0.03, 0.012, 2, 0.12), mat(0x8e8a82, 0.8), 0, 0, 0);
 const FZ = D / 2; // front face
 
 // Screen bezel, recessed glass, brand strip
@@ -126,7 +126,7 @@ const label = (txt, w, h, size, color, font = '600') => {
   return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
 };
 const brand = label('TS-26  ·  POCKET PORTFOLIO', 2.2, 0.14, 15, '#aeb9b4', '600'); brand.position.set(-0.08, 0.13, FZ + 0.037); dev.add(brand);
-const led = add(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 20), new THREE.MeshStandardMaterial({ color: 0x3b5446, emissive: 0x000000 }), -1.18, 2.12, FZ + 0.04);
+const led = add(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 20), new THREE.MeshStandardMaterial({ color: 0x3b5446, emissive: 0x000000 }), -1.28, 1.72, FZ + 0.04);
 led.rotation.x = Math.PI / 2;
 
 // D-pad in a shallow well
