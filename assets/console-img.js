@@ -220,7 +220,7 @@ function setPower(v) {
   if (v === on) return;
   on = v; clearTimeout(bootTimer); wrap.classList.toggle('on', on);
   if (on) {
-    view = 'boot'; idx = 0; bootAt = performance.now(); chime(); startMusic(0.6); flipTo(0);
+    view = 'boot'; idx = 0; bootAt = performance.now(); chime(); startMusic(0.6); toFront();
     hint.innerHTML = coarse ? 'Tap the d-pad, A to open, B to go back, or tap the screen'
       : 'Click the buttons or the screen, or use <kbd>&#8593;</kbd><kbd>&#8595;</kbd> <kbd>Enter</kbd> <kbd>Backspace</kbd> <kbd>M</kbd> mute';
     bootTimer = setTimeout(() => { view = 'menu'; draw(); }, still ? 300 : 1900);
@@ -243,6 +243,7 @@ function toggleMute() {
 }
 function press(k) {
   if (k === 'mute') { toggleMute(); return; }
+  if (showingBack()) { toFront(); return; }
   flash(k);
   if (!on) { if (k === 'a' || k === 'screen') setPower(true); return; }
   if (view === 'boot') return;
@@ -302,6 +303,8 @@ cv.addEventListener('click', e => {
 // ---------- Tilt, flip by dragging ----------
 let rx = 0, ry = 0, tx = 0, ty = 0, flip = 0, flipTarget = 0, drag = null, moved = false;
 function flipTo(v) { flipTarget = v; }
+const showingBack = () => Math.abs(Math.round(flipTarget / 180)) % 2 === 1;
+const toFront = () => { flipTarget = Math.round(flipTarget / 360) * 360 + (Math.round(flipTarget / 180) % 2 ? 0 : 0); if (showingBack()) flipTarget += flipTarget > 0 ? -180 : 180; };
 addEventListener('pointermove', e => {
   if (drag) {
     const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) moved = true;
@@ -333,7 +336,6 @@ function frame() {
   requestAnimationFrame(frame);
   if (document.hidden || !inView) { clock.getDelta(); return; }
   const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
-  if (on && !drag) flipTarget = Math.round(flipTarget / 360) * 360;
   flip += (flipTarget - flip) * Math.min(1, dt * 8);
   rx += (tx * (on ? 0.4 : 1) - rx) * Math.min(1, dt * 5); ry += (ty * (on ? 0.4 : 1) - ry) * Math.min(1, dt * 5);
   const float = still ? 0 : Math.sin(t * 1.1) * 6;
