@@ -6,7 +6,8 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const SHORT = { ai: 'AI', alphacrm: 'CRM', email: 'EMAIL', side: 'SIDE' };
-  const MENU = ['ABOUT ME', 'PROJECTS', 'EXPERIENCE', 'CONTACT', 'NORMAL VIEW'];
+  const MENU = ['ABOUT ME', 'PROJECTS', 'EXPERIENCE', 'CONTACT', 'NORMAL VIEW', 'SOUND'];
+  const CONTACT = ['COPY EMAIL', 'OPEN LINKEDIN'];
   let on = false, view = 'off', idx = 0, sub = 0, sound = true, inView = true, projects = [], exp = null, bootTimer;
 
   // Depth: stack copies of the body shape behind the face
@@ -19,7 +20,7 @@
   }
 
   // Fit to screen width
-  function fit() { stage.style.setProperty('--s', Math.min(1, (innerWidth - 32) / 800).toFixed(3)); }
+  function fit() { stage.style.setProperty('--s', Math.max(0.55, Math.min(1, (innerWidth - 32) / 420, (innerHeight - 180) / 700)).toFixed(3)); }
   fit(); addEventListener('resize', fit);
 
   // Tilt with the pointer
@@ -55,7 +56,7 @@
       return;
     }
     if (view === 'menu') {
-      scr.innerHTML = page('MAIN MENU', `<ul class="menu">${MENU.map((m, i) => `<li class="${i === idx ? 'sel' : ''}">${m}</li>`).join('')}</ul>`,
+      scr.innerHTML = page('MAIN MENU', `<ul class="menu">${MENU.map((m, i) => `<li data-i="${i}" class="${i === idx ? 'sel' : ''}">${m === 'SOUND' ? `SOUND: ${sound ? 'ON' : 'OFF'}` : m}</li>`).join('')}</ul>`,
         `<span>&#9650;&#9660; MOVE</span><span>A SELECT</span>`);
       return;
     }
@@ -69,14 +70,14 @@
     if (view === 'projects') {
       const top = Math.max(0, Math.min(idx - 3, projects.length - 7));
       scr.innerHTML = page(`PROJECTS ${idx + 1}/${projects.length}`, `<ul class="menu">${projects.slice(top, top + 7).map((p, i) =>
-        `<li class="${top + i === idx ? 'sel' : ''}"><span class="cat">${SHORT[p.category]}</span> ${esc(p.title.toUpperCase())}</li>`).join('')}</ul>`,
+        `<li data-i="${top + i}" class="${top + i === idx ? 'sel' : ''}"><span class="cat">${SHORT[p.category]}</span> ${esc(p.title.toUpperCase())}</li>`).join('')}</ul>`,
         `<span>A OPEN</span><span>B BACK</span>`);
       return;
     }
     if (view === 'project') {
       const p = projects[idx];
-      scr.innerHTML = page(esc(p.title.toUpperCase()), `${p.image ? `<img class="proj-img" src="${p.image}" alt="">` : ''}<div class="small">${esc(p.summary)}</div>`,
-        `<span>A FULL STORY${p.demo ? ' / START DEMO' : ''}</span><span>B BACK</span>`);
+      scr.innerHTML = `<div class="shot">${p.image ? `<img src="${p.image}" alt="">` : ''}<div class="cap"><b>${esc(p.title.toUpperCase())}</b>
+        <span>TAP OR A: FULL STORY &middot; &#9664;&#9654; NEXT</span></div></div>`;
       return;
     }
     if (view === 'exp') {
@@ -89,10 +90,11 @@
       return;
     }
     if (view === 'contact') {
-      scr.innerHTML = page('CONTACT', `<div class="small">EMAIL</div><div class="small" style="color:#fff;margin-bottom:12px">thomas.s686@gmail.com</div>
-        <div class="small">LINKEDIN</div><div class="small" style="color:#fff">in/ts0kolowski</div>
-        <div class="small" style="margin-top:14px;color:#ffd37a" id="c-msg">A COPY EMAIL<br>START OPEN LINKEDIN</div>`,
-        `<span>SELECT SOUND ${sound ? 'ON' : 'OFF'}</span><span>B BACK</span>`);
+      scr.innerHTML = page('CONTACT', `<div class="small">EMAIL</div><div class="small" style="color:#fff;margin-bottom:10px">thomas.s686@gmail.com</div>
+        <div class="small">LINKEDIN</div><div class="small" style="color:#fff;margin-bottom:14px">in/ts0kolowski</div>
+        <ul class="menu">${CONTACT.map((m, i) => `<li data-i="${i}" class="${i === idx ? 'sel' : ''}">${m}</li>`).join('')}</ul>
+        <div class="small" style="color:#ffd37a;margin-top:6px" id="c-msg"></div>`,
+        `<span>A DO IT</span><span>B BACK</span>`);
     }
   }
 
@@ -116,35 +118,33 @@
     if (btn) { btn.classList.add('down'); setTimeout(() => btn.classList.remove('down'), 120); }
     if (!on) { setPower(true); return; }
     if (view === 'boot') return;
-    const n = { menu: MENU.length, projects: projects.length }[view];
+    const n = { menu: MENU.length, projects: projects.length, contact: CONTACT.length }[view];
     if ((k === 'up' || k === 'down') && n) { idx = (idx + (k === 'up' ? -1 : 1) + n) % n; beep(880, 0.04); render(); return; }
     if (view === 'exp' && ['left', 'right', 'up', 'down'].includes(k)) {
       const len = exp.work.length + exp.education.length;
       sub = (sub + (k === 'left' || k === 'up' ? -1 : 1) + len) % len; beep(880, 0.04); render(); return;
     }
     if (view === 'project' && (k === 'left' || k === 'right')) { idx = (idx + (k === 'left' ? -1 : 1) + projects.length) % projects.length; beep(880, 0.04); render(); return; }
-    if (k === 'select') { sound = !sound; beep(1200, 0.05); render(); return; }
     if (k === 'b') {
       beep(330, 0.06);
       if (view === 'project') view = 'projects';
       else if (view !== 'menu') { idx = Math.max(0, ['about', 'projects', 'exp', 'contact'].indexOf(view)); view = 'menu'; }
       render(); return;
     }
-    if (k === 'a' || k === 'start') {
+    if (k === 'a') {
       beep(990, 0.06);
       if (view === 'menu') {
         const choice = MENU[idx];
+        if (choice === 'SOUND') { sound = !sound; beep(1200, 0.05); render(); return; }
         if (choice === 'NORMAL VIEW') { document.getElementById('about').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return; }
         view = { 'ABOUT ME': 'about', PROJECTS: 'projects', EXPERIENCE: 'exp', CONTACT: 'contact' }[choice];
         idx = 0; sub = 0;
         if ((view === 'projects' && !projects.length) || (view === 'exp' && !exp)) { view = 'menu'; }
       } else if (view === 'projects') view = 'project';
       else if (view === 'project') {
-        const p = projects[idx];
-        if (k === 'start' && p.demo) { location.href = p.demo; return; }
-        window.openProject && window.openProject(p.id); return;
+        window.openProject && window.openProject(projects[idx].id); return;
       } else if (view === 'contact') {
-        if (k === 'start') { window.open('https://www.linkedin.com/in/ts0kolowski', '_blank', 'noopener'); return; }
+        if (idx === 1) { window.open('https://www.linkedin.com/in/ts0kolowski', '_blank', 'noopener'); return; }
         navigator.clipboard?.writeText('thomas.s686@gmail.com').then(() => { const m = document.getElementById('c-msg'); if (m) m.textContent = 'COPIED!'; }).catch(() => {});
         return;
       }
@@ -154,10 +154,17 @@
 
   dev.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); press(b.dataset.k); }));
   document.getElementById('power').addEventListener('click', () => setPower(!on));
+  // Tap the screen: open the tapped item, or the full story of the project shown
+  scr.addEventListener('click', e => {
+    if (!on) { setPower(true); return; }
+    const li = e.target.closest('li[data-i]');
+    if (li) { idx = Number(li.dataset.i); press('a'); return; }
+    if (view === 'project') press('a');
+  });
   addEventListener('keydown', e => {
     if (!inView || e.target.closest('input,textarea,select,dialog') || e.metaKey || e.ctrlKey || e.altKey) return;
     if (document.querySelector('dialog[open]')) return;
-    const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'a', z: 'a', Z: 'a', x: 'b', X: 'b', Backspace: 'b', Escape: 'b', ' ': 'start', Shift: 'select' };
+    const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'a', z: 'a', Z: 'a', x: 'b', X: 'b', Backspace: 'b', Escape: 'b' };
     const k = map[e.key];
     if (!on) { if (k || e.key.length === 1) { e.preventDefault(); setPower(true); } return; }
     if (k) { e.preventDefault(); press(k); }
