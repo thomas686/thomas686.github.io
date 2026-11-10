@@ -2,6 +2,10 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const host = document.getElementById('stage3d');
 const section = document.getElementById('play');
@@ -21,15 +25,17 @@ try {
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.12;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 host.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
 const BG = 0x0d1714;
-scene.background = new THREE.Color(BG);
-scene.fog = new THREE.Fog(BG, 14, 42);
+{ const c = document.createElement('canvas'); c.width = 4; c.height = 512; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, 512); g.addColorStop(0, '#070d0b'); g.addColorStop(0.55, '#0f211c'); g.addColorStop(1, '#16342c');
+  x.fillStyle = g; x.fillRect(0, 0, 4, 512); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; scene.background = t; }
+scene.fog = new THREE.Fog(0x142d26, 14, 42);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
@@ -44,18 +50,27 @@ const rim = new THREE.DirectionalLight(0xdff5ea, 0.7); rim.position.set(-5, 2, -
 
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.ShadowMaterial({ opacity: 0.16 }));
 ground.rotation.x = -Math.PI / 2; ground.position.y = -3.25; ground.receiveShadow = true; scene.add(ground);
-const grid = new THREE.GridHelper(80, 80, 0x3f8f77, 0x1c3a31); grid.position.y = -3.26; scene.add(grid);
+const grid = new THREE.GridHelper(90, 90, 0x3fe0a8, 0x1f6b55); grid.position.y = -3.26;
+grid.material.transparent = true; grid.material.opacity = 0.55; scene.add(grid);
+{ const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
+  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 2.2), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.y = -3.24; scene.add(m); }
 // Soft glow behind the console
 { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
   const g = x.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, 'rgba(125,255,176,.45)'); g.addColorStop(.5, 'rgba(63,143,119,.18)'); g.addColorStop(1, 'rgba(0,0,0,0)');
   x.fillStyle = g; x.fillRect(0, 0, 256, 256);
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthWrite: false, fog: false })); s.scale.set(14, 14, 1); s.position.set(0, 0.5, -3); scene.add(s); }
 // Drifting cubes
-const cubeCols = [0x7dffb0, 0xffd37a, 0xe0795a, 0x9aaee6, 0x5fa58c];
+const cubeCols = [0x9fd8bb, 0x5fa58c, 0x2f6f5e, 0xffd37a];
 const cubes = [];
-for (let i = 0; i < 46; i++) {
-  const sz = 0.15 + Math.random() * 0.5;
-  const m = new THREE.Mesh(new THREE.BoxGeometry(sz, sz, sz), new THREE.MeshStandardMaterial({ color: cubeCols[i % 5], roughness: 0.5, emissive: cubeCols[i % 5], emissiveIntensity: 0.25 }));
+for (let i = 0; i < 24; i++) {
+  const sz = 0.25 + Math.random() * 0.6, col = cubeCols[i % 4];
+  const geo = new THREE.BoxGeometry(sz, sz, sz);
+  const m = i % 3 === 0
+    ? new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: i % 2 ? 0x7dffb0 : 0xffd37a, transparent: true, opacity: 0.9 }))
+    : new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ color: col, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.2 }));
   const side = i % 2 ? 1 : -1;
   m.position.set(side * (3.2 + Math.random() * 10), -2.5 + Math.random() * 9, -2 - Math.random() * 14);
   m.rotation.set(Math.random() * 3, Math.random() * 3, 0);
@@ -72,11 +87,14 @@ scene.add(particles);
 // ---------- The device ----------
 const W = 3.2, H = 5.4, D = 0.72;
 const dev = new THREE.Group(); scene.add(dev);
-const mat = (color, rough = 0.55, extra = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: rough, metalness: 0, clearcoat: 0.15, clearcoatRoughness: 0.6, ...extra });
+const grain = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); const d = x.createImageData(256, 256);
+  for (let i = 0; i < d.data.length; i += 4) { const v = 200 + Math.random() * 55; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  x.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 6); return t; })();
+const mat = (color, rough = 0.55, extra = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: rough, roughnessMap: grain, bumpMap: grain, bumpScale: 0.004, metalness: 0, clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.25, sheenColor: new THREE.Color(0xdff5ea), ...extra });
 const add = (geo, m, x = 0, y = 0, z = 0, parent = dev) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; o.receiveShadow = true; parent.add(o); return o; };
 
 // Two shells with a seam between them
-add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 5, 0.17), mat(0xa3c6b1), 0, 0, D / 4 + 0.005);
+add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 6, 0.15), mat(0xa6cbb5, 0.5), 0, 0, D / 4 + 0.005);
 add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 5, 0.17), mat(0x86ab96, 0.65), 0, 0, -D / 4 - 0.005);
 add(new RoundedBoxGeometry(W - 0.08, H - 0.08, 0.03, 2, 0.12), mat(0x5d7f6c, 0.8), 0, 0, 0);
 const FZ = D / 2; // front face
@@ -84,20 +102,24 @@ const FZ = D / 2; // front face
 // Screen bezel, recessed glass, brand strip
 add(new RoundedBoxGeometry(2.76, 2.42, 0.07, 3, 0.1), mat(0x22272c, 0.35), 0, 1.13, FZ + 0.02);
 const SCR_W = 2.36, SCR_H = 1.77;
-const sc = document.createElement('canvas'); sc.width = 640; sc.height = 480;
+add(new RoundedBoxGeometry(SCR_W + 0.12, SCR_H + 0.12, 0.02, 2, 0.03), mat(0x3a4249, 0.3), 0, 1.25, FZ + 0.052);
+const sc = document.createElement('canvas'); sc.width = 960; sc.height = 720;
 const sx = sc.getContext('2d');
 const screenTex = new THREE.CanvasTexture(sc); screenTex.colorSpace = THREE.SRGBColorSpace; screenTex.anisotropy = 4;
 const screen = add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false }), 0, 1.25, FZ + 0.058);
 screen.castShadow = false; screen.userData.k = 'screen';
-add(new THREE.PlaneGeometry(SCR_W + 0.02, SCR_H + 0.02), new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.06, roughness: 0.05, clearcoat: 1 }), 0, 1.25, FZ + 0.062).castShadow = false;
+{ const c = document.createElement('canvas'); c.width = 256; c.height = 192; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 256, 192); g.addColorStop(0, 'rgba(255,255,255,.10)'); g.addColorStop(0.35, 'rgba(255,255,255,.02)'); g.addColorStop(0.5, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,.04)');
+  x.fillStyle = g; x.fillRect(0, 0, 256, 192);
+  const glass = add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }), 0, 1.25, FZ + 0.062); glass.castShadow = false; }
 const label = (txt, w, h, size, color, font = '600') => {
-  const c = document.createElement('canvas'); c.width = w * 200; c.height = h * 200;
-  const x = c.getContext('2d'); x.fillStyle = color; x.font = `${font} ${size}px Geist, Segoe UI, Arial, sans-serif`; x.textBaseline = 'middle';
+  const c = document.createElement('canvas'); c.width = w * 500; c.height = h * 500;
+  const x = c.getContext('2d'); x.fillStyle = color; x.font = `${font} ${size * 2.5}px Geist, Segoe UI, Arial, sans-serif`; x.textBaseline = 'middle'; x.letterSpacing = '6px';
   x.fillText(txt, 4, c.height / 2);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
 };
-const brand = label('TS-26   POCKET PORTFOLIO', 2.2, 0.16, 26, '#c9d3ce', '700'); brand.position.set(-0.1, 0.12, FZ + 0.06); dev.add(brand);
+const brand = label('TS-26  ·  POCKET PORTFOLIO', 2.2, 0.14, 15, '#aeb9b4', '600'); brand.position.set(-0.08, 0.13, FZ + 0.06); dev.add(brand);
 const led = add(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 20), new THREE.MeshStandardMaterial({ color: 0x3b5446, emissive: 0x000000 }), -1.18, 2.12, FZ + 0.06);
 led.rotation.x = Math.PI / 2;
 
@@ -151,11 +173,18 @@ for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) a
 
 const clickables = [screen, dpad, bA, bB, knob, muteBtn];
 
+// ---------- Post-processing ----------
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.6, 0.82);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
 // ---------- Layout ----------
 let dist = 13;
 function fit() {
   const w = host.clientWidth, h = host.clientHeight;
-  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false); composer.setSize(w, h); bloom.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
   const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   dist = Math.max((H * 1.42) / (2 * t), (W * 1.5) / (2 * t * camera.aspect));
   scene.fog.near = dist * 1.7; scene.fog.far = dist * 4.2;
@@ -208,6 +237,7 @@ let projects = [], exp = null, bootAt = 0, offAt = 0;
 
 function draw() {
   hits = [];
+  sx.setTransform(1.5, 0, 0, 1.5, 0, 0);
   sx.fillStyle = C.bg; sx.fillRect(0, 0, 640, 480); sx.textBaseline = 'alphabetic';
   const say = [];
   if (!on) {
@@ -464,7 +494,7 @@ function frame() {
   camera.position.set(0, THREE.MathUtils.lerp(1.6, 0.2, z), THREE.MathUtils.lerp(dist * 1.55, dist, z));
   camera.lookAt(0, THREE.MathUtils.lerp(-0.4, -0.35, z), 0);
   if ((on && view === 'boot') || (!on && offAt && performance.now() - offAt < 400)) draw();
-  renderer.render(scene, camera);
+  composer.render();
 }
 
 Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
