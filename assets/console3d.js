@@ -338,10 +338,12 @@ function draw() {
   } else if (view === 'project') {
     const p = projects[idx];
     if (p.image) drawContain(img(p.image), 0, 0, 640, 400);
+    { const tag = `${idx + 1}/${projects.length}`; sx.font = `12px ${PX}`; const w = sx.measureText(tag).width + 20;
+      sx.fillStyle = 'rgba(5,10,16,.85)'; sx.fillRect(640 - w - 14, 14, w, 30); txt(tag, 640 - w - 4, 35, C.amber, 12); }
     const g = sx.createLinearGradient(0, 330, 0, 480); g.addColorStop(0, 'rgba(5,10,16,0)'); g.addColorStop(0.45, 'rgba(5,10,16,.94)');
     sx.fillStyle = g; sx.fillRect(0, 330, 640, 150);
     wrap(p.title.toUpperCase(), 24, 418, 592, 15, C.amber, 24, 2);
-    txt('TAP OR A: FULL STORY   ◀▶ NEXT', 24, 464, C.dim, 11);
+    txt('A: FULL STORY  ◀▶ NEXT  B: MENU', 24, 464, C.dim, 11);
     hits.push({ i: -1, x: 0, y: 0, w: 640, h: 480 }); say.push(`${p.title}. ${p.summary} Press A for the full story.`);
   } else if (view === 'exp') {
     const all = [...exp.work, ...exp.education], e = all[sub];
@@ -458,10 +460,10 @@ function press(k) {
   if (view === 'exp' && ['left', 'right', 'up', 'down'].includes(k)) {
     const len = exp.work.length + exp.education.length; sub = (sub + (k === 'left' || k === 'up' ? -1 : 1) + len) % len; beep(880, 0.04); draw(); return;
   }
-  if (view === 'project' && (k === 'left' || k === 'right')) { idx = (idx + (k === 'left' ? -1 : 1) + projects.length) % projects.length; beep(880, 0.04); draw(); return; }
+  if (view === 'project' && ['left', 'right', 'up', 'down'].includes(k)) { idx = (idx + (k === 'left' || k === 'up' ? -1 : 1) + projects.length) % projects.length; beep(880, 0.04); draw(); return; }
   if (k === 'b') {
     beep(330, 0.06);
-    if (view === 'project') view = 'projects';
+    if (view === 'project') { idx = 1; view = 'menu'; }
     else if (view !== 'menu') { idx = Math.max(0, ['about', 'projects', 'exp', 'contact'].indexOf(view)); view = 'menu'; }
     draw(); return;
   }
@@ -470,8 +472,8 @@ function press(k) {
   if (view === 'menu') {
     const choice = MENU[idx];
     if (choice === 'NORMAL VIEW') { document.getElementById('about').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return; }
-    const next = { 'ABOUT ME': 'about', PROJECTS: 'projects', EXPERIENCE: 'exp', CONTACT: 'contact' }[choice];
-    if ((next === 'projects' && !projects.length) || (next === 'exp' && !exp)) return;
+    const next = { 'ABOUT ME': 'about', PROJECTS: 'project', EXPERIENCE: 'exp', CONTACT: 'contact' }[choice];
+    if ((next === 'project' && !projects.length) || (next === 'exp' && !exp)) return;
     view = next; idx = 0; sub = 0; msg = '';
   } else if (view === 'projects') view = 'project';
   else if (view === 'project') { window.openProject && window.openProject(projects[idx].id); return; }
