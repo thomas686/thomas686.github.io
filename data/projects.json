@@ -1,0 +1,208 @@
+[
+  {
+    "id": "agent-files-explorer",
+    "title": "What do people make their AI do?",
+    "category": "side",
+    "year": "2026",
+    "summary": "An explorer of 16,591 public instruction files that developers write for their AI agents.",
+    "problem": "People now write instruction files (CLAUDE.md, AGENTS.md) that tell AI agents what to do and what never to do. There are around two million of them on GitHub, and nobody had looked at what they actually say. I wanted to know for my master's thesis on how AI agents change the way work is organised.",
+    "built": "A small pipeline that searches GitHub, downloads the files, and sorts every one by what it hands to the AI, which rules it sets and what it forbids. Claude read a random sample of 100 to check the keyword sorting. On top sits an interactive page with a constellation of what goes together and click-through quotes from real files.",
+    "result": "16,591 files analysed in an afternoon. Testing (59%) and coding (53%) are what people hand over most; not committing or pushing without permission is the most common ban. The pilot also showed that word counting misses most rules, which shapes the method for the thesis.",
+    "tools": [
+      "Node.js",
+      "GitHub API",
+      "Claude",
+      "D3",
+      "HTML/CSS"
+    ],
+    "demo": "explorer/",
+    "featured": true
+  },
+  {
+    "id": "alphacrm-integrations",
+    "title": "AlphaCRM: accounting integrations",
+    "category": "alphacrm",
+    "year": "2026",
+    "summary": "Connected Alpha's CRM to the three accounting systems Danish small businesses use most.",
+    "problem": "AlphaCRM is a CRM that the customer owns outright, with no subscription. Danish small businesses keep their books in e-conomic, Billy or Dinero, and a CRM that cannot talk to the books is a hard sell.",
+    "built": "Integrations with e-conomic, Billy and Dinero, so customers and invoices move between the CRM and the accounting system.",
+    "result": "The work was estimated at 44 to 64 hours. Building with AI, it took about 5.",
+    "tools": [
+      "TypeScript",
+      "React",
+      "Supabase",
+      "Claude Code"
+    ]
+  },
+  {
+    "id": "alphacrm-english",
+    "title": "AlphaCRM in English",
+    "category": "alphacrm",
+    "year": "2026",
+    "summary": "An English version of the CRM, with a language switcher, so it can sell beyond Denmark.",
+    "problem": "The CRM was Danish only, which closed the door to customers outside Denmark and to Alpha's team in Thailand.",
+    "built": "Translated the interface and added language switching across the app.",
+    "result": "The product can now be shown and sold in English.",
+    "tools": [
+      "React",
+      "i18n",
+      "Claude Code"
+    ]
+  },
+  {
+    "id": "alphacrm-help",
+    "title": "AlphaCRM help site and guide videos",
+    "category": "alphacrm",
+    "year": "2026",
+    "summary": "A searchable help site with a narrated video for every guide.",
+    "problem": "A new customer meets the product alone, weeks after signing. Help built into each installation is hard to keep up to date.",
+    "built": "A standalone help site with written guides, search across everything, a catalogue of add-ons, and five guide videos with voiceover, generated from code so they can be re-rendered when the product changes.",
+    "result": "One place to fix a guide instead of every installation, and videos that can be remade in minutes instead of re-recorded.",
+    "tools": [
+      "Astro",
+      "Remotion",
+      "Cloudflare Pages",
+      "Claude Code"
+    ]
+  },
+  {
+    "id": "alphacrm-deck",
+    "title": "Interactive sales presentation",
+    "category": "alphacrm",
+    "year": "2026",
+    "summary": "A web-based sales deck for the CRM that the sales lead can edit himself.",
+    "problem": "Slides go stale and every edit had to go through the person who made them.",
+    "built": "A presentation that runs in the browser, with an edit mode so the sales lead can change the wording himself. It is linked from the company's internal system.",
+    "result": "Used in sales meetings and kept current by the people who use it.",
+    "tools": [
+      "HTML/CSS/JS",
+      "Cloudflare Pages",
+      "Claude Code"
+    ]
+  },
+  {
+    "id": "post-generator",
+    "title": "Social post generator for a franchise",
+    "category": "ai",
+    "year": "2026",
+    "summary": "AI that drafts local social media posts for every branch of a franchise, with a human check before anything is posted.",
+    "problem": "A franchise with many local branches needs regular, local posts for each one. Writing them by hand does not scale, and fully automatic posting is a risk.",
+    "built": "A generator inside Alpha's social media platform that drafts posts and images for each branch, and a review queue where a person approves, edits or rejects each post. Scheduled agents fill the queue over the weekend.",
+    "result": "Posts are ready for review every Monday. A person still gives every post the go-ahead before it is published.",
+    "tools": [
+      "Claude",
+      "Supabase",
+      "Scheduled agents",
+      "Lovable"
+    ],
+    "featured": true
+  },
+  {
+    "id": "tyre-agent",
+    "title": "Tyre advice chat agent",
+    "category": "ai",
+    "year": "2026",
+    "summary": "One chat agent for a tyre chain's website that advises customers and sends them to a dealer that is open.",
+    "problem": "The first idea was one agent per dealer website. A check showed almost no dealers had their own site, so the real job was one agent on the chain's site covering all of them.",
+    "built": "An AI chat agent that gives tyre advice using only the chain's own pages, sends the customer to the nearest dealer that is actually open, and hands over to booking.",
+    "result": "Built and deployed in a single working shift.",
+    "tools": [
+      "Claude",
+      "Cloudflare",
+      "Claude Code"
+    ]
+  },
+  {
+    "id": "weekend-agents",
+    "title": "Agents that work the weekend",
+    "category": "ai",
+    "year": "2026",
+    "summary": "Scheduled AI agents that check, draft and prepare work while the office is closed.",
+    "problem": "Routine checks and drafts eat into the working week.",
+    "built": "Cloud agents on a schedule: one checks the email programme every Saturday, one fills the social post queue, one finds content ideas and emails them to the content team on Sunday.",
+    "result": "The team starts Monday with checks done and drafts waiting, and a person still decides what ships.",
+    "tools": [
+      "Claude Code",
+      "Scheduled agents",
+      "Slack",
+      "Klaviyo"
+    ]
+  },
+  {
+    "id": "jewellery-email",
+    "title": "Email programme for a jewellery brand",
+    "category": "email",
+    "year": "2026",
+    "summary": "Audit, welcome series, abandoned cart and win-back emails for a Danish jewellery webshop.",
+    "problem": "The brand had Klaviyo but little running in it, and the emails that existed did not look or sound like the brand.",
+    "built": "An audit with a proposal, then a three-email welcome series, an abandoned cart email and two win-back campaigns, written in the brand's voice and styled in its own palette. The client chose the final colours from a clickable PDF of six variants.",
+    "result": "The audit turned into a proposal for an ongoing hours package, and the emails were reworked from the client's own feedback.",
+    "tools": [
+      "Klaviyo",
+      "HTML email",
+      "Playwright",
+      "Claude"
+    ]
+  },
+  {
+    "id": "own-email",
+    "title": "Email for Alpha's own AI brand",
+    "category": "email",
+    "year": "2026",
+    "summary": "Fixed consent, built a welcome flow and a monthly newsletter, with an agent that checks it weekly.",
+    "problem": "The sign-up forms did not collect consent the way Danish marketing law requires, and there was no newsletter.",
+    "built": "Consent fixes on every form, a welcome flow, a monthly newsletter format and a house style guide for emails. An AI agent reviews the whole programme every weekend and reports what needs fixing.",
+    "result": "Compliant sign-ups and a newsletter that runs on a routine.",
+    "tools": [
+      "Klaviyo",
+      "Claude Code",
+      "Scheduled agents"
+    ]
+  },
+  {
+    "id": "preflight",
+    "title": "Creative pre-flight tool",
+    "category": "side",
+    "year": "2026",
+    "summary": "Lets a designer see her ads inside real Meta and Google placements, and flags problems before handover.",
+    "problem": "The agency's designer had no access to the ad platforms, so she never saw her designs live. Text hidden under platform buttons, covers cropped differently on mobile and white text on light backgrounds only surfaced after handover.",
+    "built": "A browser tool: drop in finished designs and see them in realistic ad mock-ups on phone and desktop, with automatic format and readability checks. The format specs were verified against the platforms' own documentation, and the files never leave the browser.",
+    "result": "Problems are caught by the designer herself, before the files reach marketing.",
+    "tools": [
+      "React",
+      "Vite",
+      "Cloudflare Pages"
+    ]
+  },
+  {
+    "id": "thai-app",
+    "title": "Thai learning app",
+    "category": "side",
+    "year": "2026",
+    "summary": "My own app for learning Thai beyond the conversational level.",
+    "problem": "I speak conversational Thai and want to read and write it properly, but most apps stop at tourist phrases.",
+    "built": "A personal learning app built around the words and phrases I actually meet at work and in Bangkok, with tone practice and an AI tutor.",
+    "result": "My own practice tool, built in a day from a long spec.",
+    "tools": [
+      "React",
+      "TypeScript",
+      "Vite",
+      "Claude API"
+    ]
+  },
+  {
+    "id": "research-journal",
+    "title": "Research journal on an AI-first agency",
+    "category": "side",
+    "year": "2026",
+    "summary": "150+ field notes on how a small AI-first agency really works, for my internship report and thesis.",
+    "problem": "My master's programme asks for research based on the internship. Memory is not data.",
+    "built": "A structured research journal: field notes filed during the working day, coded with the Gioia method, with weekly summaries and an AI that argues against my research questions.",
+    "result": "The evidence base for my internship report and the starting point for my thesis.",
+    "tools": [
+      "Qualitative research",
+      "Gioia method",
+      "Claude"
+    ]
+  }
+]

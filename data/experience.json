@@ -1,0 +1,20 @@
+{
+  "work": [
+    { "when": "Aug 2026 - Feb 2027", "role": "Digital Innovation Specialist (intern)", "org": "Alpha Agency", "place": "Bangkok",
+      "text": "Building AI agents, CRM features and email programmes for an AI-first marketing agency, directing AI to write production software." },
+    { "when": "Jul - Nov 2024", "role": "Sales & Partnerships Intern", "org": "ONE Championship", "place": "Bangkok",
+      "text": "200+ qualified leads from outbound prospecting; partnership proposals and follow-up with 30+ potential partners." },
+    { "when": "Jan - Apr 2023", "role": "Marketing Intern", "org": "IDA, the Danish Society of Engineers", "place": "Copenhagen",
+      "text": "5+ social campaigns with twice the usual engagement; audience segmentation and reporting dashboards." },
+    { "when": "Jun 2022 - Jan 2023", "role": "Student Assistant", "org": "IDA", "place": "Copenhagen",
+      "text": "Top 10% in sales through upselling, alongside phone and email support." },
+    { "when": "Sep 2021 - May 2022", "role": "Student Brand Ambassador", "org": "GlobalConnect", "place": "Denmark",
+      "text": "Face-to-face sales of fibre internet." }
+  ],
+  "education": [
+    { "when": "2025 - 2027", "role": "MSc Innovation Management", "org": "Sino-Danish Center: University of Chinese Academy of Sciences and Aalborg University", "place": "Beijing and Denmark",
+      "text": "Double degree. GPA 90/100. Thesis on AI agents and the organisation of work." },
+    { "when": "2021 - 2025", "role": "BA International Trade & Marketing", "org": "Copenhagen Business Academy", "place": "Copenhagen",
+      "text": "GPA 8.5/12." }
+  ]
+}

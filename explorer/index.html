@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<title>Agent Files Explorer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a header that reads like the top of an instruction file, three charts side by side (stacked on phones), an evidence panel of quoted lines below. */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --fg:#1b1e24; --muted:#5d6370; --line:#dde0e6; --track:#e9ebef;
+  --tasks:#2f5aa8; --rules:#2e7d5b; --bans:#b2453b; --focus:#2f5aa8;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13151a; --surface:#1b1e25; --fg:#e7e9ee; --muted:#9aa1ae; --line:#2c303a; --track:#262a33;
+  --tasks:#7da2e8; --rules:#6cc29b; --bans:#e88a80; --focus:#7da2e8; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#13151a; --surface:#1b1e25; --fg:#e7e9ee; --muted:#9aa1ae; --line:#2c303a; --track:#262a33;
+  --tasks:#7da2e8; --rules:#6cc29b; --bans:#e88a80; --focus:#7da2e8; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body)}
+.wrap{max-width:1120px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:grid;gap:10px;margin-bottom:22px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font:700 clamp(28px,5vw,44px)/1.08 var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+.sub{margin:0;color:var(--muted);max-width:62ch}
+code{font:500 .9em var(--mono);background:var(--track);padding:1px 5px;border-radius:4px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 20px}
+select{font:14px var(--body);max-width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+select:focus-visible,.row:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 16px 10px;min-width:0}
+.chart h2{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font:600 17px/1.3 var(--display);margin:0 0 4px}
+.chart h2 span{font:400 12px var(--mono);color:var(--muted)}
+.chart p{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.row{display:grid;grid-template-columns:minmax(0,128px) 1fr 3.2em;gap:10px;align-items:center;width:100%;padding:5px 4px;border:0;border-radius:6px;background:none;color:inherit;font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.row:hover{background:var(--track)}
+.row.on{background:var(--track)}
+.row.on .lbl{font-weight:600}
+.lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{display:block;height:10px;background:var(--track);border-radius:3px;overflow:hidden}
+.row:hover .track,.row.on .track{background:var(--surface)}
+.fill{display:block;height:100%;border-radius:3px;background:var(--c)}
+.pct{font:500 13px var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--muted)}
+#quotes{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+#quotes h2{font:600 18px/1.3 var(--display);margin:0 0 4px}
+#quotes .hint{margin:0 0 14px;color:var(--muted);font-size:13px}
+.q{display:grid;gap:4px;padding:10px 0;border-top:1px solid var(--line)}
+.q blockquote{margin:0;font:400 14px/1.5 var(--mono);color:var(--fg);overflow-wrap:anywhere}
+.q blockquote::before{content:"- ";color:var(--c)}
+.q a{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+#qfind{display:block;width:100%;max-width:420px;margin:0 0 6px;font:14px var(--body);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+#qfind:focus-visible,.more:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.more{margin-top:12px;font:500 14px var(--body);padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer}
+.more:hover{border-color:var(--muted)}
+.how{margin-top:20px;color:var(--muted);font-size:13px;max-width:80ch}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .25s ease}}
+/* The constellation panel is deliberately night-sky dark in both themes. */
+:root{--sky:#0c0f16;--sky-fg:#e9ecf3;--sky-muted:#8d94a5;--sky-tasks:#7fa8ff;--sky-rules:#5fd3a0;--sky-bans:#ff7d6e}
+.sky{position:relative;margin:4px 0 22px;background:radial-gradient(120% 90% at 50% 0%,#161b28 0%,var(--sky) 70%);border-radius:14px;overflow:hidden;color:var(--sky-fg)}
+.sky-head{position:absolute;inset:0 auto auto 0;padding:16px 18px;pointer-events:none;max-width:min(430px,90%)}
+.sky-head h2{font:700 20px/1.2 var(--display);margin:0 0 4px}
+.sky-head p{margin:0;font-size:13px;color:var(--sky-muted)}
+.sky-key{position:absolute;right:16px;bottom:12px;display:flex;gap:12px;font:500 11px var(--mono);color:var(--sky-muted);pointer-events:none}
+.sky-key i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:0}
+#sky{display:block;width:100%;cursor:crosshair}
+#skytip{position:absolute;max-width:300px;padding:10px 12px;background:rgba(18,22,32,.94);border:1px solid #2a3142;border-radius:8px;font-size:13px;line-height:1.45;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+#skytip b{display:block;font:600 13px var(--display);margin-bottom:4px}
+#skytip q{display:block;font:400 12px/1.45 var(--mono);color:#c9cfdb;quotes:none}
+#skytip small{display:block;margin-top:6px;color:var(--sky-muted);font-size:11px}
+@media (max-width:600px){.sky-head{position:static;padding:14px 16px 0}.sky-key{position:static;padding:0 16px 12px}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <p style="margin:0 0 18px"><a href="../" style="font:600 14px var(--body);color:var(--muted)">&larr; Back to Thomas Sokolowski</a></p>
+  <header>
+    <div class="eyebrow">CLAUDE.md &middot; AGENTS.md &middot; public GitHub</div>
+    <h1>What do people make their AI do?</h1>
+    <p class="sub" id="sub">Loading the files...</p>
+  </header>
+  <section class="sky" aria-label="Constellation of instruction types">
+    <div class="sky-head"><h2>What goes together</h2><p id="skysub">Each star is a kind of instruction, sized by how many files contain it.</p></div>
+    <canvas id="sky"></canvas>
+    <div class="sky-key"><span><i style="background:var(--sky-tasks)"></i>hands over</span><span><i style="background:var(--sky-rules)"></i>rules</span><span><i style="background:var(--sky-bans)"></i>forbids</span></div>
+    <div id="skytip" hidden></div>
+  </section>
+  <div class="filters">
+    <select id="src" aria-label="Sorted by"><option value="kw">Sorted by keyword rules (all files)</option><option value="cl">Sorted by Claude (only the 100 files it read)</option></select>
+    <select id="type" aria-label="File type"><option value="">CLAUDE.md and AGENTS.md</option><option>CLAUDE.md</option><option>AGENTS.md</option></select>
+    <select id="lang" aria-label="Language"><option value="">All languages</option></select>
+    <select id="stars" aria-label="Popularity"><option value="">Any popularity</option><option value="0-9">0-9 stars</option><option value="10-99">10-99 stars</option><option value="100-999">100-999 stars</option><option value="1000+">1000+ stars</option></select>
+  </div>
+  <div class="grid" id="charts"></div>
+  <section id="quotes" hidden></section>
+  <p class="how" id="how"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const DIMS={
+  tasks:{t:'What they hand over',d:'Work the file gives the AI',c:'var(--tasks)'},
+  rules:{t:'Rules they set',d:'What the AI is told to do, and how',c:'var(--rules)'},
+  bans:{t:'What they forbid',d:'What the AI is told not to do',c:'var(--bans)'}
+};
+let D,sel=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nice=c=>c.replace(/-/g,' ');
+const band=s=>s>=1000?'1000+':s>=100?'100-999':s>=10?'10-99':'0-9';
+function expand(d){
+  const dims=Object.keys(d.cats),un=m=>Object.fromEntries(dims.map((dim,i)=>[dim,d.cats[dim].filter((c,j)=>(m[i]>>j)&1)]));
+  d.files=d.files.map(f=>{const o={id:f.r+'/'+f.p,repo:f.r,path:f.p,url:`https://github.com/${f.r}/blob/HEAD/${f.p.split('/').map(encodeURIComponent).join('/')}`,
+    type:f.t?'AGENTS.md':'CLAUDE.md',lang:d.langs[f.l],stars:f.s,starBand:band(f.s),tags:un(f.k),quotes:f.q||{}};
+    if(f.c)o.claude={tags:un(f.c.k),quotes:f.c.q};return o;});
+  return d;
+}
+fetch('data.json').then(r=>r.json()).then(d=>{D=expand(d);init();}).catch(()=>{$('sub').textContent='The data file did not load. Reload the page to try again.';});
+function init(){
+  const langs={};D.files.forEach(f=>langs[f.lang]=(langs[f.lang]||0)+1);
+  Object.entries(langs).sort((a,b)=>b[1]-a[1]).filter(([l,n])=>n>=5).forEach(([l,n])=>$('lang').add(new Option(`${l} (${n.toLocaleString('en-GB')})`,l)));
+  ['src','type','lang','stars'].forEach(id=>{$(id).value='';$(id).onchange=()=>{sel=null;render();};});
+  $('src').value='kw';
+  const a=D.meta.agreement,m=D.meta;
+  $('how').textContent=`How this was made: run on ${m.runDate}. ${m.nFiles.toLocaleString('en-GB')} public files from GitHub code search, spread over ${m.bands.length} file-size bands so long and short files both appear (search returns at most 1,000 files per query, so this is a large sample, not every file); ${m.dupesDropped.toLocaleString('en-GB')} exact copies of the same file were dropped. Keyword rules tag every file; example lines are kept for ${m.quoteFiles.toLocaleString('en-GB')} of them. Claude read a random sample of ${m.sampleSize}${m.sampleSize?`. Counting only the labels at least one of them gave, keyword rules and Claude agree on ${a.tasks.overlap}% of task labels, ${a.rules.overlap}% of rule labels and ${a.bans.overlap}% of ban labels. Keyword rules mostly miss plain instructions such as "Use pnpm", so for rules and bans the Claude view is the better guide`:''}. Every quote links to its file.`;
+  if(!m.sampleSize)$('src').options[1].disabled=true;
+  render();
+  if(window.d3){sky();window.skyUpdate(pool());}else document.querySelector('.sky').hidden=true;
+}
+function sky(){
+  const cv=$('sky'),ctx=cv.getContext('2d'),tip=$('skytip');
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const col={tasks:css('--sky-tasks'),rules:css('--sky-rules'),bans:css('--sky-bans')};
+  const keys=[];for(const dim of Object.keys(DIMS))for(const c of D.cats[dim])keys.push({dim,c});
+  let nodes=[],links=[],maxW=1,total=0,W=0,H=0,hover=null,lastKey='';
+  const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){
+    const dpr=window.devicePixelRatio||1;W=cv.parentElement.clientWidth;H=W<600?Math.round(W*1.05):Math.min(560,Math.round(W*.52));
+    cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  size();
+  const stars=Array.from({length:140},()=>({x:Math.random(),y:Math.random(),a:Math.random()*.5+.1}));
+  const cx=()=>W<600?W/2:W*.6, cy=()=>W<600?H/2:H*.5;
+  const sim=d3.forceSimulation([]).force('collide',d3.forceCollide(d=>d.r+16)).on('tick',draw);
+  function forces(){
+    const k=Math.min(W,H)/520;
+    sim.force('link',d3.forceLink(links).distance(l=>(170-90*l.w/maxW)*k+20).strength(l=>.08+.4*l.w/maxW))
+       .force('charge',d3.forceManyBody().strength(-420*k))
+       .force('x',d3.forceX(cx).strength(.05)).force('y',d3.forceY(cy).strength(.08));
+  }
+  // Rebuild stars and lines from whatever files the dropdowns currently select.
+  window.skyUpdate=P=>{
+    const key=['src','type','lang','stars'].map(id=>$(id).value).join('|');
+    if(key===lastKey)return;lastKey=key;hover=null;tip.hidden=true;
+    total=P.length;
+    const count=new Array(keys.length).fill(0),pair=new Map(),ex=keys.map(()=>[]);
+    for(const p of P){
+      const on=[];
+      keys.forEach((k,i)=>{if(p.tags[k.dim].includes(k.c)){on.push(i);count[i]++;if(ex[i].length<60&&p.quotes[k.dim+':'+k.c])ex[i].push(p);}});
+      for(let a=0;a<on.length;a++)for(let b=a+1;b<on.length;b++){const id=on[a]*100+on[b];pair.set(id,(pair.get(id)||0)+1);}
+    }
+    const old=new Map(nodes.map(n=>[n.dim+':'+n.c,n]));
+    const idx=new Map();nodes=[];
+    keys.forEach((k,i)=>{
+      if(count[i]<2||count[i]/Math.max(total,1)<.01)return;
+      const prev=old.get(k.dim+':'+k.c);
+      idx.set(i,nodes.length);
+      nodes.push({...k,n:count[i],share:count[i]/total,ex:ex[i],r:5+Math.sqrt(100*count[i]/total)*3.1,
+        tw:prev?prev.tw:Math.random()*6.28,x:prev?.x??W/2+(Math.random()-.5)*80,y:prev?.y??H/2+(Math.random()-.5)*80});
+    });
+    const all=[...pair].map(([id,w])=>({a:Math.floor(id/100),b:id%100,w})).filter(l=>idx.has(l.a)&&idx.has(l.b)).sort((x,y)=>y.w-x.w);
+    const pick=new Set(all.slice(0,45));
+    for(const i of idx.keys()){const best=all.find(l=>l.a===i||l.b===i);if(best)pick.add(best);}
+    links=[...pick].map(l=>({source:idx.get(l.a),target:idx.get(l.b),w:l.w}));
+    maxW=Math.max(1,...links.map(l=>l.w));
+    sim.nodes(nodes);forces();sim.alpha(.7).restart();if(!still)sim.alphaTarget(.015);
+    $('skysub').textContent=`Each star is a kind of instruction, sized by how many of these ${total.toLocaleString('en-GB')} files contain it. Lines join the pairs that most often sit in the same file, plus each star's strongest partner. Hover to read one, click to see them all.`;
+  };
+  const near=n=>hover&&(n===hover||links.some(l=>(l.source===hover&&l.target===n)||(l.target===hover&&l.source===n)));
+  function draw(){
+    const t=performance.now()/1000;
+    ctx.clearRect(0,0,W,H);
+    for(const s of stars){ctx.fillStyle=`rgba(220,228,255,${s.a*(.6+.4*Math.sin(t*1.3+s.x*40))})`;ctx.fillRect(s.x*W,s.y*H,1.2,1.2);}
+    for(const n of nodes){n.x=Math.max(n.r+4,Math.min(W-n.r-4,n.x));n.y=Math.max(n.r+4,Math.min(H-n.r-4,n.y));}
+    for(const l of links){
+      if(typeof l.source!=='object')continue;
+      const on=hover&&(l.source===hover||l.target===hover);
+      ctx.strokeStyle=on?col[hover.dim]:'rgba(170,185,220,1)';
+      ctx.globalAlpha=hover?(on?.85:.04):.08+.32*l.w/maxW;ctx.lineWidth=on?1.2+2.5*l.w/maxW:.6+1.6*l.w/maxW;
+      ctx.beginPath();ctx.moveTo(l.source.x,l.source.y);ctx.lineTo(l.target.x,l.target.y);ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+    for(const n of nodes){
+      const dim=hover&&!near(n),pulse=still?1:1+.06*Math.sin(t*2+n.tw);
+      ctx.globalAlpha=dim?.25:1;ctx.shadowColor=col[n.dim];ctx.shadowBlur=dim?0:n===hover?28:14;
+      ctx.fillStyle=col[n.dim];ctx.beginPath();ctx.arc(n.x,n.y,n.r*pulse,0,6.283);ctx.fill();
+      ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.arc(n.x-n.r*.3,n.y-n.r*.3,Math.max(1.2,n.r*.22),0,6.283);ctx.fill();
+      if(!dim&&(hover?near(n):n.share>=(W<600?.3:.18))){ctx.font=`${n===hover?600:500} 11px "IBM Plex Mono",monospace`;ctx.fillStyle=n===hover?'#fff':'rgba(233,236,243,.8)';ctx.textAlign='center';ctx.fillText(nice(n.c),n.x,n.y+n.r+14);}
+      ctx.globalAlpha=1;
+    }
+  }
+  function pick(e){const b=cv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;return {x,y,n:nodes.find(n=>Math.hypot(n.x-x,n.y-y)<n.r+8)};}
+  cv.addEventListener('pointermove',e=>{
+    const p=pick(e);hover=p.n||null;cv.style.cursor=hover?'pointer':'crosshair';
+    if(!hover){tip.hidden=true;if(still)draw();return;}
+    const f=hover.ex.length?hover.ex[Math.floor((performance.now()/1500)%hover.ex.length)]:null;
+    tip.innerHTML=`<b>${DIMS[hover.dim].t}: ${nice(hover.c)}</b>${f?`<q>${esc(f.quotes[hover.dim+':'+hover.c])}</q>`:''}<small>${hover.n.toLocaleString('en-GB')} of ${total.toLocaleString('en-GB')} files (${Math.round(100*hover.share)}%)${f?' &middot; '+esc(f.f.repo):''}</small>`;
+    tip.hidden=false;const tw=tip.offsetWidth,th=tip.offsetHeight;
+    tip.style.left=Math.min(p.x+16,W-tw-8)+'px';tip.style.top=Math.max(8,Math.min(p.y+16,H-th-8)+cv.offsetTop)+'px';
+    if(still)draw();
+  });
+  cv.addEventListener('pointerleave',()=>{hover=null;tip.hidden=true;if(still)draw();});
+  cv.addEventListener('click',e=>{const n=pick(e).n;if(!n)return;sel={dim:n.dim,c:n.c};render();$('quotes').scrollIntoView({behavior:'smooth',block:'start'});});
+  new ResizeObserver(()=>{if(cv.parentElement.clientWidth!==W){size();forces();sim.alpha(.5).restart();}}).observe(cv.parentElement);
+}
+function pool(){
+  const src=$('src').value,t=$('type').value,l=$('lang').value,s=$('stars').value;
+  return D.files.filter(f=>(src==='kw'||f.claude)&&(!t||f.type===t)&&(!l||f.lang===l)&&(!s||f.starBand===s))
+    .map(f=>({f,tags:src==='kw'?f.tags:f.claude.tags,quotes:src==='kw'?f.quotes:f.claude.quotes}));
+}
+function render(){
+  const P=pool();
+  if(window.skyUpdate)window.skyUpdate(P);
+  $('sub').innerHTML=`Patterns in <strong>${P.length.toLocaleString('en-GB')}</strong> instruction files people wrote for their AI agents. Click a bar to read the actual lines.`;
+  $('charts').innerHTML=Object.entries(DIMS).map(([dim,o])=>{
+    const rows=D.cats[dim].map(c=>({c,n:P.filter(p=>p.tags[dim].includes(c)).length})).sort((a,b)=>b.n-a.n);
+    return `<div class="chart" style="--c:${o.c}"><h2>${o.t}<span>share of files</span></h2><p>${o.d}</p>${rows.map(r=>{
+      const pc=P.length?Math.round(100*r.n/P.length):0,on=!!(sel&&sel.dim===dim&&sel.c===r.c);
+      return `<button class="row${on?' on':''}" data-dim="${dim}" data-c="${r.c}" aria-pressed="${on}" title="${r.n} files"><span class="lbl">${nice(r.c)}</span><span class="track"><span class="fill" style="width:${pc}%"></span></span><span class="pct">${pc}%</span></button>`;}).join('')}</div>`;
+  }).join('');
+  document.querySelectorAll('.row').forEach(b=>b.onclick=()=>{sel={dim:b.dataset.dim,c:b.dataset.c};render();$('quotes').scrollIntoView({behavior:'smooth',block:'nearest'});});
+  const q=$('quotes');
+  if(!sel){q.hidden=true;return;}
+  const key=sel.dim+':'+sel.c;
+  if(key!==lastSel){lastSel=key;shown=50;qtext='';}
+  lastP=P;
+  q.hidden=false;q.style.setProperty('--c',DIMS[sel.dim].c);
+  q.innerHTML=`<h2>${DIMS[sel.dim].t}: ${nice(sel.c)}</h2><p class="hint" id="qhint"></p>
+    <input id="qfind" type="search" placeholder="Find a project by name" aria-label="Find a project by name" value="${esc(qtext)}">
+    <div id="qlist"></div><button id="qmore" class="more" type="button"></button>`;
+  $('qfind').oninput=e=>{qtext=e.target.value.trim().toLowerCase();shown=50;list();};
+  $('qmore').onclick=()=>{shown+=50;list();};
+  list();
+}
+let lastSel='',shown=50,qtext='',lastP=[];
+function list(){
+  const key=sel.dim+':'+sel.c;
+  const all=lastP.filter(p=>p.tags[sel.dim].includes(sel.c)&&(!qtext||(p.f.repo+'/'+p.f.path).toLowerCase().includes(qtext)))
+    .sort((a,b)=>(!!b.quotes[key]-!!a.quotes[key])||b.f.stars-a.f.stars);
+  const part=all.slice(0,shown),n=all.length.toLocaleString('en-GB');
+  $('qhint').textContent=`${n} files${qtext?' match':''}. Showing ${part.length.toLocaleString('en-GB')}, the ones with a kept example line first, then by stars.`;
+  $('qlist').innerHTML=part.length?part.map(p=>`<div class="q">${p.quotes[key]?`<blockquote>${esc(p.quotes[key])}</blockquote>`:''}<a href="${esc(p.f.url)}" target="_blank" rel="noopener">${esc(p.f.repo)} / ${esc(p.f.path)} &middot; ${p.f.stars.toLocaleString('en-GB')} stars</a></div>`).join(''):'<p>No files here.</p>';
+  const left=all.length-part.length;
+  $('qmore').hidden=left<=0;$('qmore').textContent=`Show ${Math.min(50,left)} more (${left.toLocaleString('en-GB')} left)`;
+}
+</script>
+
+</body>
+</html>
