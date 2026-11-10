@@ -19,12 +19,26 @@
 <a class="skip" href="#about">Skip to the normal portfolio</a>
 
 <section class="play" id="play" aria-label="Interactive portfolio console">
-  <div class="stage3d" id="stage3d" role="application" aria-label="TS-26 console. Arrow keys move, Enter opens, Backspace goes back, M mutes.">
+  <div class="stage3d" id="stage3d" aria-hidden="true"></div>
+  <div class="tsc" id="tsc" role="application" aria-label="TS-26 console. A or Enter opens, Backspace goes back, arrow keys move, M mutes, drag to turn it over.">
+    <div class="tsc-card" id="tsc-card">
+      <div class="tsc-face tsc-front">
+        <img src="img/ts26-front-cut.png" alt="" width="457" height="612" draggable="false">
+        <canvas id="tsc-screen" class="tsc-screen"></canvas>
+        <span class="tsc-glass" aria-hidden="true"></span>
+        <button type="button" class="tsc-hit tsc-dpad" data-k="dpad" aria-label="Direction pad"></button>
+        <button type="button" class="tsc-hit tsc-b" data-k="b" aria-label="B, back"></button>
+        <button type="button" class="tsc-hit tsc-a" data-k="a" aria-label="A, open"></button>
+        <button type="button" class="tsc-hit tsc-mute" data-k="mute" aria-label="Mute"></button>
+        <span class="tsc-sheen" aria-hidden="true"></span>
+      </div>
+      <div class="tsc-face tsc-back" aria-hidden="true"><img src="img/ts26-back-cut.png" alt="" width="577" height="611" draggable="false"></div>
+    </div>
     <div id="screen-text" class="sr-only" aria-live="polite"></div>
   </div>
   <div class="play-top"><p class="play-title">Thomas Sokolowski &middot; pocket portfolio</p></div>
   <div class="play-bottom">
-    <p class="play-hint" id="play-hint">Flip the power switch, or press any key</p>
+    <p class="play-hint" id="play-hint">Press A or any key to start, drag to turn it over</p>
     <a class="skip-view" href="#about">Skip to normal view &darr;</a>
   </div>
 </section>
@@ -130,6 +144,6 @@
 
 <script src="assets/app.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module" src="assets/console3d.js"></script>
+<script type="module" src="assets/console-img.js"></script>
 </body>
 </html>
