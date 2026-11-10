@@ -25,11 +25,14 @@
 
   // Tilt with the pointer
   addEventListener('pointermove', e => {
-    if (!inView || still) return;
+    if (!inView || still || dev.classList.contains('zoom')) return;
     stage.style.setProperty('--ry', `${((e.clientX / innerWidth) - 0.5) * 34}deg`);
     stage.style.setProperty('--rx', `${(0.5 - e.clientY / innerHeight) * 20 + 10}deg`);
   });
-  new IntersectionObserver(([en]) => { inView = en.intersectionRatio > 0.5; }, { threshold: [0, 0.5, 1] }).observe(section);
+  new IntersectionObserver(([en]) => {
+    inView = en.intersectionRatio > 0.5;
+    if (typeof stopMusic === 'function') { if (!inView) stopMusic(); else if (on) startMusic(); }
+  }, { threshold: [0, 0.5, 1] }).observe(section);
   if (!still) dev.classList.add('idle');
 
   // Sound: tiny square-wave beeps, created on first interaction
@@ -46,6 +49,54 @@
     } catch { /* no audio, fine */ }
   }
   const chime = () => { [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.12, 'square', i * 0.09)); };
+
+  // Background chiptune: an original 4-bar loop (lead, bass, hi-hat), scheduled ahead in time
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  const LEAD = [69, 0, 72, 0, 76, 74, 72, 0, 69, 0, 67, 69, 72, 0, 0, 0, 74, 0, 76, 0, 79, 76, 74, 0, 72, 0, 74, 72, 69, 0, 0, 0,
+    69, 0, 72, 0, 76, 74, 72, 0, 77, 0, 76, 74, 72, 0, 74, 0, 76, 0, 74, 72, 69, 0, 67, 0, 69, 0, 0, 0, 0, 0, 0, 0];
+  const ROOTS = [45, 41, 48, 43];
+  const STEP = 60 / 132 / 4;
+  let music = null;
+  function voice(t, f, d, type, vol, dest) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g).connect(dest); o.start(t); o.stop(t + d + 0.02);
+  }
+  function hat(t, dest) {
+    const n = ac.createBufferSource(), b = ac.createBuffer(1, ac.sampleRate * 0.04, ac.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const f = ac.createBiquadFilter(), g = ac.createGain();
+    f.type = 'highpass'; f.frequency.value = 6000; g.gain.value = 0.25;
+    n.buffer = b; n.connect(f).connect(g).connect(dest); n.start(t);
+  }
+  function startMusic(delay = 0) {
+    if (!sound || music) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      ac.resume();
+      const out = ac.createGain(); out.gain.value = 0; out.connect(ac.destination);
+      out.gain.setValueAtTime(0, ac.currentTime + delay); out.gain.linearRampToValueAtTime(0.09, ac.currentTime + delay + 1.5);
+      let step = 0, next = ac.currentTime + delay;
+      const timer = setInterval(() => {
+        while (next < ac.currentTime + 0.15) {
+          const s = step % 64, lead = LEAD[s];
+          if (lead) voice(next, hz(lead), STEP * 1.8, 'square', 0.32, out);
+          if (s % 2 === 0) voice(next, hz(ROOTS[Math.floor(s / 16)] + (s % 8 === 4 ? 12 : 0)), STEP * 1.6, 'triangle', 0.6, out);
+          if (s % 4 === 2) hat(next, out);
+          next += STEP; step++;
+        }
+      }, 25);
+      music = { out, timer };
+    } catch { music = null; }
+  }
+  function stopMusic() {
+    if (!music) return;
+    const m = music; music = null;
+    try { m.out.gain.cancelScheduledValues(ac.currentTime); m.out.gain.setValueAtTime(m.out.gain.value, ac.currentTime); m.out.gain.linearRampToValueAtTime(0, ac.currentTime + 0.4); } catch { }
+    setTimeout(() => { clearInterval(m.timer); m.out.disconnect(); }, 450);
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stopMusic(); else if (on && inView) startMusic(); });
 
   const page = (title, body, foot) => `<div class="scr"><h4>${title}</h4>${body}<div class="foot">${foot}</div></div>`;
 
@@ -102,11 +153,17 @@
     if (v === on) return;
     on = v; dev.classList.toggle('on', on); clearTimeout(bootTimer);
     if (on) {
-      view = 'boot'; idx = 0; render(); chime();
+      view = 'boot'; idx = 0; render(); chime(); startMusic(0.6);
+      if (!still) {
+        dev.classList.remove('unzoom'); dev.classList.add('zoom');
+        stage.style.setProperty('--rx', '0deg'); stage.style.setProperty('--ry', '0deg');
+        setTimeout(() => { dev.classList.remove('zoom'); dev.classList.add('unzoom'); stage.style.setProperty('--rx', '8deg'); stage.style.setProperty('--ry', '-12deg'); }, 2300);
+      }
       hint.innerHTML = matchMedia('(pointer: coarse)').matches ? 'Tap the d-pad, A to open, B to go back'
         : 'Use the d-pad and A/B, or <kbd>&#8593;</kbd><kbd>&#8595;</kbd> <kbd>Enter</kbd> <kbd>Backspace</kbd>';
       bootTimer = setTimeout(() => { view = 'menu'; render(); }, still ? 300 : 1900);
     } else {
+      stopMusic(); dev.classList.remove('zoom');
       beep(220, 0.15, 'sawtooth'); scr.classList.add('power-off');
       setTimeout(() => { scr.classList.remove('power-off'); view = 'off'; render(); }, 350);
       hint.innerHTML = 'Flip the power switch, or press any key';
@@ -135,7 +192,7 @@
       beep(990, 0.06);
       if (view === 'menu') {
         const choice = MENU[idx];
-        if (choice === 'SOUND') { sound = !sound; beep(1200, 0.05); render(); return; }
+        if (choice === 'SOUND') { sound = !sound; if (sound) { beep(1200, 0.05); startMusic(); } else stopMusic(); render(); return; }
         if (choice === 'NORMAL VIEW') { document.getElementById('about').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return; }
         view = { 'ABOUT ME': 'about', PROJECTS: 'projects', EXPERIENCE: 'exp', CONTACT: 'contact' }[choice];
         idx = 0; sub = 0;
