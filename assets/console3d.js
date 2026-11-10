@@ -22,11 +22,13 @@ try {
   host.innerHTML = '<p class="no3d">This browser cannot show the 3D console. Scroll down for the normal portfolio.</p>';
   throw new Error('no webgl');
 }
-let PR = Math.min(devicePixelRatio, 1.5);
+let PR = Math.min(devicePixelRatio, 2);
 renderer.setPixelRatio(PR);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.12;
+renderer.toneMappingExposure = 1.08;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 host.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -37,11 +39,14 @@ const BG = 0x0d1714;
 scene.fog = new THREE.Fog(0x142d26, 14, 42);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.7;
 const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
 
-scene.add(new THREE.HemisphereLight(0xdff2e8, 0x0d1714, 0.75));
+scene.add(new THREE.HemisphereLight(0xdff2e8, 0x0d1714, 0.5));
 const key = new THREE.DirectionalLight(0xffffff, 1.6);
-key.position.set(3, 6, 6);
+key.position.set(-3, 5, 8); key.intensity = 2.3; key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.02;
+Object.assign(key.shadow.camera, { left: -3.5, right: 3.5, top: 4, bottom: -4, near: 1, far: 20 });
 scene.add(key);
 const rim = new THREE.DirectionalLight(0xdff5ea, 0.7); rim.position.set(-5, 2, -4); scene.add(rim);
 
@@ -90,8 +95,8 @@ const mat = (color, rough = 0.55, extra = {}) => new THREE.MeshStandardMaterial(
 const add = (geo, m, x = 0, y = 0, z = 0, parent = dev) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); parent.add(o); return o; };
 
 // Two shells with a seam between them
-add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 4, 0.15), shell(0xa6cbb5, 0.5), 0, 0, D / 4 + 0.005);
-add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 4, 0.15), shell(0x86ab96, 0.65), 0, 0, -D / 4 - 0.005);
+add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 3, 0.085), shell(0xa6cbb5, 0.36, { clearcoat: 0.45, clearcoatRoughness: 0.35 }), 0, 0, D / 4 + 0.005);
+add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 3, 0.085), shell(0x8db29d, 0.45), 0, 0, -D / 4 - 0.005);
 add(new RoundedBoxGeometry(W - 0.08, H - 0.08, 0.03, 2, 0.12), mat(0x5d7f6c, 0.8), 0, 0, 0);
 const FZ = D / 2; // front face
 
@@ -102,7 +107,7 @@ const rr = (p, w, h, r, cx = 0, cy = 0) => { const x = cx - w / 2, y = cy - h / 
   p.moveTo(x + r, y); p.lineTo(x + w - r, y); p.quadraticCurveTo(x + w, y, x + w, y + r); p.lineTo(x + w, y + h - r); p.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
   p.lineTo(x + r, y + h); p.quadraticCurveTo(x, y + h, x, y + h - r); p.lineTo(x, y + r); p.quadraticCurveTo(x, y, x + r, y); return p; };
 const ring = (rOut, rIn) => { const s = new THREE.Shape(); s.absarc(0, 0, rOut, 0, Math.PI * 2); const h = new THREE.Path(); h.absarc(0, 0, rIn, 0, Math.PI * 2, true); s.holes.push(h); return s; };
-const bevel = { bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.02, bevelSegments: 3, curveSegments: 32 };
+const bevel = { bevelEnabled: true, bevelThickness: 0.018, bevelSize: 0.014, bevelSegments: 2, curveSegments: 32 };
 { const s = rr(new THREE.Shape(), 2.96, 2.62, 0.2); s.holes.push(rr(new THREE.Path(), 2.74, 2.4, 0.1));
   add(new THREE.ExtrudeGeometry(s, { depth: 0.03, ...bevel }), mat(0xa2c7b1, 0.55), 0, 1.13, FZ + 0.02); }
 const SCR_W = 2.36, SCR_H = 1.77;
@@ -130,7 +135,7 @@ add(new THREE.ExtrudeGeometry(ring(0.68, 0.6), { depth: 0.02, ...bevel }), mat(0
 const arm = 0.15, len = 0.5, s = new THREE.Shape();
 s.moveTo(-arm, len); s.lineTo(arm, len); s.lineTo(arm, arm); s.lineTo(len, arm); s.lineTo(len, -arm); s.lineTo(arm, -arm); s.lineTo(arm, -len);
 s.lineTo(-arm, -len); s.lineTo(-arm, -arm); s.lineTo(-len, -arm); s.lineTo(-len, arm); s.lineTo(-arm, arm); s.closePath();
-const dpad = add(new THREE.ExtrudeGeometry(s, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 3 }), mat(0x2b3034, 0.42), -0.8, -0.95, FZ + 0.01);
+const dpad = add(new THREE.ExtrudeGeometry(s, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 3 }), shell(0x2b3034, 0.38, { clearcoat: 0.3, roughnessMap: null, bumpMap: null }), -0.8, -0.95, FZ + 0.01);
 dpad.userData.k = 'dpad'; dpad.userData.z = dpad.position.z;
 const nub = add(new THREE.SphereGeometry(0.06, 16, 12), mat(0x1f2326, 0.4), 0, 0, 0.13, dpad); nub.scale.z = 0.3;
 
@@ -139,7 +144,7 @@ const btn = (k, color, x, y, letter) => {
   const g = new THREE.Group(); g.position.set(x, y, FZ + 0.01); dev.add(g);
   add(new THREE.CylinderGeometry(0.33, 0.33, 0.02, 48), mat(0x8fb49f, 0.7), 0, 0, -0.005, g).rotation.x = Math.PI / 2;
   add(new THREE.ExtrudeGeometry(ring(0.37, 0.32), { depth: 0.015, ...bevel }), mat(0xa2c7b1, 0.55), 0, 0, -0.015, g);
-  const b = add(new THREE.CylinderGeometry(0.26, 0.27, 0.14, 48), mat(color, 0.35), 0, 0, 0.07, g); b.rotation.x = Math.PI / 2;
+  const b = add(new THREE.CylinderGeometry(0.26, 0.27, 0.14, 48), shell(color, 0.22, { clearcoat: 0.9, clearcoatRoughness: 0.15, roughnessMap: null, bumpMap: null }), 0, 0, 0.07, g); b.rotation.x = Math.PI / 2;
   const l = label(letter, 0.24, 0.24, 30, 'rgba(255,255,255,.92)', '700'); l.position.set(0.035, 0, 0.142); g.add(l);
   g.userData.k = k; b.userData.k = k; l.userData.k = k; g.userData.z = g.position.z; return g;
 };
@@ -166,7 +171,7 @@ function drawIcon(muted) {
 // Speaker holes
 const holeGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.02, 14), holeMat = mat(0x4f6f5d, 0.9);
 { const slot = new THREE.CapsuleGeometry(0.04, 0.3, 4, 12);
-  for (let c = 0; c < 6; c++) { const m = add(slot, mat(0x3f5a4c, 0.9), -0.5 + c * 0.2, -2.2, FZ - 0.01); m.scale.z = 0.4; } }
+  for (let c = 0; c < 6; c++) { const m = add(slot, mat(0x0d1110, 0.9), -0.5 + c * 0.2, -2.2, FZ - 0.01); m.scale.z = 0.4; } }
 
 // Power slider on the top edge
 add(new THREE.BoxGeometry(0.7, 0.05, 0.22), mat(0x4d6b5a, 0.8), -0.8, H / 2 + 0.005, 0);
@@ -186,6 +191,7 @@ add(new RoundedBoxGeometry(0.5, 0.05, 0.18, 2, 0.02), mat(0x4d6b5a, 0.7), -0.6, 
 for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) add(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 16), mat(0x9aa39e, 0.3, { metalness: 0.8 }), x, y, -D / 2 - 0.005).rotation.x = Math.PI / 2;
 
 const clickables = [screen, dpad, bA, bB, knob, muteBtn];
+dev.traverse(o => { if (o.isMesh && o !== screen && !o.material.transparent) { o.castShadow = true; o.receiveShadow = true; } });
 
 // ---------- Post-processing ----------
 const composer = new EffectComposer(renderer);
@@ -489,15 +495,14 @@ addEventListener('keydown', e => {
 // ---------- Loop ----------
 const clock = new THREE.Clock();
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-let slow = 0, useBloom = true, checked = 0;
+let slow = 0, useBloom = false, checked = 0;
 function frame() {
   requestAnimationFrame(frame);
   if (document.hidden || !inView) { clock.getDelta(); return; }
   const raw = clock.getDelta(), dt = Math.min(raw, 0.05), t = clock.elapsedTime;
   if (checked < 240) {
     checked++; if (raw > 1 / 40) slow++;
-    if (checked === 120 && slow > 60) { PR = 1; renderer.setPixelRatio(1); fit(); }
-    if (checked === 240 && slow > 150) { useBloom = false; }
+    if (checked === 120 && slow > 60) { PR = 1.25; renderer.setPixelRatio(PR); renderer.shadowMap.enabled = false; fit(); }
   }
   zoom = still ? zoomTarget : zoom + (zoomTarget - zoom) * Math.min(1, dt * 1.6);
   const z = ease(Math.min(1, Math.max(0, zoom)));
