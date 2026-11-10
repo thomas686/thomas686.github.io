@@ -17,17 +17,16 @@ const coarse = matchMedia('(pointer: coarse)').matches;
 // ---------- Renderer, scene, camera ----------
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 } catch {
   host.innerHTML = '<p class="no3d">This browser cannot show the 3D console. Scroll down for the normal portfolio.</p>';
   throw new Error('no webgl');
 }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+let PR = Math.min(devicePixelRatio, 1.5);
+renderer.setPixelRatio(PR);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.12;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 host.prepend(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -42,18 +41,14 @@ const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
 
 scene.add(new THREE.HemisphereLight(0xdff2e8, 0x0d1714, 0.75));
 const key = new THREE.DirectionalLight(0xffffff, 1.6);
-key.position.set(3, 6, 6); key.castShadow = true;
-key.shadow.mapSize.set(1024, 1024);
-Object.assign(key.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5, near: 1, far: 20 });
+key.position.set(3, 6, 6);
 scene.add(key);
 const rim = new THREE.DirectionalLight(0xdff5ea, 0.7); rim.position.set(-5, 2, -4); scene.add(rim);
 
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.ShadowMaterial({ opacity: 0.16 }));
-ground.rotation.x = -Math.PI / 2; ground.position.y = -3.25; ground.receiveShadow = true; scene.add(ground);
 const grid = new THREE.GridHelper(90, 90, 0x3fe0a8, 0x1f6b55); grid.position.y = -3.26;
 grid.material.transparent = true; grid.material.opacity = 0.55; scene.add(grid);
 { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d');
-  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  const g = x.createRadialGradient(128, 128, 0, 128, 128, 128); g.addColorStop(0, 'rgba(0,0,0,.7)'); g.addColorStop(1, 'rgba(0,0,0,0)');
   x.fillStyle = g; x.fillRect(0, 0, 256, 256);
   const m = new THREE.Mesh(new THREE.PlaneGeometry(5.5, 2.2), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
   m.rotation.x = -Math.PI / 2; m.position.y = -3.24; scene.add(m); }
@@ -78,7 +73,7 @@ for (let i = 0; i < 24; i++) {
   scene.add(m); cubes.push(m);
 }
 // Pixel particles floating up
-const PN = 320, pPos = new Float32Array(PN * 3);
+const PN = 140, pPos = new Float32Array(PN * 3);
 for (let i = 0; i < PN; i++) { pPos[i * 3] = (Math.random() - 0.5) * 34; pPos[i * 3 + 1] = -3 + Math.random() * 12; pPos[i * 3 + 2] = -1 - Math.random() * 18; }
 const pGeo = new THREE.BufferGeometry(); pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
 const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({ color: 0xbff5d6, size: 0.06, transparent: true, opacity: 0.7 }));
@@ -90,28 +85,29 @@ const dev = new THREE.Group(); scene.add(dev);
 const grain = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); const d = x.createImageData(256, 256);
   for (let i = 0; i < d.data.length; i += 4) { const v = 200 + Math.random() * 55; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
   x.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 6); return t; })();
-const mat = (color, rough = 0.55, extra = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: rough, roughnessMap: grain, bumpMap: grain, bumpScale: 0.004, metalness: 0, clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.25, sheenColor: new THREE.Color(0xdff5ea), ...extra });
-const add = (geo, m, x = 0, y = 0, z = 0, parent = dev) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; o.receiveShadow = true; parent.add(o); return o; };
+const shell = (color, rough = 0.55, extra = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: rough, roughnessMap: grain, bumpMap: grain, bumpScale: 0.004, metalness: 0, clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.25, sheenColor: new THREE.Color(0xdff5ea), ...extra });
+const mat = (color, rough = 0.55, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: 0, ...extra });
+const add = (geo, m, x = 0, y = 0, z = 0, parent = dev) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); parent.add(o); return o; };
 
 // Two shells with a seam between them
-add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 6, 0.15), mat(0xa6cbb5, 0.5), 0, 0, D / 4 + 0.005);
-add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 5, 0.17), mat(0x86ab96, 0.65), 0, 0, -D / 4 - 0.005);
+add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 4, 0.15), shell(0xa6cbb5, 0.5), 0, 0, D / 4 + 0.005);
+add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 4, 0.15), shell(0x86ab96, 0.65), 0, 0, -D / 4 - 0.005);
 add(new RoundedBoxGeometry(W - 0.08, H - 0.08, 0.03, 2, 0.12), mat(0x5d7f6c, 0.8), 0, 0, 0);
 const FZ = D / 2; // front face
 
 // Screen bezel, recessed glass, brand strip
 add(new RoundedBoxGeometry(2.76, 2.42, 0.07, 3, 0.1), mat(0x22272c, 0.35), 0, 1.13, FZ + 0.02);
 const SCR_W = 2.36, SCR_H = 1.77;
-add(new RoundedBoxGeometry(SCR_W + 0.12, SCR_H + 0.12, 0.02, 2, 0.03), mat(0x3a4249, 0.3), 0, 1.25, FZ + 0.052);
+add(new RoundedBoxGeometry(SCR_W + 0.12, SCR_H + 0.12, 0.02, 2, 0.03), mat(0x3a4249, 0.3), 0, 1.25, FZ + 0.044);
 const sc = document.createElement('canvas'); sc.width = 960; sc.height = 720;
 const sx = sc.getContext('2d');
 const screenTex = new THREE.CanvasTexture(sc); screenTex.colorSpace = THREE.SRGBColorSpace; screenTex.anisotropy = 4;
 const screen = add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false }), 0, 1.25, FZ + 0.058);
-screen.castShadow = false; screen.userData.k = 'screen';
+screen.userData.k = 'screen';
 { const c = document.createElement('canvas'); c.width = 256; c.height = 192; const x = c.getContext('2d');
   const g = x.createLinearGradient(0, 0, 256, 192); g.addColorStop(0, 'rgba(255,255,255,.10)'); g.addColorStop(0.35, 'rgba(255,255,255,.02)'); g.addColorStop(0.5, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,.04)');
   x.fillStyle = g; x.fillRect(0, 0, 256, 192);
-  const glass = add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }), 0, 1.25, FZ + 0.062); glass.castShadow = false; }
+  add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }), 0, 1.25, FZ + 0.062); }
 const label = (txt, w, h, size, color, font = '600') => {
   const c = document.createElement('canvas'); c.width = w * 500; c.height = h * 500;
   const x = c.getContext('2d'); x.fillStyle = color; x.font = `${font} ${size * 2.5}px Geist, Segoe UI, Arial, sans-serif`; x.textBaseline = 'middle'; x.letterSpacing = '6px';
@@ -184,7 +180,7 @@ composer.addPass(new OutputPass());
 let dist = 13;
 function fit() {
   const w = host.clientWidth, h = host.clientHeight;
-  renderer.setSize(w, h, false); composer.setSize(w, h); bloom.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h, false); composer.setPixelRatio(PR); composer.setSize(w, h); bloom.resolution.set(w / 2, h / 2); camera.aspect = w / h; camera.updateProjectionMatrix();
   const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   dist = Math.max((H * 1.42) / (2 * t), (W * 1.5) / (2 * t * camera.aspect));
   scene.fog.near = dist * 1.7; scene.fog.far = dist * 4.2;
@@ -475,10 +471,16 @@ addEventListener('keydown', e => {
 // ---------- Loop ----------
 const clock = new THREE.Clock();
 const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+let slow = 0, useBloom = true, checked = 0;
 function frame() {
   requestAnimationFrame(frame);
-  if (document.hidden) return;
-  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+  if (document.hidden || !inView) { clock.getDelta(); return; }
+  const raw = clock.getDelta(), dt = Math.min(raw, 0.05), t = clock.elapsedTime;
+  if (checked < 240) {
+    checked++; if (raw > 1 / 40) slow++;
+    if (checked === 120 && slow > 60) { PR = 1; renderer.setPixelRatio(1); fit(); }
+    if (checked === 240 && slow > 150) { useBloom = false; }
+  }
   zoom = still ? zoomTarget : zoom + (zoomTarget - zoom) * Math.min(1, dt * 1.6);
   const z = ease(Math.min(1, Math.max(0, zoom)));
   const rx = THREE.MathUtils.lerp(tiltX + 0.28, tiltX * 0.35, z), ry = THREE.MathUtils.lerp(tiltY - 0.35, tiltY * 0.35, z);
@@ -487,14 +489,14 @@ function frame() {
   dev.position.y = still ? 0 : Math.sin(t * 1.1) * 0.06;
   if (!still) {
     for (const c of cubes) { c.rotation.x += c.userData.spin * dt; c.rotation.y += c.userData.spin * 0.7 * dt; c.position.y = c.userData.y + Math.sin(t * 0.6 + c.userData.bob) * 0.3; }
-    const a = pGeo.attributes.position; for (let i = 0; i < PN; i++) { let y = a.getY(i) + dt * 0.25; if (y > 9) y = -3; a.setY(i, y); } a.needsUpdate = true;
+    particles.position.y = (t * 0.25) % 12; if (particles.position.y > 6) particles.position.y -= 12;
     grid.position.z = (t * 0.4) % 1;
   }
   knob.position.x += ((on ? -0.63 : -0.97) - knob.position.x) * Math.min(1, dt * 12);
   camera.position.set(0, THREE.MathUtils.lerp(1.6, 0.2, z), THREE.MathUtils.lerp(dist * 1.55, dist, z));
   camera.lookAt(0, THREE.MathUtils.lerp(-0.4, -0.35, z), 0);
   if ((on && view === 'boot') || (!on && offAt && performance.now() - offAt < 400)) draw();
-  composer.render();
+  if (useBloom) composer.render(); else renderer.render(scene, camera);
 }
 
 Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
