@@ -90,14 +90,14 @@ const dev = new THREE.Group(); scene.add(dev);
 const grain = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); const d = x.createImageData(256, 256);
   for (let i = 0; i < d.data.length; i += 4) { const v = 200 + Math.random() * 55; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
   x.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(6, 6); return t; })();
-const shell = (color, rough = 0.55, extra = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: rough, roughnessMap: grain, bumpMap: grain, bumpScale: 0.004, metalness: 0, clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.25, sheenColor: new THREE.Color(0xdff5ea), ...extra });
+const shell = (color, rough = 0.55, extra = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: rough, roughnessMap: grain, bumpMap: grain, bumpScale: 0.004, metalness: 0, clearcoat: 0.2, clearcoatRoughness: 0.5, sheen: 0.25, sheenColor: new THREE.Color(0xffffff), ...extra });
 const mat = (color, rough = 0.55, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: 0, ...extra });
 const add = (geo, m, x = 0, y = 0, z = 0, parent = dev) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); parent.add(o); return o; };
 
 // Two shells with a seam between them
-add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 3, 0.085), shell(0xa6cbb5, 0.36, { clearcoat: 0.45, clearcoatRoughness: 0.35 }), 0, 0, D / 4 + 0.005);
-add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 3, 0.085), shell(0x8db29d, 0.45), 0, 0, -D / 4 - 0.005);
-add(new RoundedBoxGeometry(W - 0.08, H - 0.08, 0.03, 2, 0.12), mat(0x5d7f6c, 0.8), 0, 0, 0);
+add(new RoundedBoxGeometry(W, H, D / 2 - 0.01, 3, 0.085), shell(0xd3cfc7, 0.36, { clearcoat: 0.45, clearcoatRoughness: 0.35 }), 0, 0, D / 4 + 0.005);
+add(new RoundedBoxGeometry(W - 0.02, H - 0.02, D / 2 - 0.01, 3, 0.085), shell(0xc6c2ba, 0.45), 0, 0, -D / 4 - 0.005);
+add(new RoundedBoxGeometry(W - 0.08, H - 0.08, 0.03, 2, 0.12), mat(0x8e8a82, 0.8), 0, 0, 0);
 const FZ = D / 2; // front face
 
 // Screen bezel, recessed glass, brand strip
@@ -109,7 +109,7 @@ const rr = (p, w, h, r, cx = 0, cy = 0) => { const x = cx - w / 2, y = cy - h / 
 const ring = (rOut, rIn) => { const s = new THREE.Shape(); s.absarc(0, 0, rOut, 0, Math.PI * 2); const h = new THREE.Path(); h.absarc(0, 0, rIn, 0, Math.PI * 2, true); s.holes.push(h); return s; };
 const bevel = { bevelEnabled: true, bevelThickness: 0.018, bevelSize: 0.014, bevelSegments: 2, curveSegments: 32 };
 { const s = rr(new THREE.Shape(), 2.96, 2.62, 0.2); s.holes.push(rr(new THREE.Path(), 2.74, 2.4, 0.1));
-  add(new THREE.ExtrudeGeometry(s, { depth: 0.03, ...bevel }), mat(0xa2c7b1, 0.55), 0, 1.13, FZ + 0.02); }
+  add(new THREE.ExtrudeGeometry(s, { depth: 0.03, ...bevel }), mat(0xd0ccc4, 0.55), 0, 1.13, FZ + 0.02); }
 const SCR_W = 2.36, SCR_H = 1.77;
 add(new RoundedBoxGeometry(SCR_W + 0.12, SCR_H + 0.12, 0.02, 2, 0.03), mat(0x3a4249, 0.35), 0, 1.25, FZ + 0.03);
 const sc = document.createElement('canvas'); sc.width = 960; sc.height = 720;
@@ -130,8 +130,8 @@ const led = add(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 20), new THREE.Me
 led.rotation.x = Math.PI / 2;
 
 // D-pad in a shallow well
-add(new THREE.CylinderGeometry(0.62, 0.62, 0.02, 48), mat(0x8fb49f, 0.7), -0.8, -0.95, FZ + 0.005).rotation.x = Math.PI / 2;
-add(new THREE.ExtrudeGeometry(ring(0.68, 0.6), { depth: 0.02, ...bevel }), mat(0xa2c7b1, 0.55), -0.8, -0.95, FZ - 0.005);
+add(new THREE.CylinderGeometry(0.62, 0.62, 0.02, 48), mat(0xc0bcb3, 0.7), -0.8, -0.95, FZ + 0.005).rotation.x = Math.PI / 2;
+add(new THREE.ExtrudeGeometry(ring(0.68, 0.6), { depth: 0.02, ...bevel }), mat(0xd0ccc4, 0.55), -0.8, -0.95, FZ - 0.005);
 const arm = 0.15, len = 0.5, s = new THREE.Shape();
 s.moveTo(-arm, len); s.lineTo(arm, len); s.lineTo(arm, arm); s.lineTo(len, arm); s.lineTo(len, -arm); s.lineTo(arm, -arm); s.lineTo(arm, -len);
 s.lineTo(-arm, -len); s.lineTo(-arm, -arm); s.lineTo(-len, -arm); s.lineTo(-len, arm); s.lineTo(-arm, arm); s.closePath();
@@ -142,8 +142,8 @@ const nub = add(new THREE.SphereGeometry(0.06, 16, 12), mat(0x1f2326, 0.4), 0, 0
 // A and B
 const btn = (k, color, x, y, letter) => {
   const g = new THREE.Group(); g.position.set(x, y, FZ + 0.01); dev.add(g);
-  add(new THREE.CylinderGeometry(0.33, 0.33, 0.02, 48), mat(0x8fb49f, 0.7), 0, 0, -0.005, g).rotation.x = Math.PI / 2;
-  add(new THREE.ExtrudeGeometry(ring(0.37, 0.32), { depth: 0.015, ...bevel }), mat(0xa2c7b1, 0.55), 0, 0, -0.015, g);
+  add(new THREE.CylinderGeometry(0.33, 0.33, 0.02, 48), mat(0xc0bcb3, 0.7), 0, 0, -0.005, g).rotation.x = Math.PI / 2;
+  add(new THREE.ExtrudeGeometry(ring(0.37, 0.32), { depth: 0.015, ...bevel }), mat(0xd0ccc4, 0.55), 0, 0, -0.015, g);
   const b = add(new THREE.CylinderGeometry(0.26, 0.27, 0.14, 48), shell(color, 0.22, { clearcoat: 0.9, clearcoatRoughness: 0.15, roughnessMap: null, bumpMap: null }), 0, 0, 0.07, g); b.rotation.x = Math.PI / 2;
   const l = label(letter, 0.24, 0.24, 30, 'rgba(255,255,255,.92)', '700'); l.position.set(0.035, 0, 0.142); g.add(l);
   g.userData.k = k; b.userData.k = k; l.userData.k = k; g.userData.z = g.position.z; return g;
@@ -153,7 +153,7 @@ const bB = btn('b', 0xe9b44c, 0.3, -1.16, 'B');
 
 // Mute button with a speaker icon
 const muteBtn = new THREE.Group(); muteBtn.position.set(0, -1.7, FZ + 0.01); dev.add(muteBtn);
-add(new THREE.CylinderGeometry(0.17, 0.17, 0.02, 32), mat(0x8fb49f, 0.7), 0, 0, -0.005, muteBtn).rotation.x = Math.PI / 2;
+add(new THREE.CylinderGeometry(0.17, 0.17, 0.02, 32), mat(0xc0bcb3, 0.7), 0, 0, -0.005, muteBtn).rotation.x = Math.PI / 2;
 add(new THREE.CylinderGeometry(0.13, 0.13, 0.08, 32), mat(0x3a4146, 0.45), 0, 0, 0.04, muteBtn).rotation.x = Math.PI / 2;
 const iconCanvas = document.createElement('canvas'); iconCanvas.width = iconCanvas.height = 128;
 const iconTex = new THREE.CanvasTexture(iconCanvas); iconTex.colorSpace = THREE.SRGBColorSpace;
@@ -174,31 +174,31 @@ const holeGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.02, 14), holeMat = mat(
   for (let c = 0; c < 6; c++) { const m = add(slot, mat(0x0d1110, 0.9), -0.5 + c * 0.2, -2.2, FZ - 0.01); m.scale.z = 0.4; } }
 
 // Power slider on the top edge
-add(new THREE.BoxGeometry(0.7, 0.05, 0.22), mat(0x4d6b5a, 0.8), -0.8, H / 2 + 0.005, 0);
+add(new THREE.BoxGeometry(0.7, 0.05, 0.22), mat(0x8a867d, 0.8), -0.8, H / 2 + 0.005, 0);
 const knob = add(new RoundedBoxGeometry(0.26, 0.12, 0.17, 2, 0.04), mat(0xeef1ea, 0.5), -0.97, H / 2 + 0.06, 0);
 knob.userData.k = 'power';
 // Volume wheel on the right side
-{ const wheel = add(new THREE.CylinderGeometry(0.22, 0.22, 0.12, 36), mat(0x5d7f6c, 0.6), W / 2 - 0.02, 0.9, 0); wheel.rotation.z = Math.PI / 2;
-  for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; const r = add(new THREE.BoxGeometry(0.13, 0.02, 0.02), mat(0x4d6b5a, 0.6), W / 2 - 0.02, 0.9 + Math.sin(a) * 0.22, Math.cos(a) * 0.22); r.rotation.x = -a; } }
+{ const wheel = add(new THREE.CylinderGeometry(0.22, 0.22, 0.12, 36), mat(0x8e8a82, 0.6), W / 2 - 0.02, 0.9, 0); wheel.rotation.z = Math.PI / 2;
+  for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; const r = add(new THREE.BoxGeometry(0.13, 0.02, 0.02), mat(0x8a867d, 0.6), W / 2 - 0.02, 0.9 + Math.sin(a) * 0.22, Math.cos(a) * 0.22); r.rotation.x = -a; } }
 // Link port on the left side, headphone jack on the bottom
 add(new RoundedBoxGeometry(0.06, 0.42, 0.22, 2, 0.025), mat(0x1f2427, 0.6), -W / 2 + 0.01, 1.35, 0);
 { const jack = add(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 20), mat(0x1f2427, 0.6), 0.9, -H / 2 + 0.01, 0); }
-add(new RoundedBoxGeometry(0.5, 0.05, 0.18, 2, 0.02), mat(0x4d6b5a, 0.7), -0.6, -H / 2 + 0.005, 0);
+add(new RoundedBoxGeometry(0.5, 0.05, 0.18, 2, 0.02), mat(0x8a867d, 0.7), -0.6, -H / 2 + 0.005, 0);
 // ---- Back: stepped plateau, embossed panel, ribbed grip, battery door with latch
 const BZ = -D / 2; // back face
-const backMat = shell(0x8db29d, 0.42, { clearcoat: 0.35 });
-const ribMat = shell(0x86ab96, 0.4, { clearcoat: 0.35 });
+const backMat = shell(0xc6c2ba, 0.42, { clearcoat: 0.35 });
+const ribMat = shell(0xbdb9b0, 0.4, { clearcoat: 0.35 });
 { // raised plateau on the upper back
   const s = rr(new THREE.Shape(), 2.7, 2.3, 0.16);
   const m = add(new THREE.ExtrudeGeometry(s, { depth: 0.06, ...bevel }), backMat, 0, 1.15, BZ + 0.01); m.rotation.y = Math.PI; }
 { // recessed text panel
   const s = rr(new THREE.Shape(), 1.9, 0.9, 0.06);
-  add(new THREE.ExtrudeGeometry(s, { depth: 0.01, ...bevel, bevelThickness: 0.006, bevelSize: 0.006 }), shell(0x82a690, 0.5), 0, 1.25, BZ - 0.075).rotation.y = Math.PI;
+  add(new THREE.ExtrudeGeometry(s, { depth: 0.01, ...bevel, bevelThickness: 0.006, bevelSize: 0.006 }), shell(0xc4c0b8, 0.5), 0, 1.25, BZ - 0.075).rotation.y = Math.PI;
   const c = document.createElement('canvas'); c.width = 1140; c.height = 540; const x = c.getContext('2d');
-  x.fillStyle = 'rgba(40,64,52,.75)'; x.font = '700 64px Geist, Arial, sans-serif'; x.fillText('TS-26', 40, 110);
+  x.fillStyle = 'rgba(70,67,62,.75)'; x.font = '700 64px Geist, Arial, sans-serif'; x.fillText('TS-26', 40, 110);
   x.font = '500 34px Geist, Arial, sans-serif';
   ['POCKET PORTFOLIO', 'DESIGNED IN BANGKOK', 'BY THOMAS SOKOLOWSKI', 'BUILT WITH AI  ·  2026'].forEach((l, i) => x.fillText(l, 40, 190 + i * 70));
-  x.strokeStyle = 'rgba(40,64,52,.6)'; x.lineWidth = 4; x.strokeRect(860, 60, 220, 120); x.font = '600 30px Geist, Arial'; x.fillText('MODEL', 905, 108); x.fillText('TS-26', 905, 152);
+  x.strokeStyle = 'rgba(70,67,62,.6)'; x.lineWidth = 4; x.strokeRect(860, 60, 220, 120); x.font = '600 30px Geist, Arial'; x.fillText('MODEL', 905, 108); x.fillText('TS-26', 905, 152);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
   const p = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.85), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.6 }));
   p.position.set(0, 1.25, BZ - 0.098); p.rotation.y = Math.PI; dev.add(p); }
@@ -209,7 +209,7 @@ const ribMat = shell(0x86ab96, 0.4, { clearcoat: 0.35 });
   const s = rr(new THREE.Shape(), 2.2, 1.55, 0.1);
   add(new THREE.ExtrudeGeometry(s, { depth: 0.04, ...bevel }), backMat, 0, -1.3, BZ - 0.02).rotation.y = Math.PI;
   for (let i = 0; i < 9; i++) add(new RoundedBoxGeometry(1.9, 0.04, 0.03, 2, 0.012), ribMat, 0, -0.75 - i * 0.14, BZ - 0.09);
-  add(new RoundedBoxGeometry(0.42, 0.2, 0.06, 2, 0.03), shell(0x7a9e89, 0.4), 0, -0.47, BZ - 0.1);
+  add(new RoundedBoxGeometry(0.42, 0.2, 0.06, 2, 0.03), shell(0xb5b1a8, 0.4), 0, -0.47, BZ - 0.1);
   add(new THREE.BoxGeometry(0.22, 0.06, 0.03), mat(0x1f2427, 0.6), 0, -0.47, BZ - 0.13);
 }
 // ribbed side grips near the bottom
@@ -218,13 +218,13 @@ for (const sx of [-1, 1]) for (let i = 0; i < 10; i++) add(new RoundedBoxGeometr
 add(new RoundedBoxGeometry(0.9, 0.04, 0.08, 2, 0.015), mat(0x161a1c, 0.7), 0.55, H / 2 + 0.002, -0.08);
 // LINK label and frame around the side port
 { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const x = c.getContext('2d');
-  x.fillStyle = 'rgba(40,64,52,.8)'; x.font = '700 40px Geist, Arial'; x.fillText('LINK', 70, 46);
+  x.fillStyle = 'rgba(70,67,62,.8)'; x.font = '700 40px Geist, Arial'; x.fillText('LINK', 70, 46);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   const p = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.125), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
   p.position.set(-W / 2 - 0.006, 1.8, 0); p.rotation.y = -Math.PI / 2; p.rotation.z = Math.PI / 2; dev.add(p);
-  add(new RoundedBoxGeometry(0.03, 0.56, 0.3, 2, 0.04), shell(0x9cc0ab, 0.4), -W / 2 - 0.002, 1.35, 0); }
+  add(new RoundedBoxGeometry(0.03, 0.56, 0.3, 2, 0.04), shell(0xcac6be, 0.4), -W / 2 - 0.002, 1.35, 0); }
 // Screws on the back
-for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) add(new THREE.CylinderGeometry(0.11, 0.11, 0.02, 24), mat(0x2a3530, 0.8), x, y, -D / 2 - 0.002).rotation.x = Math.PI / 2;
+for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) add(new THREE.CylinderGeometry(0.11, 0.11, 0.02, 24), mat(0x5c5953, 0.8), x, y, -D / 2 - 0.002).rotation.x = Math.PI / 2;
 for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) add(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 16), mat(0x9aa39e, 0.3, { metalness: 0.8 }), x, y, -D / 2 - 0.005).rotation.x = Math.PI / 2;
 
 const clickables = [screen, dpad, bA, bB, knob, muteBtn];
