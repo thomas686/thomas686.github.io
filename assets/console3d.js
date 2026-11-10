@@ -96,18 +96,23 @@ add(new RoundedBoxGeometry(W - 0.08, H - 0.08, 0.03, 2, 0.12), mat(0x5d7f6c, 0.8
 const FZ = D / 2; // front face
 
 // Screen bezel, recessed glass, brand strip
-add(new RoundedBoxGeometry(2.76, 2.42, 0.07, 3, 0.1), mat(0x22272c, 0.35), 0, 1.13, FZ + 0.02);
+add(new RoundedBoxGeometry(2.76, 2.42, 0.07, 3, 0.1), mat(0x22272c, 0.4), 0, 1.13, FZ + 0.0);
+// shape helper: rounded rectangle on a Shape or Path
+const rr = (p, w, h, r, cx = 0, cy = 0) => { const x = cx - w / 2, y = cy - h / 2;
+  p.moveTo(x + r, y); p.lineTo(x + w - r, y); p.quadraticCurveTo(x + w, y, x + w, y + r); p.lineTo(x + w, y + h - r); p.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  p.lineTo(x + r, y + h); p.quadraticCurveTo(x, y + h, x, y + h - r); p.lineTo(x, y + r); p.quadraticCurveTo(x, y, x + r, y); return p; };
+const ring = (rOut, rIn) => { const s = new THREE.Shape(); s.absarc(0, 0, rOut, 0, Math.PI * 2); const h = new THREE.Path(); h.absarc(0, 0, rIn, 0, Math.PI * 2, true); s.holes.push(h); return s; };
+const bevel = { bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.02, bevelSegments: 3, curveSegments: 32 };
+{ const s = rr(new THREE.Shape(), 2.96, 2.62, 0.2); s.holes.push(rr(new THREE.Path(), 2.74, 2.4, 0.1));
+  add(new THREE.ExtrudeGeometry(s, { depth: 0.03, ...bevel }), mat(0xa2c7b1, 0.55), 0, 1.13, FZ + 0.02); }
 const SCR_W = 2.36, SCR_H = 1.77;
-add(new RoundedBoxGeometry(SCR_W + 0.12, SCR_H + 0.12, 0.02, 2, 0.03), mat(0x3a4249, 0.3), 0, 1.25, FZ + 0.044);
+add(new RoundedBoxGeometry(SCR_W + 0.12, SCR_H + 0.12, 0.02, 2, 0.03), mat(0x3a4249, 0.35), 0, 1.25, FZ + 0.03);
 const sc = document.createElement('canvas'); sc.width = 960; sc.height = 720;
 const sx = sc.getContext('2d');
 const screenTex = new THREE.CanvasTexture(sc); screenTex.colorSpace = THREE.SRGBColorSpace; screenTex.anisotropy = 4;
-const screen = add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false }), 0, 1.25, FZ + 0.058);
+const screen = add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: screenTex, color: 0xd9d9d9, toneMapped: true }), 0, 1.25, FZ + 0.045);
 screen.userData.k = 'screen';
-{ const c = document.createElement('canvas'); c.width = 256; c.height = 192; const x = c.getContext('2d');
-  const g = x.createLinearGradient(0, 0, 256, 192); g.addColorStop(0, 'rgba(255,255,255,.10)'); g.addColorStop(0.35, 'rgba(255,255,255,.02)'); g.addColorStop(0.5, 'rgba(255,255,255,0)'); g.addColorStop(1, 'rgba(255,255,255,.04)');
-  x.fillStyle = g; x.fillRect(0, 0, 256, 192);
-  add(new THREE.PlaneGeometry(SCR_W, SCR_H), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }), 0, 1.25, FZ + 0.062); }
+
 const label = (txt, w, h, size, color, font = '600') => {
   const c = document.createElement('canvas'); c.width = w * 500; c.height = h * 500;
   const x = c.getContext('2d'); x.fillStyle = color; x.font = `${font} ${size * 2.5}px Geist, Segoe UI, Arial, sans-serif`; x.textBaseline = 'middle'; x.letterSpacing = '6px';
@@ -115,12 +120,13 @@ const label = (txt, w, h, size, color, font = '600') => {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
 };
-const brand = label('TS-26  ·  POCKET PORTFOLIO', 2.2, 0.14, 15, '#aeb9b4', '600'); brand.position.set(-0.08, 0.13, FZ + 0.06); dev.add(brand);
-const led = add(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 20), new THREE.MeshStandardMaterial({ color: 0x3b5446, emissive: 0x000000 }), -1.18, 2.12, FZ + 0.06);
+const brand = label('TS-26  ·  POCKET PORTFOLIO', 2.2, 0.14, 15, '#aeb9b4', '600'); brand.position.set(-0.08, 0.13, FZ + 0.037); dev.add(brand);
+const led = add(new THREE.CylinderGeometry(0.045, 0.045, 0.03, 20), new THREE.MeshStandardMaterial({ color: 0x3b5446, emissive: 0x000000 }), -1.18, 2.12, FZ + 0.04);
 led.rotation.x = Math.PI / 2;
 
 // D-pad in a shallow well
 add(new THREE.CylinderGeometry(0.62, 0.62, 0.02, 48), mat(0x8fb49f, 0.7), -0.8, -0.95, FZ + 0.005).rotation.x = Math.PI / 2;
+add(new THREE.ExtrudeGeometry(ring(0.68, 0.6), { depth: 0.02, ...bevel }), mat(0xa2c7b1, 0.55), -0.8, -0.95, FZ - 0.005);
 const arm = 0.15, len = 0.5, s = new THREE.Shape();
 s.moveTo(-arm, len); s.lineTo(arm, len); s.lineTo(arm, arm); s.lineTo(len, arm); s.lineTo(len, -arm); s.lineTo(arm, -arm); s.lineTo(arm, -len);
 s.lineTo(-arm, -len); s.lineTo(-arm, -arm); s.lineTo(-len, -arm); s.lineTo(-len, arm); s.lineTo(-arm, arm); s.closePath();
@@ -132,6 +138,7 @@ const nub = add(new THREE.SphereGeometry(0.06, 16, 12), mat(0x1f2326, 0.4), 0, 0
 const btn = (k, color, x, y, letter) => {
   const g = new THREE.Group(); g.position.set(x, y, FZ + 0.01); dev.add(g);
   add(new THREE.CylinderGeometry(0.33, 0.33, 0.02, 48), mat(0x8fb49f, 0.7), 0, 0, -0.005, g).rotation.x = Math.PI / 2;
+  add(new THREE.ExtrudeGeometry(ring(0.37, 0.32), { depth: 0.015, ...bevel }), mat(0xa2c7b1, 0.55), 0, 0, -0.015, g);
   const b = add(new THREE.CylinderGeometry(0.26, 0.27, 0.14, 48), mat(color, 0.35), 0, 0, 0.07, g); b.rotation.x = Math.PI / 2;
   const l = label(letter, 0.24, 0.24, 30, 'rgba(255,255,255,.92)', '700'); l.position.set(0.035, 0, 0.142); g.add(l);
   g.userData.k = k; b.userData.k = k; l.userData.k = k; g.userData.z = g.position.z; return g;
@@ -158,12 +165,23 @@ function drawIcon(muted) {
 
 // Speaker holes
 const holeGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.02, 14), holeMat = mat(0x4f6f5d, 0.9);
-for (let r = 0; r < 2; r++) for (let c = 0; c < 7; c++) add(holeGeo, holeMat, -0.48 + c * 0.16 + (r % 2) * 0.08, -2.12 - r * 0.15, FZ + 0.003).rotation.x = Math.PI / 2;
+{ const slot = new THREE.CapsuleGeometry(0.04, 0.3, 4, 12);
+  for (let c = 0; c < 6; c++) { const m = add(slot, mat(0x3f5a4c, 0.9), -0.5 + c * 0.2, -2.2, FZ - 0.01); m.scale.z = 0.4; } }
 
 // Power slider on the top edge
 add(new THREE.BoxGeometry(0.7, 0.05, 0.22), mat(0x4d6b5a, 0.8), -0.8, H / 2 + 0.005, 0);
 const knob = add(new RoundedBoxGeometry(0.26, 0.12, 0.17, 2, 0.04), mat(0xeef1ea, 0.5), -0.97, H / 2 + 0.06, 0);
 knob.userData.k = 'power';
+// Volume wheel on the right side
+{ const wheel = add(new THREE.CylinderGeometry(0.22, 0.22, 0.12, 36), mat(0x5d7f6c, 0.6), W / 2 - 0.02, 0.9, 0); wheel.rotation.z = Math.PI / 2;
+  for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; const r = add(new THREE.BoxGeometry(0.13, 0.02, 0.02), mat(0x4d6b5a, 0.6), W / 2 - 0.02, 0.9 + Math.sin(a) * 0.22, Math.cos(a) * 0.22); r.rotation.x = -a; } }
+// Link port on the left side, headphone jack on the bottom
+add(new RoundedBoxGeometry(0.06, 0.42, 0.22, 2, 0.025), mat(0x1f2427, 0.6), -W / 2 + 0.01, 1.35, 0);
+{ const jack = add(new THREE.CylinderGeometry(0.06, 0.06, 0.06, 20), mat(0x1f2427, 0.6), 0.9, -H / 2 + 0.01, 0); }
+add(new RoundedBoxGeometry(0.5, 0.05, 0.18, 2, 0.02), mat(0x4d6b5a, 0.7), -0.6, -H / 2 + 0.005, 0);
+// Battery cover with grip lines on the back
+{ const s = rr(new THREE.Shape(), 2.4, 1.5, 0.12); add(new THREE.ExtrudeGeometry(s, { depth: 0.015, ...bevel, bevelThickness: 0.01, bevelSize: 0.01 }), mat(0x7fa38e, 0.65), 0, -1.4, -D / 2 - 0.03).rotation.y = Math.PI;
+  for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(0.5, 0.025, 0.02), mat(0x6c8f7b, 0.7), 0, -0.9 - i * 0.08, -D / 2 - 0.05); }
 // Screws on the back
 for (const [x, y] of [[-1.25, 2.3], [1.25, 2.3], [-1.25, -2.3], [1.25, -2.3]]) add(new THREE.CylinderGeometry(0.07, 0.07, 0.02, 16), mat(0x9aa39e, 0.3, { metalness: 0.8 }), x, y, -D / 2 - 0.005).rotation.x = Math.PI / 2;
 
@@ -172,7 +190,7 @@ const clickables = [screen, dpad, bA, bB, knob, muteBtn];
 // ---------- Post-processing ----------
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.6, 0.82);
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.32, 0.5, 0.95);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
