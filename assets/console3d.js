@@ -157,7 +157,8 @@ function fit() {
   const w = host.clientWidth, h = host.clientHeight;
   renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
   const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-  dist = Math.max((H * 1.22) / (2 * t), (W * 1.5) / (2 * t * camera.aspect));
+  dist = Math.max((H * 1.42) / (2 * t), (W * 1.5) / (2 * t * camera.aspect));
+  scene.fog.near = dist * 1.7; scene.fog.far = dist * 4.2;
 }
 new ResizeObserver(fit).observe(host); fit();
 
@@ -211,7 +212,7 @@ function draw() {
   const say = [];
   if (!on) {
     if (offAt && performance.now() - offAt < 350) { const k = 1 - (performance.now() - offAt) / 350; sx.fillStyle = '#e9fff2'; sx.fillRect(320 - 300 * k, 238, 600 * k, 4); }
-    else { txt('FLIP THE SWITCH', 185, 230, '#2f4656', 16); txt('▲ ON TOP', 245, 270, '#2f4656', 14); }
+    else { txt('FLIP THE SWITCH', 185, 230, '#6f9a87', 16); txt('▲ ON TOP', 245, 270, '#4f7766', 14); }
     screenTex.needsUpdate = true; srText.textContent = 'The console is off. Press any key or the power switch.'; return;
   }
   if (view === 'boot') {
@@ -461,7 +462,7 @@ function frame() {
   }
   knob.position.x += ((on ? -0.63 : -0.97) - knob.position.x) * Math.min(1, dt * 12);
   camera.position.set(0, THREE.MathUtils.lerp(1.6, 0.2, z), THREE.MathUtils.lerp(dist * 1.55, dist, z));
-  camera.lookAt(0, THREE.MathUtils.lerp(-0.4, 0, z), 0);
+  camera.lookAt(0, THREE.MathUtils.lerp(-0.4, -0.35, z), 0);
   if ((on && view === 'boot') || (!on && offAt && performance.now() - offAt < 400)) draw();
   renderer.render(scene, camera);
 }
