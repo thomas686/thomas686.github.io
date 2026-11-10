@@ -52,8 +52,8 @@
       "i18n",
       "Claude Code"
     ],
-    "image": "img/english.svg",
-    "imageKind": "illustration"
+    "image": "img/english.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "alphacrm-help",
@@ -106,8 +106,8 @@
       "Lovable"
     ],
     "featured": true,
-    "image": "img/post-generator.svg",
-    "imageKind": "illustration"
+    "image": "img/post-generator.webp",
+    "imageKind": "blurred"
   },
   {
     "id": "tyre-agent",
@@ -123,8 +123,8 @@
       "Cloudflare",
       "Claude Code"
     ],
-    "image": "img/tyre-agent.svg",
-    "imageKind": "illustration"
+    "image": "img/tyre-agent.webp",
+    "imageKind": "blurred"
   },
   {
     "id": "weekend-agents",
@@ -141,8 +141,8 @@
       "Slack",
       "Klaviyo"
     ],
-    "image": "img/weekend-agents.svg",
-    "imageKind": "illustration"
+    "image": "img/weekend-agents.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "jewellery-email",
@@ -159,8 +159,8 @@
       "Playwright",
       "Claude"
     ],
-    "image": "img/jewellery-email.svg",
-    "imageKind": "illustration"
+    "image": "img/jewellery-email.webp",
+    "imageKind": "blurred"
   },
   {
     "id": "own-email",
@@ -176,8 +176,8 @@
       "Claude Code",
       "Scheduled agents"
     ],
-    "image": "img/own-email.svg",
-    "imageKind": "illustration"
+    "image": "img/own-email.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "preflight",
@@ -211,8 +211,8 @@
       "Vite",
       "Claude API"
     ],
-    "image": "img/thai-app.svg",
-    "imageKind": "illustration"
+    "image": "img/thai-app.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "research-journal",
@@ -228,7 +228,7 @@
       "Gioia method",
       "Claude"
     ],
-    "image": "img/research-journal.svg",
-    "imageKind": "illustration"
+    "image": "img/research-journal.webp",
+    "imageKind": "screenshot"
   }
 ]

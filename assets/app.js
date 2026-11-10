@@ -24,8 +24,8 @@ function openProject(id) {
   $('d-title').textContent = p.title;
   const img = $('d-img');
   img.hidden = !p.image;
-  if (p.image) { img.src = p.image; img.alt = p.imageKind === 'screenshot' ? `Screenshot: ${p.title}` : `Illustration: ${p.title}`; }
-  $('d-imgnote').textContent = p.imageKind === 'illustration' ? 'Illustration. Client work is shown without client data.' : '';
+  if (p.image) { img.src = p.image; img.alt = `Screenshot: ${p.title}`; }
+  $('d-imgnote').textContent = p.imageKind === 'blurred' ? 'Real screenshot. Client names and logos are blurred.' : '';
   $('d-summary').textContent = p.summary;
   $('d-problem').textContent = p.problem;
   $('d-built').textContent = p.built;

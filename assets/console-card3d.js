@@ -104,7 +104,7 @@ back.position.z = -D / 2 - 0.003; back.rotation.y = Math.PI; dev.add(back);
   for (let i = 0; i < 16; i++) { const y = ch * 0.5 + i * 30; x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(60, y, cw - 120, 6); x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(60, y + 6, cw - 120, 6); }
   for (const [X, Y] of [[60, 60], [cw - 60, 60], [60, ch - 60], [cw - 60, ch - 60]]) { x.beginPath(); x.arc(X, Y, 16, 0, 7); x.fillStyle = '#8f8a80'; x.fill(); x.fillStyle = '#5e5a53'; x.fillRect(X - 9, Y - 2, 18, 4); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; back.material.map = t; back.material.needsUpdate = true;
-  const flat = new Image(); flat.onload = () => { const ft = new THREE.Texture(flat); ft.colorSpace = THREE.SRGBColorSpace; ft.needsUpdate = true; back.material.map = ft; back.material.needsUpdate = true; }; flat.src = 'img/ts26-back-face.png'; }
+  }
 
 // ---------- Screen drawing (logical 640 x 480, drawn at 1.5x) ----------
 const C = { bg: '#0c1620', mint: '#bff5d6', amber: '#ffd37a', dim: '#6f9a87', white: '#ffffff', sel: 'rgba(125,255,176,.14)' };
