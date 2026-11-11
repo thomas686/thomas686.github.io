@@ -337,17 +337,11 @@ function draw() {
     foot('▲▼ MOVE', 'A OPEN'); say.push('Main menu. Selected: ' + MENU[idx]);
   } else if (view === 'about') {
     txt('ABOUT ME', 30, 60, C.amber, 20);
-    sx.fillStyle = '#132a22'; sx.fillRect(30, 82, 102, 102);
-    sx.strokeStyle = C.amber; sx.lineWidth = 3; sx.strokeRect(30, 82, 102, 102);
-    sx.font = `34px ${PX}`; txt('TS', 81 - sx.measureText('TS').width / 2, 152, C.mint, 34);
-    ['THOMAS SOKOLOWSKI', 'SALES + MARKETING', 'WHO BUILDS WITH AI', 'BANGKOK'].forEach((l, i) => txt(l, 156, 106 + i * 24, i ? C.mint : C.white, 13));
-    [['SALES', 90], ['BUILD W/ AI', 85], ['EMAIL', 80], ['MARKETING', 78], ['THAI', 55]].forEach(([k, v], i) => {
-      const y = 232 + i * 38; txt(k, 30, y, C.mint, 13);
-      sx.fillStyle = '#21323f'; sx.fillRect(230, y - 14, 370, 16);
-      const g = sx.createLinearGradient(230, 0, 600, 0); g.addColorStop(0, '#7dffb0'); g.addColorStop(1, C.amber);
-      sx.fillStyle = g; sx.fillRect(230, y - 14, 370 * v / 100, 16);
-    });
-    foot('SELF-RATED', 'B BACK'); say.push('About me. Sales and marketing person who builds with AI, Bangkok.');
+    txt('THOMAS SOKOLOWSKI', 30, 108, C.white, 15);
+    const about = ['A sales and marketing person who builds with AI. I turn messy business problems into working tools, and then I help sell them.',
+      'Based in Bangkok. Studying an MSc in Innovation Management. I speak Danish, English, Thai and some Mandarin.'];
+    let ay = 150; for (const para of about) ay += wrapText(para, 30, ay, 580, 12, C.mint, 24) * 24 + 16;
+    foot('', 'B BACK'); say.push('About me. ' + about.join(' '));
   } else if (view === 'project') {
     const p = projects[idx]; window.__tsProject = p.id;
     if (p.image) drawContain(img(p.image), 0, 0, 640, 400);
