@@ -82,9 +82,8 @@ if (BG === 'work' || BG === 'mix') {
     const shown = id => floating.find(f => (f.userData.pending != null ? st.p[f.userData.pending].id : f.userData.id) === id);
     const want = window.__tsProject;
     if (want && !shown(want)) { const f = floating.find(f => f !== hoverScreen && f.userData.pending == null) || floating[0]; f.userData.pending = st.p.findIndex(q => q.id === want); }
-    st.timer += dt;
-    if (st.timer > 4.5) {
-      st.timer = 0;
+    if (t - st.last > 4.5) {
+      st.last = t;
       for (let n = 0; n < floating.length; n++) {
         st.rr = (st.rr + 1) % floating.length; const f = floating[st.rr];
         if (f === hoverScreen || f.userData.id === want || f.userData.pending != null) continue;
@@ -96,13 +95,17 @@ if (BG === 'work' || BG === 'mix') {
       const u = f.userData;
       if (u.pending != null) { u.fade -= dt * 3; if (u.fade <= 0) { u.fade = 0; const q = st.p[u.pending]; u.img.material.map = st.texs[u.pending]; u.label.material.map = st.labels[u.pending]; u.img.material.needsUpdate = true; u.label.material.needsUpdate = true; u.id = q.id; u.pending = null; } }
       else if (u.fade < 1) u.fade = Math.min(1, u.fade + dt * 2.5);
-      const hot = f === hoverScreen || u.id === want;
+      const playing = u.id === want, hot = f === hoverScreen || playing;
       u.k += ((hot ? 1 : 0) - u.k) * Math.min(1, dt * 6);
+      u.q = (u.q || 0) + ((playing ? 1 : 0) - (u.q || 0)) * Math.min(1, dt * 5);
       f.position.y = u.y + Math.sin(t * 0.5 + u.p) * 0.08;
-      f.scale.setScalar(1 + u.k * 0.1);
-      u.edge.material.opacity = (0.3 + u.k * 0.7) * u.fade;
+      f.position.z = u.z + u.q * 0.8;
+      f.scale.setScalar(1 + u.k * 0.08 + u.q * 0.18);
+      u.edge.material.color.setHex(u.q > 0.5 ? 0xffd37a : 0x7dffb0);
+      u.edge.material.opacity = Math.min(1, (0.3 + u.k * 0.7) * u.fade * (u.q > 0.5 ? 0.75 + 0.25 * Math.sin(t * 6) : 1));
       u.img.material.color.setScalar((0.6 + u.k * 0.4) * u.fade);
       u.label.material.opacity = u.fade;
+      u.tag.material.opacity = u.q * u.fade;
     }
   };
 } else if (BG === 'studio') {
@@ -528,35 +531,40 @@ Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experi
     if (BG !== 'work' && BG !== 'mix') return;
     const texs = p.map(q => { const t = loader.load(q.image); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; });
     const labelTex = title => {
-      const lc = document.createElement('canvas'); lc.width = 512; lc.height = 64; const lx = lc.getContext('2d');
-      lx.fillStyle = 'rgba(11,10,22,.94)'; lx.fillRect(0, 0, 512, 64); lx.fillStyle = '#ffd37a'; lx.textBaseline = 'middle';
-      const words = title.toUpperCase().split(' '); let size = 18, lines;
+      const lc = document.createElement('canvas'); lc.width = 512; lc.height = 104; const lx = lc.getContext('2d');
+      lx.fillStyle = 'rgba(11,10,22,.94)'; lx.fillRect(0, 0, 512, 104); lx.fillStyle = '#ffd37a'; lx.textBaseline = 'middle';
+      const words = title.toUpperCase().split(' '); let size = 26, lines;
       for (;;) { lx.font = size + 'px "Press Start 2P", monospace'; lines = [''];
         for (const w of words) { const tl = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + w : w; if (lx.measureText(tl).width > 492 && lines[lines.length - 1]) lines.push(w); else lines[lines.length - 1] = tl; }
         if (lines.length <= 2 && lines.every(l => lx.measureText(l).width <= 492)) break; if (--size < 9) break; }
-      lines.forEach((l, n) => lx.fillText(l, 10, lines.length === 1 ? 32 : 18 + n * 28));
+      lines.forEach((l, n) => lx.fillText(l, 10, lines.length === 1 ? 52 : 30 + n * 44));
       const t = new THREE.CanvasTexture(lc); t.colorSpace = THREE.SRGBColorSpace; return t;
     };
     const labels = p.map(q => labelTex(q.title));
+    const tagTex = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 48; const x = c.getContext('2d');
+      x.fillStyle = '#ffd37a'; x.fillRect(0, 0, 256, 48); x.fillStyle = '#1b1408'; x.font = '18px "Press Start 2P", monospace'; x.textBaseline = 'middle'; x.fillText('\u25B6 NOW PLAYING', 10, 25);
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
     const SW = 2.4, SH = SW * 0.625;
     const slots = [];
-    for (const side of [-1, 1]) for (const r of [0, 1]) for (const c of [0, 1]) slots.push([side * (4.1 + c * 2.9), r ? 0.7 : 3.35, -7 - c * 0.5, side]);
+    for (const side of [-1, 1]) for (const r of [0, 1]) for (const c of [0, 1]) slots.push([side * (4.0 + c * 2.75), r ? 0.45 : 3.25, -7.6 - c * 0.5, side]);
     slots.forEach((s, i) => {
       const g = new THREE.Group();
-      const backing = new THREE.Mesh(new THREE.PlaneGeometry(SW + 0.16, SH + 0.62), new THREE.MeshBasicMaterial({ color: 0x0b0a16 }));
-      backing.position.set(0, -0.23, -0.02);
+      const backing = new THREE.Mesh(new THREE.PlaneGeometry(SW + 0.16, SH + 0.7), new THREE.MeshBasicMaterial({ color: 0x0b0a16 }));
+      backing.position.set(0, -0.3, -0.02);
       const imgM = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshBasicMaterial({ map: texs[i], color: 0x999999 }));
-      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(SW + 0.16, SH + 0.62)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.3 }));
-      edge.position.y = -0.23;
-      const label = new THREE.Mesh(new THREE.PlaneGeometry(SW, SW / 8), new THREE.MeshBasicMaterial({ map: labels[i], transparent: true }));
-      label.position.y = -SH / 2 - 0.2;
-      g.add(backing, imgM, edge, label);
+      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(SW + 0.16, SH + 0.7)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.3 }));
+      edge.position.y = -0.3;
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(SW, SW * 104 / 512), new THREE.MeshBasicMaterial({ map: labels[i], transparent: true }));
+      label.position.y = -SH / 2 - 0.3;
+      const tag = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.24), new THREE.MeshBasicMaterial({ map: tagTex, transparent: true, opacity: 0 }));
+      tag.position.set(-SW / 2 + 0.65, SH / 2 + 0.2, 0.01);
+      g.add(backing, imgM, edge, label, tag);
       g.position.set(s[0], s[1], s[2]); g.rotation.y = -s[3] * 0.2;
-      g.userData = { y: s[1], p: i * 1.1, k: 0, fade: 1, pending: null, id: p[i].id, img: imgM, label, edge };
+      g.userData = { y: s[1], z: s[2], p: i * 1.1, k: 0, q: 0, fade: 1, pending: null, id: p[i].id, img: imgM, label, edge, tag };
       imgM.userData.screen = g;
       gallery.add(g); floating.push(g);
     });
-    galleryState = { p, texs, labels, timer: 0, rr: -1, next: slots.length - 1 };
+    galleryState = { p, texs, labels, last: 0, rr: -1, next: slots.length - 1 };
   })
   .catch(() => {});
 document.fonts.load(`16px ${PX}`).finally(() => draw());
