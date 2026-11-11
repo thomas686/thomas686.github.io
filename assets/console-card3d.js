@@ -505,7 +505,7 @@ const clock = new THREE.Clock();
 function frame() {
   requestAnimationFrame(frame);
   if (document.hidden || !inView) { clock.getDelta(); return; }
-  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+  const raw = clock.getDelta(), dt = Math.min(raw, 0.05), rdt = Math.min(raw, 0.5), t = clock.elapsedTime;
   zoom += (zoomTarget - zoom) * Math.min(1, dt * 1.8);
   spin += (spinTarget - spin) * Math.min(1, dt * 7);
   const z = zoom;
@@ -519,9 +519,9 @@ function frame() {
     particles.position.y = (t * 0.25) % 12; if (particles.position.y > 6) particles.position.y -= 12;
     grid.position.z = (t * 0.4) % 1;
   }
-  camera.position.set(0, THREE.MathUtils.lerp(1.4, 0.15, z), THREE.MathUtils.lerp(dist * 1.35, dist * 0.92, z));
+  camera.position.set(0, THREE.MathUtils.lerp(1.4, 0.3, z), THREE.MathUtils.lerp(dist * 1.35, dist * 1.12, z));
   camera.lookAt(0, THREE.MathUtils.lerp(-0.3, -0.1, z), 0);
-  if (!still) bgTick(t, dt);
+  if (!still) bgTick(t, rdt);
   if ((on && view === 'boot') || (!on && offAt && performance.now() - offAt < 400)) draw();
   renderer.render(scene, camera);
 }
