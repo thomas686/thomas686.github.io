@@ -44,7 +44,7 @@
     "category": "alphacrm",
     "year": "2026",
     "summary": "An English version of the CRM, with a language switcher, so it can sell beyond Denmark.",
-    "problem": "The CRM was Danish only, which closed the door to customers outside Denmark and to Alpha's team in Thailand.",
+    "problem": "The CRM was Danish only, which closed the door to customers outside Denmark and to Alpha's international team.",
     "built": "Translated the interface and added language switching across the app.",
     "result": "The product can now be shown and sold in English.",
     "tools": [
@@ -259,7 +259,7 @@
     "year": "2026",
     "summary": "My own app for learning Thai beyond the conversational level.",
     "problem": "I speak conversational Thai and want to read and write it properly, but most apps stop at tourist phrases.",
-    "built": "A personal learning app built around the words and phrases I actually meet at work and in Bangkok, with tone practice and an AI tutor.",
+    "built": "A personal learning app built around the words and phrases I actually meet at work and in daily life, with tone practice and an AI tutor.",
     "result": "My own practice tool, built in a day from a long spec.",
     "tools": [
       "React",

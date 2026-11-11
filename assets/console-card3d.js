@@ -175,7 +175,7 @@ if (BG === 'pixel' || BG === 'mix') {
     const drawRidge = (pts, col, speed, shift) => { x.fillStyle = col; const off = Math.floor(t * speed + shift);
       for (let i = 0; i < PW; i++) { const y = pts[((i + off) % pts.length + pts.length) % pts.length]; x.fillRect(i, y, 1, 200 - y); } };
     drawRidge(far, '#3a2150', 2, -par * 0.3); drawRidge(mid, '#271a3d', 4, -par * 0.6);
-    x.fillStyle = '#1a1230'; temple(x, 330 - par * 0.8, 200, 1.1); temple(x, 300 - par * 0.8, 200, 0.7); temple(x, 362 - par * 0.8, 200, 0.6);
+    
     x.fillStyle = '#1a1230'; x.fillRect(0, 196, PW, 6);
     for (let y = 202; y < PH; y++) { x.fillStyle = y % 3 === 0 ? '#2b1b46' : '#1e1536'; x.fillRect(0, y, PW, 1); }
     for (let y = 204; y < PH; y += 3) { const w = Math.max(2, 60 - (y - 204) * 0.6) * (0.7 + 0.3 * Math.sin(t * 3 + y)); x.fillStyle = 'rgba(255,170,90,.55)'; x.fillRect(Math.round(sunX - w), y, Math.round(w * 2), 1); }
@@ -240,7 +240,7 @@ back.position.z = -D / 2 - 0.003; back.rotation.y = Math.PI; dev.add(back);
   const path = (X, Y, w, h, r) => { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); };
   path(0, 0, cw, ch, rr); const g = x.createLinearGradient(0, 0, cw, ch); g.addColorStop(0, '#d2cdc3'); g.addColorStop(1, '#bdb8ae'); x.fillStyle = g; x.fill();
   path(70, 120, cw - 140, 300, 40); x.fillStyle = '#c8c3b9'; x.fill(); x.strokeStyle = 'rgba(0,0,0,.12)'; x.lineWidth = 4; x.stroke();
-  x.fillStyle = 'rgba(70,66,60,.7)'; x.font = '600 34px Geist, Arial, sans-serif'; x.textAlign = 'center'; x.fillText('TS-26  ·  DESIGNED IN BANGKOK', cw / 2, 285);
+  x.fillStyle = 'rgba(70,66,60,.7)'; x.font = '600 34px Geist, Arial, sans-serif'; x.textAlign = 'center'; x.fillText('TS-26  ·  POCKET PORTFOLIO', cw / 2, 285);
   for (let i = 0; i < 16; i++) { const y = ch * 0.5 + i * 30; x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(60, y, cw - 120, 6); x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(60, y + 6, cw - 120, 6); }
   for (const [X, Y] of [[60, 60], [cw - 60, 60], [60, ch - 60], [cw - 60, ch - 60]]) { x.beginPath(); x.arc(X, Y, 16, 0, 7); x.fillStyle = '#8f8a80'; x.fill(); x.fillStyle = '#5e5a53'; x.fillRect(X - 9, Y - 2, 18, 4); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; back.material.map = t; back.material.needsUpdate = true;
@@ -341,7 +341,7 @@ function draw() {
     txt('ABOUT ME', 30, 62, C.amber, 24);
     txt('THOMAS SOKOLOWSKI', 30, 112, C.white, 19);
     const about = ['A sales and marketing person who builds with AI. I turn messy business problems into working tools, and then I help sell them.',
-      'Based in Bangkok. Studying an MSc in Innovation Management. I speak Danish, English, Thai and some Mandarin.'];
+      'Studying an MSc in Innovation Management. I speak Danish, English, Thai and some Mandarin.'];
     let ay = 162; for (const para of about) ay += wrapText(para, 30, ay, 580, 25, C.mint, 33, 99, 'sans') * 33 + 14;
     foot('', 'B BACK'); say.push('About me. ' + about.join(' '));
   } else if (view === 'project') {
@@ -379,7 +379,7 @@ function draw() {
     txt(`EXPERIENCE ${sub + 1}/${all.length}`, 30, 62, C.amber, 22);
     txt(e.when, 30, 108, C.amber, 22, 'sans');
     let ey = 146; ey += wrapText(e.role, 30, ey, 580, 26, C.white, 31, 2, 'sans') * 31;
-    ey += wrapText(`${e.org} · ${e.place}`, 30, ey, 580, 21, C.mint, 27, 2, 'sans') * 27 + 14;
+    ey += wrapText(e.org, 30, ey, 580, 21, C.mint, 27, 2, 'sans') * 27 + 14;
     wrapText(e.text, 30, ey, 580, 21, '#c5e6d4', 28, 5, 'sans');
     foot('◀▶ FLIP', 'B BACK'); say.push(`${e.role}, ${e.org}, ${e.when}. ${e.text}`);
   } else if (view === 'contact') {

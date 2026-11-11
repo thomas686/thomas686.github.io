@@ -44,7 +44,7 @@ window.portfolioData = () => projects;
 
 function renderTimeline(id, items) {
   $(id).innerHTML = items.map(i => `
-    <li><div class="t-when">${esc(i.when)} · ${esc(i.place)}</div>
+    <li><div class="t-when">${esc(i.when)}</div>
       <div class="t-role">${esc(i.role)}</div>
       <div class="t-org">${esc(i.org)}</div>
       <p class="t-text">${esc(i.text)}</p></li>`).join('');
@@ -63,12 +63,6 @@ $('copy').addEventListener('click', async () => {
   setTimeout(() => { btn.textContent = 'Copy email'; }, 2500);
 });
 
-function tick() {
-  const t = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }).format(new Date());
-  $('clock').textContent = `${t} local time`;
-}
-tick();
-setInterval(tick, 30000);
 
 Promise.all([fetch('data/projects.json?t=' + Date.now()).then(r => r.json()), fetch('data/experience.json?t=' + Date.now()).then(r => r.json())])
   .then(([p, e]) => {
