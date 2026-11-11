@@ -217,7 +217,7 @@
   {
     "id": "research-journal",
     "title": "Research journal on an AI-first agency",
-    "category": "side",
+    "category": "academic",
     "year": "2026",
     "summary": "150+ field notes on how a small AI-first agency really works, for my internship report and thesis.",
     "problem": "My master's programme asks for research based on the internship. Memory is not data.",
@@ -230,5 +230,39 @@
     ],
     "image": "img/research-journal.webp",
     "imageKind": "screenshot"
+  },
+  {
+    "id": "thesis",
+    "title": "Master's thesis: A team of one?",
+    "category": "academic",
+    "year": "2026-27",
+    "summary": "How AI agents change the way work is organised, and whether one person with agents can do what used to take a team.",
+    "problem": "A common claim is that one person working with AI agents can now do work that used to need a team. It is repeated a lot and researched very little.",
+    "built": "A thesis for my MSc in Innovation Management (University of Chinese Academy of Sciences and Aalborg University), using public instruction files that people write for their AI agents and a questionnaire, framed with organisation theory on why teams and firms exist.",
+    "result": "In progress, due June 2027. The agent files explorer is the pilot for its data.",
+    "tools": [
+      "Qualitative research",
+      "Organisation theory",
+      "GitHub data",
+      "Survey"
+    ],
+    "demo": "explorer/",
+    "image": "img/explorer.webp",
+    "imageKind": "screenshot"
+  },
+  {
+    "id": "internship-report",
+    "title": "Internship research report",
+    "category": "academic",
+    "year": "2026",
+    "summary": "A research report on how work changes when AI takes over producing a classic agency service.",
+    "problem": "My master's programme asks for a research report built on the internship, tied to tasks I actually did.",
+    "built": "A study of an AI-driven social media and email service at an AI-first agency, based on my own research journal of field notes and the work records of the tasks.",
+    "result": "Due January 2027.",
+    "tools": [
+      "Field research",
+      "Gioia method",
+      "Case study"
+    ]
   }
 ]

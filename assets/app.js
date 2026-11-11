@@ -1,4 +1,4 @@
-const CATS = { ai: 'AI and automation', alphacrm: 'AlphaCRM', email: 'Email', side: 'Side project' };
+const CATS = { ai: 'AI and automation', alphacrm: 'AlphaCRM', email: 'Email', side: 'Side project', academic: 'Academic' };
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let projects = [];
