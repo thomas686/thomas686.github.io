@@ -3,17 +3,36 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let projects = [];
 
+const GROUPS = [
+  ['ai', 'AI and automation', 'AI agents and tools that do real work: drafting posts, answering customers and running on a schedule, always with a person approving what goes out.'],
+  ['alphacrm', 'AlphaCRM', 'The agency\'s own CRM, which customers buy once and own. I built features, the English version, the help site and the material used to sell it.'],
+  ['email', 'Email', 'Email programmes in Klaviyo, for clients and for the agency itself: welcome flows, campaigns and newsletters that follow the law and sound like the brand.'],
+  ['web', 'Web', 'Pages, forms and small sites that bring in leads and help the sales team.'],
+  ['side', 'Side projects', 'Things I built on my own initiative, to learn something or to scratch an itch.'],
+  ['academic', 'Academic', 'Research and course projects from my MSc in Innovation Management at the University of Chinese Academy of Sciences and Aalborg University.'],
+];
+
 function renderCards(cat) {
-  const list = cat === 'all' ? projects : projects.filter(p => p.category === cat);
-  $('cards').innerHTML = list.map(p => `
-    <button type="button" class="card c-${p.category}${cat === 'all' && p.featured ? ' wide' : ''}" data-id="${p.id}">
+  const groups = GROUPS.filter(([k]) => cat === 'all' || k === cat)
+    .map(([k, title, text]) => [k, title, text, projects.filter(p => p.category === k)])
+    .filter(g => g[3].length);
+  $('cards').innerHTML = groups.map(([k, title, text, list]) => `
+    <section class="group c-${k}">
+      <div class="group-head"><h3 class="group-h">${title}</h3><p class="group-p">${text}</p></div>
+      <div class="cards">${cardsHtml(list, cat)}</div>
+    </section>`).join('');
+  document.querySelectorAll('.card').forEach(b => b.addEventListener("click", () => openProject(b.dataset.id)));
+}
+
+function cardsHtml(list, cat) {
+  return list.map(p => `
+    <button type="button" class="card c-${p.category}${p.featured ? ' wide' : ''}" data-id="${p.id}">
       ${p.image ? `<img class="thumb" src="${p.image}" alt="" loading="lazy" width="1120" height="700">` : ''}
       <span class="tag">${CATS[p.category]}</span>
       <h3>${esc(p.title)}</h3>
       <p>${esc(p.summary)}</p>
       <span class="more">Read the story ${p.demo ? '<span class="live">Live demo</span>' : ''}</span>
     </button>`).join('');
-  document.querySelectorAll('.card').forEach(b => b.addEventListener("click", () => openProject(b.dataset.id)));
 }
 
 function openProject(id) {

@@ -160,3 +160,9 @@ dialog p{margin:0}
 @media (max-width:860px){.hello{order:-1;justify-self:start;margin:0}}
 
 .d-actions{display:flex;flex-wrap:wrap;gap:10px}
+
+/* Project groups: a short header explains each segment */
+.groups{display:grid;gap:44px}
+.group-head{display:grid;gap:6px;margin:0 0 16px;padding-left:14px;border-left:3px solid var(--c)}
+.group-h{margin:0;font:400 12px/1.2 var(--pixel);letter-spacing:.04em;color:var(--c)}
+.group-p{margin:0;max-width:70ch;color:var(--muted);font-size:16px}
