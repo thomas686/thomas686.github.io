@@ -76,10 +76,10 @@ if (BG === 'work') {
   window.addEventListener('portfolio-data', () => {}, { once: true });
 } else if (BG === 'studio') {
   scene.background = canvasBg(512, 512, (x, w, h) => { const g = x.createRadialGradient(w / 2, h * 0.45, 10, w / 2, h * 0.45, w * 0.7); g.addColorStop(0, '#2a2e2c'); g.addColorStop(1, '#070908'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
-  scene.fog = null;
+  scene.fog = new THREE.Fog(0x0b0d0c, 12, 34);
   const mirror = new Reflector(new THREE.PlaneGeometry(60, 60), { textureWidth: 1024, textureHeight: 1024, color: 0x8a8f8c });
   mirror.rotation.x = -Math.PI / 2; mirror.position.y = -3.32; scene.add(mirror);
-  const dim = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshBasicMaterial({ color: 0x070908, transparent: true, opacity: 0.72 }));
+  const dim = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshBasicMaterial({ color: 0x070908, transparent: true, opacity: 0.5 }));
   dim.rotation.x = -Math.PI / 2; dim.position.y = -3.31; scene.add(dim);
   const spot = new THREE.SpotLight(0xffffff, 60, 30, 0.45, 0.6, 1.4); spot.position.set(0, 9, 4); spot.target.position.set(0, -1, 0); scene.add(spot, spot.target);
   shadow.material.opacity = 0.9;
