@@ -219,6 +219,25 @@
     "imageKind": "screenshot"
   },
   {
+    "id": "webshop-email",
+    "title": "Restarting a silent webshop's email",
+    "category": "email",
+    "year": "2026",
+    "summary": "An electronics webshop had Klaviyo for years without sending a single email. I audited it, fixed consent and data, and got it sending again.",
+    "problem": "The account had never sent one email. 89 people had signed up for the newsletter, some as far back as 2022, and heard nothing. The shop's signup did not reach Klaviyo, the tracking script had disappeared from the shop, and thousands of customers who never said yes were synced in, pushing it over the free plan.",
+    "built": "A full audit with a read-only key, then the fixes: a privacy page for the newsletter, consent text and a Danish double opt-in confirmation email in the shop's own design, duplicate shop emails switched off, and the non-consenting profiles cleaned out so the account fits the free plan. Then a welcome flow, a re-introduction email to the people who had waited, and a monthly newsletter.",
+    "result": "The re-introduction went out to all 90 subscribers on 3 November 2026, the welcome flow is live, and the monthly newsletter now goes out on the 10th of each month.",
+    "tools": [
+      "Klaviyo",
+      "PrestaShop",
+      "HTML email",
+      "Consent and GDPR",
+      "Claude Code"
+    ],
+    "image": "img/webshop-email.webp",
+    "imageKind": "screenshot"
+  },
+  {
     "id": "own-email",
     "title": "Email for Alpha's own AI brand",
     "category": "email",
