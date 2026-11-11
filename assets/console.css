@@ -52,3 +52,11 @@
 .v-num{font:400 16px/1 var(--pixel);color:#ffd37a;text-shadow:0 0 10px rgba(255,211,122,.5);font-variant-numeric:tabular-nums}
 @media (max-width:600px){.visits{padding:7px 9px}.v-num{font-size:12px}.v-label{font-size:7px}}
 @media (max-width:600px){.visits{top:44px;right:50%;translate:50% 0;flex-direction:row;align-items:center;gap:8px}}
+
+/* Normal view: no console section; a button brings it back. The counter sits top right in both views. */
+.visits{position:absolute}
+.normal-view #play{display:none}
+.play-mode{display:none}
+.normal-view .play-mode{display:inline-flex;position:absolute;top:max(16px,env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));z-index:3;align-items:center;font:400 10px/1 var(--pixel);letter-spacing:.04em;color:#1b1408;background:#ffd37a;border:0;border-radius:6px;padding:10px 12px;cursor:pointer;box-shadow:0 4px 0 #7a5a1c}
+.normal-view .play-mode:active{transform:translateY(3px);box-shadow:0 1px 0 #7a5a1c}
+@media (max-width:600px){.normal-view .visits{top:16px;right:16px;left:auto;translate:none;flex-direction:column;align-items:flex-end}}

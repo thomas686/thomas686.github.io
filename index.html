@@ -12,21 +12,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Press+Start+2P&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/style.css?v=1794365924">
-<link rel="stylesheet" href="assets/console.css?v=1794365924">
+<script>
+(() => { const q = new URLSearchParams(location.search).get('view'); let v = q;
+  try { if (q) localStorage.setItem('ts26-view', q); else v = localStorage.getItem('ts26-view'); } catch { }
+  if (v === 'normal') document.documentElement.classList.add('normal-view'); })();
+</script>
+<link rel="stylesheet" href="assets/style.css?v=1794366175">
+<link rel="stylesheet" href="assets/console.css?v=1794366175">
 </head>
 <body>
 <a class="skip" href="#about">Skip to the normal portfolio</a>
 
+<div class="visits" id="visits" hidden aria-live="polite"><span class="v-label">PLAYERS VISITED</span><span class="v-num" id="v-num">000000</span></div>
+<button type="button" class="play-mode" id="play-mode">&#9654; PLAY MODE</button>
 <section class="play" id="play" aria-label="Interactive portfolio console">
   <div class="stage3d" id="stage3d" aria-hidden="true"></div>
   <div class="stage-aria" role="application" aria-label="TS-26 console. A or Enter opens, Backspace goes back, arrow keys move, M mutes, drag to spin it."><div id="screen-text" class="sr-only" aria-live="polite"></div></div>
   <button type="button" class="power-callout gone" id="power-callout" aria-label="Turn the console on"><span class="pc-arrow" aria-hidden="true">&#9664;</span> FLIP THE SWITCH</button>
-  <div class="visits" id="visits" hidden aria-live="polite"><span class="v-label">PLAYERS VISITED</span><span class="v-num" id="v-num">000000</span></div>
   <div class="play-top"><p class="play-title">Thomas Sokolowski &middot; pocket portfolio</p></div>
   <div class="play-bottom">
     <p class="play-hint" id="play-hint">Flip the switch on the right side to start, or press any key</p>
-    <a class="skip-view" href="#about">Skip to normal view &darr;</a>
+    <a class="skip-view" href="?view=normal" id="to-normal">Normal view &darr;</a>
   </div>
 </section>
 
@@ -133,8 +139,13 @@
   <a class="btn primary" id="d-demo" href="#" hidden>Try it live</a>
 </dialog>
 
-<script src="assets/app.js?v=1794365924"></script>
+<script src="assets/app.js?v=1794366175"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module" src="assets/console-card3d.js?v=1794365924"></script>
+<script type="module">if (!document.documentElement.classList.contains('normal-view')) import('./assets/console-card3d.js?v=1794366175');</script>
+<script>
+document.getElementById('to-normal').addEventListener('click', e => { e.preventDefault(); try { localStorage.setItem('ts26-view', 'normal'); } catch { }
+  document.documentElement.classList.add('normal-view'); history.replaceState(null, '', '?view=normal'); scrollTo(0, 0); });
+document.getElementById('play-mode').addEventListener('click', () => { try { localStorage.setItem('ts26-view', 'play'); } catch { } location.href = '?view=play'; });
+</script>
 </body>
 </html>

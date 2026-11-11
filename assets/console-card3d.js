@@ -492,7 +492,7 @@ function press(k) {
   if (view === 'menu') {
     const choice = MENU[idx];
     if (choice === 'TURN OFF') { setPower(false); return; }
-    if (choice === 'NORMAL VIEW') { document.getElementById('about').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return; }
+    if (choice === 'NORMAL VIEW') { stopMusic(); document.getElementById('to-normal').click(); return; }
     if (choice === 'SNAKE') { snakeNew(); view = 'snake'; draw(); return; }
     const next = { 'ABOUT ME': 'about', PROJECTS: 'project', EXPERIENCE: 'exp', CONTACT: 'contact' }[choice];
     if ((next === 'project' && !projects.length) || (next === 'exp' && !exp)) return;
