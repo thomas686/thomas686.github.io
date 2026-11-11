@@ -34,6 +34,7 @@ function openProject(id) {
   const demo = $('d-demo');
   demo.hidden = !p.demo;
   if (p.demo) { demo.href = p.demo; const ext = /^https?:/.test(p.demo); demo.target = ext ? '_blank' : ''; demo.rel = ext ? 'noopener' : ''; }
+  const pdf = $('d-pdf'); pdf.hidden = !p.pdf; if (p.pdf) pdf.href = p.pdf;
   d.showModal();
   d.scrollTop = 0;
 }

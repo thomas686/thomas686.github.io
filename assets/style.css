@@ -158,3 +158,5 @@ dialog p{margin:0}
 .hero{grid-template-columns:1fr}
 .hello{align-self:start;margin:120px 0 0;font:500 22px var(--sans);padding:12px 18px;border-radius:8px;background:var(--screen);border:2px solid var(--mint);color:var(--mint);transform:rotate(-4deg);box-shadow:0 0 24px rgba(125,255,176,.15)}
 @media (max-width:860px){.hello{order:-1;justify-self:start;margin:0}}
+
+.d-actions{display:flex;flex-wrap:wrap;gap:10px}
