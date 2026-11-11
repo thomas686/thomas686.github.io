@@ -18,7 +18,7 @@ body{margin:0;background:#fff}
 </style>
 </head>
 <body>
-<div id="boot"><div class="spin"></div><b>Pharma Flu Logistics Optimizer</b><span>Python is starting inside your browser, so nothing is installed or sent anywhere.<br>The first visit takes 1 to 3 minutes. Next time it is faster.</span><span id="elapsed">0 s</span></div>
+<div id="boot"><div class="spin"></div><b>Pharma Flu Logistics Optimizer</b><span>Python is starting inside your browser, so nothing is installed or sent anywhere.<br>The first visit takes about a minute. Next time it is faster.</span><span id="elapsed">0 s</span></div>
 <div id="root"></div>
 <div class="bar"><span>Group project, Digital Innovation, MSc</span><a href="../?view=normal#work">&larr; Back to Thomas Sokolowski</a></div>
 <script type="module">
@@ -28,7 +28,7 @@ const files = Object.fromEntries(names.map(n => [n, { url: "./" + n }]));
 mount({ requirements: ["plotly", "scikit-learn", "scipy"], entrypoint: "app.py", files }, document.getElementById("root"));
 const t0 = Date.now(), el = document.getElementById("elapsed");
 const iv = setInterval(() => { el.textContent = Math.round((Date.now() - t0) / 1000) + " s";
-  if ((document.getElementById("root").innerText || "").trim().length > 40) { document.getElementById("boot").remove(); clearInterval(iv); } }, 1000);
+  if (document.querySelector("#root [data-testid=stSidebarNav], #root [data-testid=stMarkdownContainer]") || Date.now() - t0 > 300000) { document.getElementById("boot").remove(); clearInterval(iv); } }, 1000);
 </script>
 </body>
 </html>

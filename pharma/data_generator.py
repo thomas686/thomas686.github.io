@@ -338,23 +338,30 @@ def generate_orders(
     region_weights = region_weights / region_weights.sum()
     region_idx = rng.choice(len(CHINA_REGIONS), size=n_orders, p=region_weights)
 
+    # Web-demo speed-up: these depend only on the client or temperature, so
+    # compute them once instead of once per order. Same random draws, same output.
+    skew_cache = {c: _client_skew(catalog, c, scenario_mult) for c in (CLIENT_HOSPITAL, CLIENT_PHARMACY, CLIENT_PRIMARY)}
+    pool_cache: dict = {}
+    sku_rows = catalog.to_dict("records")
+
     for i in range(n_orders):
         # Pick client category first
         client_cat_idx = rng.choice(3, p=mix)
         client = [CLIENT_HOSPITAL, CLIENT_PHARMACY, CLIENT_PRIMARY][client_cat_idx]
 
         # Pick SKU biased by client
-        catalog_probs = _client_skew(catalog, client, scenario_mult)
+        catalog_probs = skew_cache[client]
         sku_idx = int(rng.choice(len(catalog), p=catalog_probs))
-        sku = catalog.iloc[sku_idx]
+        sku = sku_rows[sku_idx]
 
         # Quantity by client and tier
         qty = _client_qty(client, sku["tier"], rng)
 
         # Pick warehouse location matching SKU temp
-        loc_pool = warehouse[warehouse["temp"] == sku["temp"]]
-        if loc_pool.empty:
-            loc_pool = warehouse  # fallback
+        if sku["temp"] not in pool_cache:
+            _p = warehouse[warehouse["temp"] == sku["temp"]]
+            pool_cache[sku["temp"]] = warehouse if _p.empty else _p  # fallback
+        loc_pool = pool_cache[sku["temp"]]
         loc = loc_pool.sample(1, random_state=int(rng.integers(0, 2**31 - 1))).iloc[0]
         # Slight per-order offset so route distances are non-trivial even when
         # multiple orders share a warehouse location

@@ -329,7 +329,7 @@
     "summary": "Digital Innovation course, group project: a control-tower app that helps a pharmaceutical warehouse plan for flu season, from demand forecasts to picking waves and staffing.",
     "problem": "Flu outbreaks make demand for medicine jump suddenly and unevenly across regions. A central warehouse that plans for a normal week ends up short-staffed, behind on next-day delivery and mixing cold-chain goods badly.",
     "built": "A Python app with five pages: a dashboard comparing Normal, Peak and Flu Season scenarios; wave planning that groups orders with machine-learning clustering and keeps room-temperature, cold and frozen goods apart; a what-if simulator; a manager overview with KPIs; and a dictionary of terms. It scores flu risk for eight regions from public health data and forecasts demand per product for 7, 30 and 90 days.",
-    "result": "A working prototype that runs entirely in the browser. The first visit takes 1 to 3 minutes while Python loads.",
+    "result": "A working prototype that runs entirely in the browser. The first visit takes about a minute while Python loads.",
     "tools": [
       "Python",
       "Streamlit",
