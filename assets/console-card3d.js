@@ -166,9 +166,9 @@ if (BG === 'pixel' || BG === 'mix') {
     for (const [sx0, sy0, ph, sz] of stars) if (Math.sin(t * 2.2 + ph * 3) > -0.2) { x.fillStyle = sz > 1 ? '#fff4d8' : '#c9c2ff'; x.fillRect(Math.round(sx0 - par * 0.05), Math.round(sy0), sz, sz); }
     if (!shoot && Math.random() < 0.004) shoot = { x: 60 + Math.random() * 300, y: 10 + Math.random() * 40, life: 0 };
     if (shoot) { shoot.life++; for (let k = 0; k < 10; k++) { x.fillStyle = 'rgba(255,255,255,' + (1 - k / 10) + ')'; x.fillRect(Math.round(shoot.x + shoot.life * 4 - k * 3), Math.round(shoot.y + shoot.life * 1.5 - k), 2, 1); } if (shoot.life > 24) shoot = null; }
-    const sunX = 372 - par * 0.15, sunY = 178;
-    for (let y = -46; y <= 0; y++) { const w = Math.round(Math.sqrt(46 * 46 - y * y)); if (y > -20 && Math.floor((y + 46) / 3) % 3 === 2) continue;
-      x.fillStyle = y < -30 ? '#ffe28a' : y < -14 ? '#ffc061' : '#ff9a4d'; x.fillRect(Math.round(sunX - w), sunY + y, w * 2, 1); }
+    const sunX = 240 - par * 0.15, sunY = 176, SR = 64;
+    for (let y = -SR; y <= 0; y++) { const w = Math.round(Math.sqrt(SR * SR - y * y)); if (y > -26 && Math.floor((y + SR) / 3) % 3 === 2) continue;
+      x.fillStyle = y < -40 ? '#ffe28a' : y < -18 ? '#ffc061' : '#ff9a4d'; x.fillRect(Math.round(sunX - w), sunY + y, w * 2, 1); }
     for (const c of clouds) { const cx = ((c[0] + t * c[3] * 4 - par * 0.2) % (PW + 80)) - 40; x.fillStyle = 'rgba(255,190,200,.55)';
       x.fillRect(Math.round(cx), Math.round(c[1]), Math.round(c[2]), 3); x.fillRect(Math.round(cx + 4), Math.round(c[1] - 2), Math.round(c[2] * 0.6), 2); }
     const drawRidge = (pts, col, speed, shift) => { x.fillStyle = col; const off = Math.floor(t * speed + shift);
@@ -177,7 +177,7 @@ if (BG === 'pixel' || BG === 'mix') {
     x.fillStyle = '#1a1230'; temple(x, 330 - par * 0.8, 200, 1.1); temple(x, 300 - par * 0.8, 200, 0.7); temple(x, 362 - par * 0.8, 200, 0.6);
     x.fillStyle = '#1a1230'; x.fillRect(0, 196, PW, 6);
     for (let y = 202; y < PH; y++) { x.fillStyle = y % 3 === 0 ? '#2b1b46' : '#1e1536'; x.fillRect(0, y, PW, 1); }
-    for (let y = 204; y < PH; y += 3) { const w = Math.max(2, 46 - (y - 204) * 0.5) * (0.7 + 0.3 * Math.sin(t * 3 + y)); x.fillStyle = 'rgba(255,170,90,.55)'; x.fillRect(Math.round(sunX - w), y, Math.round(w * 2), 1); }
+    for (let y = 204; y < PH; y += 3) { const w = Math.max(2, 60 - (y - 204) * 0.6) * (0.7 + 0.3 * Math.sin(t * 3 + y)); x.fillStyle = 'rgba(255,170,90,.55)'; x.fillRect(Math.round(sunX - w), y, Math.round(w * 2), 1); }
     for (const b of birds) { const bx = ((b[0] + t * 14 * b[2]) % (PW + 20)) - 10, by = b[1] + Math.sin(t * 2 + b[0]) * 3, f = Math.sin(t * 9 + b[0]) > 0 ? 1 : 0;
       x.fillStyle = '#1a1230'; x.fillRect(Math.round(bx - 2), Math.round(by - f), 2, 1); x.fillRect(Math.round(bx), Math.round(by), 1, 1); x.fillRect(Math.round(bx + 1), Math.round(by - f), 2, 1); }
     x.fillStyle = '#0f0b1f'; palm(x, Math.round(60 - par * 1.2), 202, 46, Math.sin(t * 1.3) * 1.5); palm(x, Math.round(88 - par * 1.2), 202, 34, Math.sin(t * 1.1 + 1) * 1.5);
@@ -215,6 +215,14 @@ const sc = document.createElement('canvas'); sc.width = 960; sc.height = 720; co
 const screenTex = new THREE.CanvasTexture(sc); screenTex.colorSpace = THREE.SRGBColorSpace; screenTex.anisotropy = 8;
 const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCR.w / FACE.w * W, SCR.h / FACE.h * H), new THREE.MeshBasicMaterial({ map: screenTex, color: 0xdedede }));
 screen.position.set(ux(SCR.x + SCR.w / 2), uy(SCR.y + SCR.h / 2), D / 2 + 0.006); dev.add(screen);
+
+// power switch on the right edge: groove + amber knob that slides down when on
+const groove = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.8, 0.26), new THREE.MeshStandardMaterial({ color: 0x2a2724, roughness: 0.8 }));
+groove.position.set(W / 2 + 0.003, 1.35, 0); dev.add(groove);
+const knob = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.26, 0.18), new THREE.MeshStandardMaterial({ color: 0xffd37a, roughness: 0.35, emissive: 0xffb84a, emissiveIntensity: 0.6 }));
+knob.position.set(W / 2 + 0.03, 1.6, 0); dev.add(knob);
+const callout = document.getElementById('power-callout');
+const knobWorld = new THREE.Vector3();
 
 // press decals over the printed controls
 const decal = (px, py, rPx) => { const m = new THREE.Mesh(new THREE.CircleGeometry(rPx / FACE.w * W, 32), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, depthWrite: false }));
@@ -392,7 +400,7 @@ function setPower(v) {
     bootTimer = setTimeout(() => { view = 'menu'; draw(); }, still ? 300 : 1900);
   } else {
     stopMusic(); beep(220, 0.15, 'sawtooth'); offAt = performance.now(); view = 'off';
-    hint.innerHTML = coarse ? 'Tap the screen or A to start, drag to spin it' : 'Press A or any key to start, drag to spin it';
+    hint.innerHTML = coarse ? 'Flip the switch on the right side to start, or tap the screen' : 'Flip the switch on the right side to start, or press any key';
   }
 }
 function flash(k) {
@@ -440,6 +448,7 @@ function hitAt(e) {
   const r = renderer.domElement.getBoundingClientRect();
   ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   ray.setFromCamera(ptr, camera);
+  if (ray.intersectObjects([knob, groove], false)[0]) return { k: 'power' };
   const h = ray.intersectObjects([screen, face], false)[0];
   if (!h) return ray.intersectObject(dev, true)[0] ? { k: 'body' } : null;
   if (h.object === screen) return { k: 'screen', x: h.uv.x * 640, y: (1 - h.uv.y) * 480 };
@@ -469,6 +478,7 @@ cv.addEventListener('pointerup', () => {
   const d = drag; drag = null;
   if (moved) { spinTarget = Math.round(spinTarget / Math.PI) * Math.PI; return; }
   const h = d.hit;
+  if (h && h.k === 'power') { setPower(!on); return; }
   if (!h && hoverScreen && window.openProject) { window.openProject(hoverScreen.userData.id); return; }
   if (!h || h.k === 'body') return;
   if (h.k === 'screen') {
@@ -521,6 +531,17 @@ function frame() {
   }
   camera.position.set(0, THREE.MathUtils.lerp(1.4, 0.3, z), THREE.MathUtils.lerp(dist * 1.35, dist * 1.12, z));
   camera.lookAt(0, THREE.MathUtils.lerp(-0.3, -0.1, z), 0);
+  knob.position.y += ((on ? 1.2 : 1.6) - knob.position.y) * Math.min(1, dt * 10);
+  knob.material.emissiveIntensity = on ? 0.15 : 0.45 + 0.35 * Math.sin(t * 4);
+  if (callout) {
+    if (on) callout.classList.add('gone');
+    else {
+      callout.classList.remove('gone');
+      knob.getWorldPosition(knobWorld); knobWorld.project(camera);
+      const r = renderer.domElement.getBoundingClientRect();
+      callout.style.transform = `translate(${(knobWorld.x * 0.5 + 0.5) * r.width + 26}px, ${(-knobWorld.y * 0.5 + 0.5) * r.height - 18}px)`;
+    }
+  }
   if (!still) bgTick(t, rdt);
   if ((on && view === 'boot') || (!on && offAt && performance.now() - offAt < 400)) draw();
   renderer.render(scene, camera);

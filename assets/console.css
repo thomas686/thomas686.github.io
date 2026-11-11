@@ -36,3 +36,12 @@
 .tsc-dpad.down[data-dir="left"]::after{left:2%}.tsc-dpad.down[data-dir="right"]::after{left:64%}
 .tsc-sheen{position:absolute;inset:3% 4%;border-radius:8%;pointer-events:none;background:radial-gradient(60% 45% at var(--lx,30%) var(--ly,20%),rgba(255,255,255,.16),transparent 70%);mix-blend-mode:soft-light}
 @media (prefers-reduced-motion:reduce){.tsc-card{transition:none}}
+
+/* Pointer to the power switch, placed by script next to the switch */
+.power-callout{position:absolute;left:0;top:0;z-index:3;display:flex;align-items:center;gap:10px;font:400 12px/1 var(--pixel);letter-spacing:.04em;color:#1b1408;background:#ffd37a;border:0;border-radius:6px;padding:11px 14px;box-shadow:0 0 0 3px rgba(255,211,122,.25),0 0 30px rgba(255,211,122,.45);cursor:pointer;white-space:nowrap;transition:opacity .4s ease}
+.power-callout.gone{opacity:0;pointer-events:none}
+.pc-arrow{display:inline-block}
+@media (prefers-reduced-motion:no-preference){.power-callout:not(.gone){animation:pc-pulse 1.6s ease-in-out infinite}.pc-arrow{animation:pc-nudge 0.8s ease-in-out infinite}}
+@keyframes pc-pulse{0%,100%{box-shadow:0 0 0 3px rgba(255,211,122,.25),0 0 20px rgba(255,211,122,.35)}50%{box-shadow:0 0 0 7px rgba(255,211,122,.12),0 0 42px rgba(255,211,122,.6)}}
+@keyframes pc-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(-5px)}}
+@media (max-width:600px){.power-callout{font-size:10px;padding:9px 11px}}
