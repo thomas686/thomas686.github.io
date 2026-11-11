@@ -275,7 +275,39 @@ function list(items, sel, y0, lh = 34, size = 17) {
 }
 const foot = (l, r) => { txt(l, 30, 458, C.dim, 12); sx.font = `12px ${PX}`; txt(r, 610 - sx.measureText(r).width, 458, C.dim, 12); };
 
-const MENU = ['ABOUT ME', 'PROJECTS', 'EXPERIENCE', 'CONTACT', 'NORMAL VIEW', 'TURN OFF'];
+const MENU = ['ABOUT ME', 'PROJECTS', 'EXPERIENCE', 'CONTACT', 'SNAKE', 'NORMAL VIEW', 'TURN OFF'];
+// ---- Snake: an original take on the classic, played on the TS-26 screen ----
+const SN = { cols: 20, rows: 13, cell: 30, x0: 20, y0: 56 };
+let snake = null;
+const hiGet = () => { try { return Number(localStorage.getItem('ts26-snake-hi')) || 0; } catch { return 0; } };
+const hiSet = v => { try { localStorage.setItem('ts26-snake-hi', String(v)); } catch { /* storage blocked */ } };
+function snakeNew() {
+  snake = { body: [[6, 6], [5, 6], [4, 6]], dir: [1, 0], next: [1, 0], food: null, score: 0, alive: true, started: false, acc: 0, step: 0.16, hi: hiGet() };
+  snakeFood();
+}
+function snakeFood() {
+  for (;;) { const f = [Math.floor(Math.random() * SN.cols), Math.floor(Math.random() * SN.rows)];
+    if (!snake.body.some(([x, y]) => x === f[0] && y === f[1])) { snake.food = f; return; } }
+}
+function snakeTick(dt) {
+  if (!snake || !snake.alive || !snake.started) return;
+  snake.acc += dt;
+  let moved = false;
+  while (snake.acc >= snake.step) {
+    snake.acc -= snake.step; snake.dir = snake.next;
+    const [hx, hy] = snake.body[0], nx = hx + snake.dir[0], ny = hy + snake.dir[1];
+    if (nx < 0 || ny < 0 || nx >= SN.cols || ny >= SN.rows || snake.body.some(([x, y], i) => i < snake.body.length - 1 && x === nx && y === ny)) {
+      snake.alive = false; [392, 330, 262, 196].forEach((f, i) => beep(f, 0.14, 'square', i * 0.12));
+      if (snake.score > snake.hi) { snake.hi = snake.score; hiSet(snake.hi); }
+      break;
+    }
+    snake.body.unshift([nx, ny]);
+    if (nx === snake.food[0] && ny === snake.food[1]) { snake.score++; beep(1046, 0.05); beep(1318, 0.06, 'square', 0.05); snake.step = Math.max(0.07, snake.step - 0.005); snakeFood(); }
+    else snake.body.pop();
+    moved = true;
+  }
+  if (moved || !snake.alive) draw();
+}
 const CONTACT = ['COPY EMAIL', 'OPEN LINKEDIN'];
 let on = false, view = 'off', idx = 0, sub = 0, sound = true, inView = true, blink = true, msg = '';
 let projects = [], exp = null, bootAt = 0, offAt = 0;
@@ -327,6 +359,26 @@ function draw() {
     wrapText(p.title.toUpperCase(), 24, 418, 592, 15, C.amber, 24, 2);
     txt('A: FULL STORY  ◀▶ NEXT  B: MENU', 24, 464, C.dim, 11);
     hits.push({ i: -1, x: 0, y: 0, w: 640, h: 480 }); say.push(`${p.title}. ${p.summary} Press A for the full story.`);
+  } else if (view === 'snake') {
+    const s = snake;
+    txt('SNAKE', 20, 40, C.amber, 16);
+    sx.font = `14px ${PX}`; const sc = `SCORE ${s.score}   HI ${Math.max(s.hi, s.score)}`; txt(sc, 620 - sx.measureText(sc).width, 40, C.mint, 14);
+    sx.fillStyle = '#081018'; sx.fillRect(SN.x0, SN.y0, SN.cols * SN.cell, SN.rows * SN.cell);
+    sx.strokeStyle = 'rgba(125,255,176,.06)'; sx.lineWidth = 1;
+    for (let c = 1; c < SN.cols; c++) { sx.beginPath(); sx.moveTo(SN.x0 + c * SN.cell, SN.y0); sx.lineTo(SN.x0 + c * SN.cell, SN.y0 + SN.rows * SN.cell); sx.stroke(); }
+    for (let r = 1; r < SN.rows; r++) { sx.beginPath(); sx.moveTo(SN.x0, SN.y0 + r * SN.cell); sx.lineTo(SN.x0 + SN.cols * SN.cell, SN.y0 + r * SN.cell); sx.stroke(); }
+    sx.strokeStyle = 'rgba(125,255,176,.35)'; sx.lineWidth = 2; sx.strokeRect(SN.x0, SN.y0, SN.cols * SN.cell, SN.rows * SN.cell);
+    const cellAt = (x, y, col, inset = 3) => { sx.fillStyle = col; sx.fillRect(SN.x0 + x * SN.cell + inset, SN.y0 + y * SN.cell + inset, SN.cell - inset * 2, SN.cell - inset * 2); };
+    if (s.food) { cellAt(s.food[0], s.food[1], '#ff8f6b', 6); sx.fillStyle = '#7dffb0'; sx.fillRect(SN.x0 + s.food[0] * SN.cell + 13, SN.y0 + s.food[1] * SN.cell + 2, 4, 6); }
+    s.body.forEach(([x, y], i) => cellAt(x, y, i === 0 ? '#ffd37a' : (i % 2 ? '#7dffb0' : '#5fe39b')));
+    if (!s.started) { sx.fillStyle = 'rgba(5,10,16,.7)'; sx.fillRect(SN.x0, 200, SN.cols * SN.cell, 90); sx.font = `16px ${PX}`;
+      const a = 'PRESS A TO PLAY'; txt(a, 320 - sx.measureText(a).width / 2, 240, C.amber, 16); sx.font = `11px ${PX}`; const b = 'STEER WITH THE D-PAD'; txt(b, 320 - sx.measureText(b).width / 2, 272, C.mint, 11); }
+    if (!s.alive) { sx.fillStyle = 'rgba(5,10,16,.8)'; sx.fillRect(SN.x0, 180, SN.cols * SN.cell, 130); sx.font = `22px ${PX}`;
+      const g = 'GAME OVER'; txt(g, 320 - sx.measureText(g).width / 2, 225, '#ff8f6b', 22); sx.font = `12px ${PX}`;
+      const r = s.score >= s.hi && s.score > 0 ? 'NEW HIGH SCORE!' : `SCORE ${s.score}`; txt(r, 320 - sx.measureText(r).width / 2, 258, C.amber, 12);
+      const h = 'A: AGAIN   B: MENU'; txt(h, 320 - sx.measureText(h).width / 2, 288, C.mint, 12); }
+    foot('\u25B2\u25BC\u25C0\u25B6 STEER', 'B MENU');
+    say.push(s.alive ? `Snake. Score ${s.score}. Steer with the arrow keys.` : `Game over. Score ${s.score}. Press A to play again or B for the menu.`);
   } else if (view === 'exp') {
     const all = [...exp.work, ...exp.education], e = all[sub];
     txt(`EXPERIENCE ${sub + 1}/${all.length}`, 30, 60, C.amber, 20);
@@ -346,7 +398,7 @@ function draw() {
   if (!sound && view !== 'project') txt('MUTED', 532, 60, C.dim, 12);
   scanlines(); screenTex.needsUpdate = true; srText.textContent = say.join(' ') + (sound ? '' : ' Sound is muted.');
 }
-setInterval(() => { blink = !blink; if (view !== 'boot') draw(); }, 500);
+setInterval(() => { blink = !blink; if (view !== 'boot' && !(view === 'snake' && snake && snake.alive && snake.started)) draw(); }, 500);
 
 // ---------- Sound ----------
 let ac, music = null;
@@ -417,6 +469,13 @@ function press(k) {
   flash(k);
   if (!on) { if (k === 'a' || k === 'screen') setPower(true); return; }
   if (view === 'boot') return;
+  if (view === 'snake') {
+    const d = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[k];
+    if (d) { if (snake.alive && !(d[0] === -snake.dir[0] && d[1] === -snake.dir[1])) { snake.next = d; if (!snake.started) snake.started = true; } return; }
+    if (k === 'a' || k === 'screen') { if (!snake.alive) snakeNew(); snake.started = true; beep(990, 0.05); draw(); return; }
+    if (k === 'b') { beep(330, 0.06); view = 'menu'; idx = MENU.indexOf('SNAKE'); draw(); return; }
+    return;
+  }
   const n = { menu: MENU.length, contact: CONTACT.length }[view];
   if ((k === 'up' || k === 'down') && n) { idx = (idx + (k === 'up' ? -1 : 1) + n) % n; msg = ''; beep(880, 0.04); draw(); return; }
   if (view === 'exp' && ['left', 'right', 'up', 'down'].includes(k)) {
@@ -432,6 +491,7 @@ function press(k) {
     const choice = MENU[idx];
     if (choice === 'TURN OFF') { setPower(false); return; }
     if (choice === 'NORMAL VIEW') { document.getElementById('about').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return; }
+    if (choice === 'SNAKE') { snakeNew(); view = 'snake'; draw(); return; }
     const next = { 'ABOUT ME': 'about', PROJECTS: 'project', EXPERIENCE: 'exp', CONTACT: 'contact' }[choice];
     if ((next === 'project' && !projects.length) || (next === 'exp' && !exp)) return;
     view = next; idx = 0; sub = 0; msg = '';
@@ -485,6 +545,7 @@ cv.addEventListener('pointerup', () => {
   if (h.k === 'screen') {
     if (showingBack()) { toFront(); return; }
     if (!on) { setPower(true); return; }
+    if (view === 'snake') { press('screen'); return; }
     const t = hits.find(t => h.x >= t.x && h.x <= t.x + t.w && h.y >= t.y && h.y <= t.y + t.h);
     if (!t) return; if (t.i >= 0) idx = t.i; press('screen'); return;
   }
@@ -543,6 +604,7 @@ function frame() {
       callout.style.transform = `translate(${(knobWorld.x * 0.5 + 0.5) * r.width + 26}px, ${(-knobWorld.y * 0.5 + 0.5) * r.height - 18}px)`;
     }
   }
+  if (on && view === 'snake') snakeTick(rdt);
   if (!still) bgTick(t, rdt);
   if ((on && view === 'boot') || (!on && offAt && performance.now() - offAt < 400)) draw();
   renderer.render(scene, camera);
