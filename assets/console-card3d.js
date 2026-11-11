@@ -2,6 +2,8 @@
 // with a live screen, clickable controls, drag to spin, and a light background scene.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+const BG = new URLSearchParams(location.search).get('bg') || 'work';
 
 const section = document.getElementById('play');
 const host = document.getElementById('stage3d');
@@ -56,6 +58,66 @@ const particles = (() => { const N = 140, p = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) { p[i * 3] = (Math.random() - 0.5) * 34; p[i * 3 + 1] = -3 + Math.random() * 12; p[i * 3 + 2] = -1 - Math.random() * 18; }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(p, 3));
   const m = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xbff5d6, size: 0.06, transparent: true, opacity: 0.7 })); scene.add(m); return m; })();
+
+// ---------- Background modes: work | studio | bangkok | pixel | cubes ----------
+if (BG !== 'cubes') { grid.visible = false; cubes.forEach(c => { c.visible = false; }); particles.visible = false; }
+const canvasBg = (w, h, paint, nearest = false) => {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); paint(x, w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  if (nearest) { t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; }
+  return { tex: t, ctx: x, c };
+};
+let bgTick = () => {};
+const floating = [];
+if (BG === 'work') {
+  scene.background = canvasBg(4, 512, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#060c0a'); g.addColorStop(0.6, '#0d1d18'); g.addColorStop(1, '#122a23'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
+  scene.fog = new THREE.Fog(0x0b1914, 10, 30);
+  bgTick = (t, dt) => { for (const f of floating) { f.position.y = f.userData.y + Math.sin(t * 0.35 + f.userData.p) * 0.35; f.rotation.y = f.userData.ry + Math.sin(t * 0.2 + f.userData.p) * 0.08; } };
+  window.addEventListener('portfolio-data', () => {}, { once: true });
+} else if (BG === 'studio') {
+  scene.background = canvasBg(512, 512, (x, w, h) => { const g = x.createRadialGradient(w / 2, h * 0.45, 10, w / 2, h * 0.45, w * 0.7); g.addColorStop(0, '#2a2e2c'); g.addColorStop(1, '#070908'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
+  scene.fog = null;
+  const mirror = new Reflector(new THREE.PlaneGeometry(60, 60), { textureWidth: 1024, textureHeight: 1024, color: 0x8a8f8c });
+  mirror.rotation.x = -Math.PI / 2; mirror.position.y = -3.32; scene.add(mirror);
+  const dim = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshBasicMaterial({ color: 0x070908, transparent: true, opacity: 0.72 }));
+  dim.rotation.x = -Math.PI / 2; dim.position.y = -3.31; scene.add(dim);
+  const spot = new THREE.SpotLight(0xffffff, 60, 30, 0.45, 0.6, 1.4); spot.position.set(0, 9, 4); spot.target.position.set(0, -1, 0); scene.add(spot, spot.target);
+  shadow.material.opacity = 0.9;
+} else if (BG === 'bangkok') {
+  const b = canvasBg(2048, 1024, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#070a1a'); g.addColorStop(0.55, '#1c1736'); g.addColorStop(0.78, '#5a2d4a'); g.addColorStop(0.9, '#c2643f'); g.addColorStop(1, '#2a1622'); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    for (let i = 0; i < 220; i++) { x.fillStyle = 'rgba(255,255,255,' + (Math.random() * 0.6) + ')'; x.fillRect(Math.random() * w, Math.random() * h * 0.5, 2, 2); }
+    const base = h * 0.86; let X = 0;
+    const tower = (tx, tw, th, col) => { x.fillStyle = col; x.fillRect(tx, base - th, tw, th);
+      for (let wy = base - th + 10; wy < base - 6; wy += 14) for (let wx = tx + 6; wx < tx + tw - 6; wx += 12) if (Math.random() < 0.38) { x.fillStyle = Math.random() < 0.8 ? 'rgba(255,214,140,.85)' : 'rgba(170,220,255,.8)'; x.fillRect(wx, wy, 5, 7); } };
+    while (X < w) { const tw = 40 + Math.random() * 110, th = 90 + Math.random() * 300; tower(X, tw, th, '#100c1c'); X += tw + Math.random() * 14; }
+    tower(w * 0.62, 70, 560, '#120d20'); tower(w * 0.31, 90, 470, '#120d20'); tower(w * 0.8, 60, 420, '#120d20');
+    x.fillStyle = '#0b0814'; x.fillRect(0, base, w, h - base);
+    x.filter = 'blur(10px)';
+    for (let i = 0; i < 120; i++) { const r = 6 + Math.random() * 26; x.beginPath(); x.arc(Math.random() * w, h * 0.7 + Math.random() * h * 0.3, r, 0, 7);
+      x.fillStyle = ['rgba(255,170,90,.35)', 'rgba(255,90,120,.28)', 'rgba(120,200,255,.28)', 'rgba(255,230,160,.35)'][i % 4]; x.fill(); }
+    x.filter = 'none';
+  });
+  scene.background = b.tex; scene.fog = null; shadow.material.opacity = 0.5;
+} else if (BG === 'pixel') {
+  const P = canvasBg(320, 180, () => {}, true);
+  const stars = Array.from({ length: 70 }, () => [Math.random() * 320, Math.random() * 80, Math.random() * 6]);
+  const ridge = (seed, amp, base) => Array.from({ length: 330 }, (_, i) => Math.round(base - amp * (0.5 + 0.5 * Math.sin(i * 0.035 + seed) * Math.cos(i * 0.011 + seed * 2))));
+  const layers = [[ridge(1, 30, 120), '#3b2752', 0.06], [ridge(4, 26, 138), '#29203f', 0.12], [ridge(7, 18, 156), '#1b1730', 0.22]];
+  scene.background = P.tex; scene.fog = null; shadow.material.opacity = 0.55;
+  bgTick = (t) => {
+    const x = P.ctx;
+    const sky = [['#1b1440', 0], ['#3d1f5c', 40], ['#7a2f62', 80], ['#d0584e', 110], ['#f59a4f', 128]];
+    for (let i = 0; i < sky.length; i++) { x.fillStyle = sky[i][0]; x.fillRect(0, sky[i][1], 320, (sky[i + 1] ? sky[i + 1][1] : 180) - sky[i][1]); }
+    x.fillStyle = '#ffd37a'; for (let r = 22; r > 0; r -= 2) { if (r % 4 === 0) x.fillRect(160 - r, 118 - Math.round(Math.sqrt(22 * 22 - r * r)), r * 2, 2); }
+    x.beginPath(); x.fillStyle = '#ffd37a'; x.arc(160, 118, 20, Math.PI, 0); x.fill();
+    for (const [sx0, sy0, ph] of stars) { if (Math.sin(t * 2 + ph) > -0.3) { x.fillStyle = '#fff2d6'; x.fillRect(Math.round(sx0), Math.round(sy0), 1, 1); } }
+    layers.forEach(([pts, col, sp]) => { x.fillStyle = col; const off = Math.floor(t * sp * 10) % 10;
+      for (let i = 0; i < 320; i++) { const y = pts[(i + off) % pts.length]; x.fillRect(i, y, 1, 180 - y); } });
+    x.fillStyle = '#120f22'; x.fillRect(0, 168, 320, 12);
+    P.tex.needsUpdate = true;
+  };
+}
 
 // ---------- The body: rounded slab with the render on its face ----------
 const IMG_W = 457, IMG_H = 612, FACE = { x: 43, y: 28, w: 370, h: 562 };   // face crop inside the full render
@@ -386,11 +448,21 @@ function frame() {
   }
   camera.position.set(0, THREE.MathUtils.lerp(1.4, 0.15, z), THREE.MathUtils.lerp(dist * 1.35, dist * 0.92, z));
   camera.lookAt(0, THREE.MathUtils.lerp(-0.3, -0.1, z), 0);
+  if (!still) bgTick(t, dt);
   if ((on && view === 'boot') || (!on && offAt && performance.now() - offAt < 400)) draw();
   renderer.render(scene, camera);
 }
 
 Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
-  .then(([p, e]) => { projects = p; exp = e; }).catch(() => {});
+  .then(([p, e]) => { projects = p; exp = e;
+    if (BG !== 'work') return;
+    const slots = [[-7.5, 3, -6], [7.8, 2.6, -7], [-9.5, -0.6, -10], [9.8, -0.4, -11], [-5.6, -2.2, -5], [6, -2.4, -6], [-12, 3.6, -15], [12.5, 3.4, -16], [0, 5.4, -18], [-3.8, 4.6, -12], [4.2, 4.8, -13], [-14, -1.5, -19], [14, -1.2, -20]];
+    p.forEach((proj, i) => { const s = slots[i % slots.length]; const tx = loader.load(proj.image); tx.colorSpace = THREE.SRGBColorSpace;
+      const g = new THREE.Group();
+      g.add(new THREE.Mesh(new THREE.PlaneGeometry(4, 2.5), new THREE.MeshBasicMaterial({ map: tx, transparent: true, opacity: 0.85 })));
+      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(4.08, 2.58)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.5 })); g.add(edge);
+      g.position.set(s[0], s[1], s[2]); g.userData = { y: s[1], ry: -Math.sign(s[0]) * 0.35, p: i * 1.7 }; g.rotation.y = g.userData.ry;
+      scene.add(g); floating.push(g); }); })
+  .catch(() => {});
 document.fonts.load(`16px ${PX}`).finally(() => draw());
 draw(); frame();
