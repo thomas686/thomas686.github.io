@@ -73,6 +73,7 @@ document.querySelectorAll('.filters button').forEach(b => b.addEventListener('cl
   document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
   renderCards(b.dataset.cat);
 }));
+document.querySelectorAll('.chip[data-proj]').forEach(c => c.addEventListener('click', () => { if (projects.length) openProject(c.dataset.proj); }));
 $('d-close').addEventListener('click', () => $('detail').close());
 $('detail').addEventListener('click', e => { if (e.target === $('detail')) $('detail').close(); });
 $('copy').addEventListener('click', async () => {
