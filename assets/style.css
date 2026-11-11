@@ -158,3 +158,8 @@ dialog p{margin:0}
   .num-grid div:nth-child(n+3){border-top:2px dashed var(--line)}
 }
 @media (max-width:420px){.num-grid{grid-template-columns:1fr}.num-grid div{border-left:0!important}.num-grid div+div{border-top:2px dashed var(--line)}.cards{grid-template-columns:1fr}dialog{padding:24px}}
+
+/* Hero without a photo: the Thai greeting as a pixel badge on the right */
+.hero{grid-template-columns:1fr auto}
+.hello{align-self:start;margin:120px 0 0;font:500 22px var(--sans);padding:12px 18px;border-radius:8px;background:var(--screen);border:2px solid var(--mint);color:var(--mint);transform:rotate(-4deg);box-shadow:0 0 24px rgba(125,255,176,.15)}
+@media (max-width:860px){.hello{order:-1;justify-self:start;margin:0}}

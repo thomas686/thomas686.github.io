@@ -337,12 +337,9 @@ function draw() {
     foot('▲▼ MOVE', 'A OPEN'); say.push('Main menu. Selected: ' + MENU[idx]);
   } else if (view === 'about') {
     txt('ABOUT ME', 30, 60, C.amber, 20);
-    const ph = img('img/thomas.png');
-    if (ph.complete && ph.naturalWidth) {
-      const t = document.createElement('canvas'); t.width = t.height = 34; t.getContext('2d').drawImage(ph, 0, 0, 34, 34);
-      sx.imageSmoothingEnabled = false; sx.drawImage(t, 30, 82, 102, 102); sx.imageSmoothingEnabled = true;
-      sx.strokeStyle = C.amber; sx.lineWidth = 3; sx.strokeRect(30, 82, 102, 102);
-    }
+    sx.fillStyle = '#132a22'; sx.fillRect(30, 82, 102, 102);
+    sx.strokeStyle = C.amber; sx.lineWidth = 3; sx.strokeRect(30, 82, 102, 102);
+    sx.font = `34px ${PX}`; txt('TS', 81 - sx.measureText('TS').width / 2, 152, C.mint, 34);
     ['THOMAS SOKOLOWSKI', 'SALES + MARKETING', 'WHO BUILDS WITH AI', 'BANGKOK'].forEach((l, i) => txt(l, 156, 106 + i * 24, i ? C.mint : C.white, 13));
     [['SALES', 90], ['BUILD W/ AI', 85], ['EMAIL', 80], ['MARKETING', 78], ['THAI', 55]].forEach(([k, v], i) => {
       const y = 232 + i * 38; txt(k, 30, y, C.mint, 13);
