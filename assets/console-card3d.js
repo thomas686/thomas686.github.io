@@ -352,7 +352,7 @@ function draw() {
     const g = sx.createLinearGradient(0, 330, 0, 480); g.addColorStop(0, 'rgba(5,10,16,0)'); g.addColorStop(0.35, 'rgba(5,10,16,.95)');
     sx.fillStyle = g; sx.fillRect(0, 320, 640, 160);
     wrapText(p.title, 24, 410, 592, 27, '#ffffff', 32, 2, 'sans');
-    txt('A: FULL STORY  ◀▶ NEXT', 24, 464, C.amber, 14);
+    txt('A: STORY  ◀▶ NEXT  B: MENU', 24, 464, C.amber, 14);
     hits.push({ i: -1, x: 0, y: 0, w: 640, h: 480 }); say.push(`${p.title}. ${p.summary} Press A for the full story.`);
   } else if (view === 'snake') {
     const s = snake;
