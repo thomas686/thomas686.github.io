@@ -320,5 +320,42 @@
       "Gioia method",
       "Case study"
     ]
+  },
+  {
+    "id": "semester2-china",
+    "title": "How Danish life science firms adapt in China",
+    "category": "academic",
+    "year": "2026",
+    "summary": "Semester 2 group project, MSc Innovation Management: how Danish life science companies changed their view of China from 2021 to 2025, and how they adapt their business models.",
+    "problem": "Danish life science is one of the country's biggest exports, and China is a key market. Since 2021, geopolitical tension and a growing gap between headquarters in Denmark and the teams in China have made the old growth plans hard to follow.",
+    "built": "A mixed-methods study: five years of the Danish Business Outlook on China survey data analysed over time, plus interviews with business organisations and managers at two major Danish life science companies. Framed with business model innovation, activity systems, dynamic capabilities and horizon scanning.",
+    "result": "Sentiment went from optimism in 2021, through a sharp fall in 2022, to a neutral level by 2024-25. Firms are moving from a headquarters-led growth model to a more local, risk-aware one: local activities and talent, new partnerships and digital channels. The conclusion: adapting is a continuous reconfiguration, not a one-time strategy change.",
+    "tools": [
+      "Mixed methods",
+      "Longitudinal survey data",
+      "Interviews",
+      "Business model innovation"
+    ],
+    "image": "img/semester2-china.webp",
+    "imageKind": "screenshot"
+  },
+  {
+    "id": "semester1-helix",
+    "title": "Bringing Chinese consumer electronics to Denmark",
+    "category": "academic",
+    "year": "2025",
+    "summary": "Semester 1 group project (team Triple Helix): a market-entry framework for a Danish design and trading company scouting Chinese gadgets for the Nordic market.",
+    "problem": "China leads in new consumer electronics, but products that succeed there often fail in Denmark because of different habits, regulation and trust expectations. The company needed a structured way to pick winners.",
+    "built": "A scouting and evaluation framework built on Rogers' diffusion of innovations, the Lean Startup and Blue Ocean Strategy, tested with a focus group and a survey of 41 Danish consumers on three candidate products.",
+    "result": "Danish consumers are open to new products but adopt cautiously: trust, quality and everyday usefulness matter more than novelty or the country of origin. A UV toothbrush sterilizer showed the strongest potential, a handheld steamer suited early adopters, and an indoor hydroponic garden would need simplifying first.",
+    "tools": [
+      "Market entry",
+      "Diffusion of innovations",
+      "Lean Startup",
+      "Focus group",
+      "Survey"
+    ],
+    "image": "img/semester1-helix.webp",
+    "imageKind": "screenshot"
   }
 ]
