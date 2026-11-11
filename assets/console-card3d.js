@@ -86,7 +86,7 @@ if (BG === 'work') {
       // base spot on the arc, nudged forward on hover
       const bx = u.x, by = u.y + bob, bz = u.z + (hov ? 1.6 : 0) * k;
       // featured spot: to the right of the console, facing the camera (in gallery space)
-      const fx = 6.2, fy = 0.9, fz = -2.5;
+      const fx = 8.4, fy = 0.6, fz = -2;
       f.position.set(bx + (fx - bx) * s, by + (fy - by) * s, bz + (fz - bz) * s);
       f.rotation.y = u.ry * (1 - s) - gallery.rotation.y * s;
       f.scale.setScalar(1 + k * 0.12 + s * 0.1);
