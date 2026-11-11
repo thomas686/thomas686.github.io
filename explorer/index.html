@@ -4,117 +4,300 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>body{margin:0}[hidden]{display:none!important}</style>
-<title>Agent Files Explorer</title>
+<title>What People Make Their AI Do</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a header that reads like the top of an instruction file, three charts side by side (stacked on phones), an evidence panel of quoted lines below. */
+/* One deliberate night look (matches the portfolio), so a single dark palette with every colour set explicitly. */
 :root{
-  --bg:#f4f5f7; --surface:#ffffff; --fg:#1b1e24; --muted:#5d6370; --line:#dde0e6; --track:#e9ebef;
-  --tasks:#2f5aa8; --rules:#2e7d5b; --bans:#b2453b; --focus:#2f5aa8;
+  --bg:#120e24; --surface:#1b1533; --surface2:#231b42; --fg:#efeaf7; --muted:#ada4c6; --line:#332a55; --track:#2a2148;
+  --tasks:#7fb0ff; --rules:#5fd3a0; --bans:#ff8a7a; --gold:#ffd37a; --sky:#0b0818;
   --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
   --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#13151a; --surface:#1b1e25; --fg:#e7e9ee; --muted:#9aa1ae; --line:#2c303a; --track:#262a33;
-  --tasks:#7da2e8; --rules:#6cc29b; --bans:#e88a80; --focus:#7da2e8; color-scheme:dark }}
-:root[data-theme="dark"]{
-  --bg:#13151a; --surface:#1b1e25; --fg:#e7e9ee; --muted:#9aa1ae; --line:#2c303a; --track:#262a33;
-  --tasks:#7da2e8; --rules:#6cc29b; --bans:#e88a80; --focus:#7da2e8; color-scheme:dark }
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--body)}
-.wrap{max-width:1120px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header{display:grid;gap:10px;margin-bottom:22px}
-.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-h1{font:700 clamp(28px,5vw,44px)/1.08 var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
-.sub{margin:0;color:var(--muted);max-width:62ch}
-code{font:500 .9em var(--mono);background:var(--track);padding:1px 5px;border-radius:4px}
-.filters{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 20px}
-select{font:14px var(--body);max-width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
-select:focus-visible,.row:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
-.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 16px 10px;min-width:0}
-.chart h2{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font:600 17px/1.3 var(--display);margin:0 0 4px}
-.chart h2 span{font:400 12px var(--mono);color:var(--muted)}
-.chart p{margin:0 0 10px;font-size:13px;color:var(--muted)}
-.row{display:grid;grid-template-columns:minmax(0,128px) 1fr 3.2em;gap:10px;align-items:center;width:100%;padding:5px 4px;border:0;border-radius:6px;background:none;color:inherit;font:inherit;font-size:14px;text-align:left;cursor:pointer}
-.row:hover{background:var(--track)}
-.row.on{background:var(--track)}
+body{background:var(--bg);color:var(--fg);font:16px/1.6 var(--body)}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-block:24px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.back{display:inline-block;margin-bottom:22px;font:600 14px var(--body);color:var(--muted);text-decoration:none}
+.back:hover{color:var(--fg)}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+h1{font:800 clamp(34px,6vw,60px)/1.02 var(--display);margin:12px 0 0;letter-spacing:-.02em;text-wrap:balance}
+h2{font:700 clamp(24px,3.4vw,34px)/1.1 var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h3{font:700 18px/1.3 var(--display);margin:0}
+section{margin-top:72px}
+.lede{font-size:18px;color:var(--muted);max-width:56ch;margin:16px 0 0}
+.lede b{color:var(--fg);font-weight:600}
+.sec-sub{color:var(--muted);max-width:62ch;margin:10px 0 0}
+code{font:500 .88em var(--mono);background:var(--track);padding:1px 6px;border-radius:4px;color:var(--fg)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* Hero: words on the left, a real file being sorted on the right */
+.hero{display:grid;grid-template-columns:1fr 1.05fr;gap:40px;align-items:center;margin-top:0}
+.hero-facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.fact{font:500 13px var(--mono);padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+.fact b{color:var(--fg)}
+.demo{background:var(--sky);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);min-width:0}
+.demo-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font:500 12px var(--mono);color:var(--muted)}
+.demo-bar i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.demo-bar span{margin-left:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.demo-lines{list-style:none;margin:0;padding:12px 0;font:400 13px/1.5 var(--mono)}
+.demo-lines li{display:grid;grid-template-columns:28px 1fr;gap:6px;padding:4px 14px 4px 0;color:#7d7699;transition:background .3s,color .3s}
+.demo-lines li::before{content:attr(data-n);text-align:right;color:#4b4470}
+.demo-lines li.on{background:rgba(255,255,255,.05);color:var(--fg)}
+.demo-lines li.done{color:#cfc8e6}
+.demo-lines .tag{display:inline-block;margin-left:8px;font:600 10px/1 var(--mono);padding:3px 6px;border-radius:4px;color:#120e24;background:var(--c);vertical-align:1px;opacity:0;transition:opacity .3s}
+.demo-lines li.done .tag,.demo-lines li.on .tag{opacity:1}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.bin{padding:12px 14px;border-right:1px solid var(--line);min-width:0}
+.bin:last-child{border-right:0}
+.bin b{display:block;font:800 26px/1 var(--display);color:var(--c)}
+.bin span{font:500 12px var(--mono);color:var(--muted)}
+.bin.pop b{animation:pop .5s ease}
+@keyframes pop{40%{transform:scale(1.3)}}
+.flyer{position:fixed;z-index:20;pointer-events:none;font:600 10px/1 var(--mono);padding:3px 6px;border-radius:4px;color:#120e24;background:var(--c)}
+.demo-src{padding:8px 14px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+
+/* Findings */
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.find{display:flex;flex-direction:column;gap:10px;text-align:left;padding:22px;border-radius:14px;background:var(--surface);border:1px solid var(--line);color:inherit;font:inherit;cursor:pointer;min-width:0;position:relative;overflow:hidden}
+.find::after{content:"";position:absolute;inset:auto -40px -60px auto;width:160px;height:160px;border-radius:50%;background:var(--c);opacity:.10;filter:blur(10px)}
+.find:hover{border-color:var(--c)}
+.find .big{font:800 52px/1 var(--display);color:var(--c);letter-spacing:-.02em}
+.find p{margin:0}
+.find blockquote{margin:0;padding:10px 12px;border-left:3px solid var(--c);background:rgba(255,255,255,.03);font:400 13px/1.5 var(--mono);color:#d8d2ee;overflow-wrap:anywhere}
+.find small{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.find .go{margin-top:auto;font:600 13px var(--body);color:var(--c)}
+
+/* Useful for / used for */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.panel{padding:24px;border-radius:14px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.panel ol{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:16px}
+.panel li{display:grid;grid-template-columns:36px 1fr;gap:12px}
+.panel li i{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--surface2);font:700 15px var(--display);font-style:normal;color:var(--gold)}
+.panel li b{display:block;font:600 16px/1.35 var(--body)}
+.panel li span{color:var(--muted);font-size:14px}
+.panel .px{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+
+/* Constellation */
+.sky{position:relative;margin-top:24px;background:radial-gradient(120% 90% at 50% 0%,#1e1638 0%,var(--sky) 70%);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.sky-key{display:flex;flex-wrap:wrap;gap:14px;padding:14px 18px 0;font:500 12px var(--mono);color:var(--muted)}
+.sky-key i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.sky-call{position:absolute;right:16px;top:12px;font:600 12px var(--mono);color:#120e24;background:var(--gold);padding:6px 10px;border-radius:6px;pointer-events:none;transition:opacity .4s}
+#sky{display:block;width:100%;cursor:crosshair;touch-action:pan-y}
+#skytip{position:absolute;max-width:310px;padding:11px 13px;background:rgba(18,14,36,.96);border:1px solid var(--line);border-radius:10px;font-size:13px;line-height:1.45;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#skytip b{display:block;font:600 14px var(--display);margin-bottom:5px}
+#skytip q{display:block;font:400 12px/1.45 var(--mono);color:#d8d2ee;quotes:none}
+#skytip small{display:block;margin-top:6px;color:var(--muted);font-size:11px}
+
+/* Inside a star: a drawer beside the map (below it on phones) listing every real line, searchable */
+.inside{position:absolute;top:0;right:0;bottom:0;width:min(380px,42%);display:flex;flex-direction:column;gap:10px;padding:16px 16px 12px;background:rgba(16,12,32,.97);border-left:1px solid var(--line);box-shadow:-20px 0 40px rgba(0,0,0,.35)}
+@media (prefers-reduced-motion:no-preference){.inside:not([hidden]){animation:slidein .35s cubic-bezier(.2,.8,.2,1)}}
+@keyframes slidein{from{transform:translateX(30px);opacity:0}}
+.in-head{display:flex;align-items:flex-start;gap:10px}
+.in-head h3{flex:1;font-size:17px}
+.in-head h3 small{display:block;font:500 12px var(--mono);color:var(--muted);margin-top:3px}
+.in-head .dot{width:12px;height:12px;border-radius:50%;margin-top:5px;flex:none;background:var(--c);box-shadow:0 0 10px var(--c)}
+.in-x{flex:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font-size:18px;line-height:1;cursor:pointer}
+.in-find{width:100%;font:14px var(--body);padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.in-note{margin:0;font-size:12px;color:var(--muted)}
+.in-list{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;margin:0 -4px;padding:0 4px}
+.in-item{display:grid;gap:3px;padding:9px 6px;border-top:1px solid var(--line);border-radius:6px}
+.in-item blockquote{margin:0;font:400 13px/1.45 var(--mono);color:var(--fg);overflow-wrap:anywhere}
+.in-item blockquote::before{content:"- ";color:var(--c)}
+.in-item mark{background:rgba(255,211,122,.28);color:inherit;border-radius:2px}
+.in-item a{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.in-item.hl{background:rgba(255,211,122,.1)}
+.in-more,.in-all{font:500 13px var(--body);padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);cursor:pointer}
+.in-all{border-color:var(--c);color:var(--c)}
+.in-foot{display:flex;flex-wrap:wrap;gap:8px}
+@media (max-width:600px){.sky-call{position:static;display:inline-block;margin:8px 18px 0}.inside{position:static;width:auto;max-height:75vh;border-left:0;border-top:1px solid var(--line);box-shadow:none}}
+
+/* Explorer */
+.howto{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 0;color:var(--muted);font-size:14px}
+.howto span::before{content:"→ ";color:var(--gold)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 18px}
+select{font:14px var(--body);max-width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 16px 12px;min-width:0}
+.chart h3{display:flex;align-items:center;gap:8px}
+.chart h3::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
+.chart p{margin:2px 0 12px;font-size:13px;color:var(--muted)}
+.row{display:grid;grid-template-columns:minmax(0,150px) 1fr 3em;gap:10px;align-items:center;width:100%;padding:6px 6px;border:0;border-radius:8px;background:none;color:inherit;font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.row:hover,.row.on{background:var(--track)}
 .row.on .lbl{font-weight:600}
 .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.track{display:block;height:10px;background:var(--track);border-radius:3px;overflow:hidden}
-.row:hover .track,.row.on .track{background:var(--surface)}
-.fill{display:block;height:100%;border-radius:3px;background:var(--c)}
+.track{display:block;height:10px;background:var(--track);border-radius:5px;overflow:hidden}
+.row:hover .track,.row.on .track{background:var(--bg)}
+.fill{display:block;height:100%;border-radius:5px;background:var(--c)}
 .pct{font:500 13px var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--muted)}
-#quotes{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
-#quotes h2{font:600 18px/1.3 var(--display);margin:0 0 4px}
-#quotes .hint{margin:0 0 14px;color:var(--muted);font-size:13px}
+#quotes{margin-top:16px;background:var(--surface);border:1px solid var(--c,var(--line));border-radius:14px;padding:20px;min-width:0;scroll-margin-top:16px}
+#quotes .hint{margin:4px 0 14px;color:var(--muted);font-size:13px}
 .q{display:grid;gap:4px;padding:10px 0;border-top:1px solid var(--line)}
 .q blockquote{margin:0;font:400 14px/1.5 var(--mono);color:var(--fg);overflow-wrap:anywhere}
 .q blockquote::before{content:"- ";color:var(--c)}
 .q a{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
-#qfind{display:block;width:100%;max-width:420px;margin:0 0 6px;font:14px var(--body);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
-#qfind:focus-visible,.more:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-.more{margin-top:12px;font:500 14px var(--body);padding:8px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer}
+#qfind{display:block;width:100%;max-width:420px;margin:0 0 6px;font:14px var(--body);padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.more{margin-top:12px;font:500 14px var(--body);padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);cursor:pointer}
 .more:hover{border-color:var(--muted)}
-.how{margin-top:20px;color:var(--muted);font-size:13px;max-width:80ch}
+details.how{margin-top:28px;color:var(--muted);font-size:14px;max-width:82ch}
+details.how summary{cursor:pointer;color:var(--fg);font-weight:600}
+details.how p{margin:10px 0 0}
 @media (prefers-reduced-motion:no-preference){.fill{transition:width .25s ease}}
-/* The constellation panel is deliberately night-sky dark in both themes. */
-:root{--sky:#0c0f16;--sky-fg:#e9ecf3;--sky-muted:#8d94a5;--sky-tasks:#7fa8ff;--sky-rules:#5fd3a0;--sky-bans:#ff7d6e}
-.sky{position:relative;margin:4px 0 22px;background:radial-gradient(120% 90% at 50% 0%,#161b28 0%,var(--sky) 70%);border-radius:14px;overflow:hidden;color:var(--sky-fg)}
-.sky-head{position:absolute;inset:0 auto auto 0;padding:16px 18px;pointer-events:none;max-width:min(430px,90%)}
-.sky-head h2{font:700 20px/1.2 var(--display);margin:0 0 4px}
-.sky-head p{margin:0;font-size:13px;color:var(--sky-muted)}
-.sky-key{position:absolute;right:16px;bottom:12px;display:flex;gap:12px;font:500 11px var(--mono);color:var(--sky-muted);pointer-events:none}
-.sky-key i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:0}
-#sky{display:block;width:100%;cursor:crosshair}
-#skytip{position:absolute;max-width:300px;padding:10px 12px;background:rgba(18,22,32,.94);border:1px solid #2a3142;border-radius:8px;font-size:13px;line-height:1.45;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.4)}
-#skytip b{display:block;font:600 13px var(--display);margin-bottom:4px}
-#skytip q{display:block;font:400 12px/1.45 var(--mono);color:#c9cfdb;quotes:none}
-#skytip small{display:block;margin-top:6px;color:var(--sky-muted);font-size:11px}
-@media (max-width:600px){.sky-head{position:static;padding:14px 16px 0}.sky-key{position:static;padding:0 16px 12px}}
+@media (max-width:860px){.hero,.two{grid-template-columns:1fr}.cards3{grid-template-columns:1fr}.hero{gap:28px}}
+@media (max-width:520px){.demo-lines{font-size:12px}.bin b{font-size:22px}.find .big{font-size:44px}section{margin-top:56px}}
 </style>
-
 </head>
 <body>
 <div class="wrap">
-  <p style="margin:0 0 18px"><a href="../" style="font:600 14px var(--body);color:var(--muted)">&larr; Back to Thomas Sokolowski</a></p>
-  <header>
-    <div class="eyebrow">CLAUDE.md &middot; AGENTS.md &middot; public GitHub</div>
-    <h1>What do people make their AI do?</h1>
-    <p class="sub" id="sub">Loading the files...</p>
-  </header>
-  <section class="sky" aria-label="Constellation of instruction types">
-    <div class="sky-head"><h2>What goes together</h2><p id="skysub">Each star is a kind of instruction, sized by how many files contain it.</p></div>
-    <canvas id="sky"></canvas>
-    <div class="sky-key"><span><i style="background:var(--sky-tasks)"></i>hands over</span><span><i style="background:var(--sky-rules)"></i>rules</span><span><i style="background:var(--sky-bans)"></i>forbids</span></div>
-    <div id="skytip" hidden></div>
-  </section>
-  <div class="filters">
-    <select id="src" aria-label="Sorted by"><option value="kw">Sorted by keyword rules (all files)</option><option value="cl">Sorted by Claude (only the 100 files it read)</option></select>
-    <select id="type" aria-label="File type"><option value="">CLAUDE.md and AGENTS.md</option><option>CLAUDE.md</option><option>AGENTS.md</option></select>
-    <select id="lang" aria-label="Language"><option value="">All languages</option></select>
-    <select id="stars" aria-label="Popularity"><option value="">Any popularity</option><option value="0-9">0-9 stars</option><option value="10-99">10-99 stars</option><option value="100-999">100-999 stars</option><option value="1000+">1000+ stars</option></select>
+  <a class="back" href="../">&larr; Back to Thomas Sokolowski</a>
+
+  <div class="hero">
+    <div>
+      <div class="eyebrow">A look inside 16,591 AI instruction files</div>
+      <h1>What do people make their AI do?</h1>
+      <p class="lede">Developers who work with an AI assistant leave it a note: a file called <code>CLAUDE.md</code> or <code>AGENTS.md</code> that the AI reads before every job. It says <b>what work to take on</b>, <b>which rules to follow</b> and <b>what it must never do</b>.</p>
+      <p class="lede">I collected <b id="nfiles">16,591</b> of these notes from public projects on GitHub and sorted every line into those three groups. This page shows what people actually ask for.</p>
+      <div class="hero-facts"><span class="fact"><b>16,591</b> files</span><span class="fact"><b>135</b> programming languages</span><span class="fact">collected <b>10 Nov 2026</b></span></div>
+    </div>
+    <figure class="demo" aria-label="A real instruction file, sorted line by line" style="margin:0">
+      <div class="demo-bar"><i></i><i></i><i></i><span>AGENTS.md &middot; antoniolg/agent-kit</span></div>
+      <ol class="demo-lines" id="demo"></ol>
+      <div class="bins">
+        <div class="bin" id="bin-tasks" style="--c:var(--tasks)"><b>0</b><span>hands over work</span></div>
+        <div class="bin" id="bin-rules" style="--c:var(--rules)"><b>0</b><span>sets a rule</span></div>
+        <div class="bin" id="bin-bans" style="--c:var(--bans)"><b>0</b><span>forbids</span></div>
+      </div>
+      <figcaption class="demo-src">Real lines from <a href="https://github.com/antoniolg/agent-kit/blob/HEAD/AGENTS.md" target="_blank" rel="noopener">one of the files</a>. Every file in the set was sorted like this.</figcaption>
+    </figure>
   </div>
-  <div class="grid" id="charts"></div>
-  <section id="quotes" hidden></section>
-  <p class="how" id="how"></p>
+
+  <section aria-labelledby="find-h">
+    <div class="eyebrow">What stands out</div>
+    <h2 id="find-h" style="margin-top:10px">Three things most people would not guess</h2>
+    <div class="cards3" id="finds"></div>
+  </section>
+
+  <section aria-labelledby="use-h">
+    <div class="two">
+      <div class="panel">
+        <div class="px">What it's useful for</div>
+        <h2 id="use-h" style="margin-top:8px">Who this helps</h2>
+        <ol>
+          <li><i>1</i><div><b>Writing your own AI instructions</b><span>See what thousands of others put in theirs, read the exact lines, and copy what fits instead of starting from a blank page.</span></div></li>
+          <li><i>2</i><div><b>Setting AI rules for a team</b><span>See which limits people settle on, such as no pushing code, no touching passwords and no deleting, before you write your own policy.</span></div></li>
+          <li><i>3</i><div><b>Understanding how people manage AI</b><span>Real data on how much freedom people give their AI, and where they draw the line.</span></div></li>
+        </ol>
+      </div>
+      <div class="panel">
+        <div class="px">What it's been used for</div>
+        <h2 style="margin-top:8px">How I've used it</h2>
+        <ol>
+          <li><i>1</i><div><b>Writing the instructions for my AI agents at work</b><span>The rules and bans that come up again and again here went into the files that steer the agents I run in my job.</span></div></li>
+          <li><i>2</i><div><b>Research for my master's degree</b><span>Material for my internship report and thesis on how people organise their work with AI.</span></div></li>
+          <li><i>3</i><div><b>A demo of building with AI</b><span>Collecting, sorting and visualising 16,591 files took one afternoon with Claude doing the heavy lifting.</span></div></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="sky-h">
+    <div class="eyebrow">The map</div>
+    <h2 id="sky-h" style="margin-top:10px">Which instructions travel together</h2>
+    <p class="sec-sub">Each star is one kind of instruction. Bigger stars appear in more files. A line joins two stars when they often sit in the same file, so tight clusters are instructions people tend to give together. Open a star to see what is inside: it bursts into dots, one for each real line, and a list you can search.</p>
+    <div class="sky">
+      <div class="sky-key"><span><i style="background:var(--tasks)"></i>hands over work</span><span><i style="background:var(--rules)"></i>sets a rule</span><span><i style="background:var(--bans)"></i>forbids</span></div>
+      <span class="sky-call" id="skycall">Open a star to see what's inside</span>
+      <canvas id="sky"></canvas>
+      <div id="skytip" hidden></div>
+      <aside class="inside" id="inside" hidden aria-label="Inside this star"></aside>
+    </div>
+  </section>
+
+  <section aria-labelledby="dig-h">
+    <div class="eyebrow">Explore</div>
+    <h2 id="dig-h" style="margin-top:10px">Dig in yourself</h2>
+    <p class="sec-sub" id="sub">Loading the files...</p>
+    <div class="howto"><span>Bars show the share of files that contain each kind of instruction</span><span>Click a bar to read the real lines, each linked to its file</span><span>Narrow it down with the filters, and the map above follows</span></div>
+    <div class="filters">
+      <select id="src" aria-label="How lines were sorted"><option value="kw">Sorted by keyword rules (all files)</option><option value="cl">Sorted by Claude (the 100 files it read)</option></select>
+      <select id="type" aria-label="File type"><option value="">CLAUDE.md and AGENTS.md</option><option>CLAUDE.md</option><option>AGENTS.md</option></select>
+      <select id="lang" aria-label="Programming language"><option value="">All languages</option></select>
+      <select id="stars" aria-label="Project popularity"><option value="">Any popularity</option><option value="0-9">0-9 stars</option><option value="10-99">10-99 stars</option><option value="100-999">100-999 stars</option><option value="1000+">1000+ stars</option></select>
+    </div>
+    <div class="grid" id="charts"></div>
+    <section id="quotes" hidden style="margin-top:16px"></section>
+    <details class="how"><summary>How this was made</summary><p id="how"></p></details>
+  </section>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script>
 const DIMS={
-  tasks:{t:'What they hand over',d:'Work the file gives the AI',c:'var(--tasks)'},
-  rules:{t:'Rules they set',d:'What the AI is told to do, and how',c:'var(--rules)'},
-  bans:{t:'What they forbid',d:'What the AI is told not to do',c:'var(--bans)'}
+  tasks:{t:'Hands over work',d:'Jobs the file gives the AI',c:'var(--tasks)'},
+  rules:{t:'Sets a rule',d:'How the AI should work',c:'var(--rules)'},
+  bans:{t:'Forbids',d:'What the AI must never do',c:'var(--bans)'}
 };
+// Plain-English names: [long, short for the map]
+const NAMES={
+  coding:['Writing code','Code'],testing:['Writing and running tests','Tests'],'git-deploy':['Git and deploying','Git & deploy'],
+  'docs-writing':['Writing documentation','Docs'],'data-analysis':['Data and analysis','Data'],'marketing-content':['Marketing content','Marketing'],
+  'email-messaging':['Emails and messages','Email'],infrastructure:['Servers and infrastructure','Servers'],research:['Research','Research'],
+  'design-ui':['Design and user interface','Design'],'project-management':['Planning and project management','Planning'],
+  'code-style':['How the code should look','Code style'],workflow:['Steps to follow','Steps'],verification:['Check its own work','Self-check'],
+  'user-communication':['How to talk to me','Tone'],'permissions-safety':['Ask before acting','Ask first'],'tool-use':['Which tools to use','Tools'],
+  'project-context':['What this project is','Context'],
+  destructive:['No deleting or wiping','No deleting'],secrets:['No leaking passwords or keys','No secrets'],'protected-files':['Hands off certain files','Hands off'],
+  'commit-push':['No committing or pushing on its own','No pushing'],dependencies:['No adding new packages','No new packages'],
+  'style-bans':['Banned ways of writing','Style bans'],'scope-creep':['No doing more than asked','Stay on task']
+};
+// How much a kept line reads like an instruction rather than a heading or a file name.
+const instr=q=>{if(!q)return -9;let s=0;if(/\b(always|never|must|should|do not|don't|avoid|prefer|make sure|before|only|use|run|keep|add|write)\b/i.test(q))s+=2;if(q.split(/\s+/).length<4||/:\s*$/.test(q)||q.length<22)s-=3;if(/^[a-z]/.test(q)||/[,;(]\s*$/.test(q))s-=2;return s;};
+const nice=c=>(NAMES[c]||[c.replace(/-/g,' ')])[0], short=c=>(NAMES[c]||[0,c])[1];
 let D,sel=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const nice=c=>c.replace(/-/g,' ');
 const band=s=>s>=1000?'1000+':s>=100?'100-999':s>=10?'10-99':'0-9';
+const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- Hero: one real file being sorted, line by line ----------
+const DEMO=[
+  ['Read README/docs before coding.','rules','Steps'],
+  ['Keep files <~500 LOC; split/refactor as needed.','rules','Code style'],
+  ['Bugs: add regression test when it fits.','tasks','Tests'],
+  ['Prefer pnpm for Node projects unless the repo specifies otherwise.','rules','Tools'],
+  ['Prefer end-to-end verify; if blocked, say what\'s missing.','rules','Self-check'],
+  ['Branch changes require user consent.','bans','No pushing'],
+  ['Destructive ops forbidden unless explicit (reset --hard, clean, restore, rm, ...).','bans','No deleting'],
+  ['Skills are public: avoid any sensitive data (tokens, internal URLs, IDs, private paths).','bans','No secrets']
+];
+(function demo(){
+  const ol=$('demo');
+  ol.innerHTML=DEMO.map(([t,d,l],i)=>`<li data-n="${i+1}" style="--c:var(--${d})"><span>${esc(t)}<span class="tag">${esc(l)}</span></span></li>`).join('');
+  const lis=[...ol.children],bins={tasks:$('bin-tasks'),rules:$('bin-rules'),bans:$('bin-bans')};
+  const counts={tasks:0,rules:0,bans:0};
+  const setBin=d=>{bins[d].querySelector('b').textContent=counts[d];bins[d].classList.remove('pop');void bins[d].offsetWidth;bins[d].classList.add('pop');};
+  if(still){DEMO.forEach(([,d],i)=>{lis[i].classList.add('done');counts[d]++;});Object.keys(bins).forEach(setBin);return;}
+  let i=0;
+  function step(){
+    if(i===DEMO.length){setTimeout(()=>{lis.forEach(l=>l.className='');Object.keys(counts).forEach(k=>{counts[k]=0;bins[k].querySelector('b').textContent=0;});i=0;step();},3200);return;}
+    const li=lis[i],d=DEMO[i][1];li.classList.add('on');
+    setTimeout(()=>{
+      const tag=li.querySelector('.tag'),a=tag.getBoundingClientRect(),b=bins[d].querySelector('b').getBoundingClientRect();
+      const f=document.createElement('span');f.className='flyer';f.style.setProperty('--c',`var(--${d})`);f.textContent=tag.textContent;
+      f.style.left=a.left+'px';f.style.top=a.top+'px';document.body.appendChild(f);
+      const anim=f.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${b.left-a.left}px,${b.top-a.top}px) scale(.7)`,opacity:.2}],{duration:650,easing:'cubic-bezier(.5,0,.3,1)'});
+      anim.onfinish=()=>{f.remove();counts[d]++;setBin(d);};
+      li.classList.remove('on');li.classList.add('done');i++;setTimeout(step,900);
+    },650);
+  }
+  // Start when the demo is on screen, so visitors see it from the first line.
+  new IntersectionObserver((e,o)=>{if(e[0].isIntersecting){o.disconnect();setTimeout(step,500);}}).observe(ol);
+})();
+
 function expand(d){
   const dims=Object.keys(d.cats),un=m=>Object.fromEntries(dims.map((dim,i)=>[dim,d.cats[dim].filter((c,j)=>(m[i]>>j)&1)]));
   d.files=d.files.map(f=>{const o={id:f.r+'/'+f.p,repo:f.r,path:f.p,url:`https://github.com/${f.r}/blob/HEAD/${f.p.split('/').map(encodeURIComponent).join('/')}`,
@@ -123,39 +306,62 @@ function expand(d){
   return d;
 }
 fetch('data.json').then(r=>r.json()).then(d=>{D=expand(d);init();}).catch(()=>{$('sub').textContent='The data file did not load. Reload the page to try again.';});
+
+function findings(){
+  const N=D.files.length,share=(dim,c)=>D.files.filter(f=>f.tags[dim].includes(c)).length/N;
+  // A real line for each card: from a well-starred file, short enough to read at a glance, and actually about the topic.
+  const quote=(dim,c,re)=>D.files.filter(f=>{const q=f.quotes[dim+':'+c];return q&&q.length>=25&&q.length<=110&&re.test(q);}).sort((a,b)=>b.stars-a.stars)[0];
+  const ratio=p=>{const n=Math.round(1/p);return `1 in ${n}`;};
+  const F=[
+    {dim:'tasks',c:'testing',big:Math.round(100*share('tasks','testing'))+'%',text:'hand their AI the testing: writing tests and running them before calling a job done.',re:/(run|write).{0,40}tests?.{0,30}before/i},
+    {dim:'bans',c:'commit-push',big:ratio(share('bans','commit-push')),text:'stop their AI from committing or pushing code on its own. A person stays the last check.',re:/(commit|push)/i},
+    {dim:'bans',c:'secrets',big:ratio(share('bans','secrets')),text:'warn their AI about passwords, keys and secret files, because one leak can be costly.',re:/(secret|\.env|key|token|credential)/i}
+  ];
+  $('finds').innerHTML=F.map((f,i)=>{const q=quote(f.dim,f.c,f.re);return `<button type="button" class="find" data-i="${i}" style="--c:var(--${f.dim})">
+    <span class="big">${f.big}</span><p>of files ${esc(f.text)}</p>
+    ${q?`<blockquote>${esc(q.quotes[f.dim+':'+f.c])}</blockquote><small>${esc(q.repo)} &middot; ${q.stars.toLocaleString('en-GB')} stars</small>`:''}
+    <span class="go">Read more lines like this &rarr;</span></button>`;}).join('');
+  document.querySelectorAll('.find').forEach(b=>b.onclick=()=>{const f=F[+b.dataset.i];openSel(f.dim,f.c);});
+}
+function openSel(dim,c){sel={dim,c};render();$('quotes').scrollIntoView({behavior:still?'auto':'smooth',block:'start'});}
+
 function init(){
   const langs={};D.files.forEach(f=>langs[f.lang]=(langs[f.lang]||0)+1);
   Object.entries(langs).sort((a,b)=>b[1]-a[1]).filter(([l,n])=>n>=5).forEach(([l,n])=>$('lang').add(new Option(`${l} (${n.toLocaleString('en-GB')})`,l)));
   ['src','type','lang','stars'].forEach(id=>{$(id).value='';$(id).onchange=()=>{sel=null;render();};});
   $('src').value='kw';
   const a=D.meta.agreement,m=D.meta;
-  $('how').textContent=`How this was made: run on ${m.runDate}. ${m.nFiles.toLocaleString('en-GB')} public files from GitHub code search, spread over ${m.bands.length} file-size bands so long and short files both appear (search returns at most 1,000 files per query, so this is a large sample, not every file); ${m.dupesDropped.toLocaleString('en-GB')} exact copies of the same file were dropped. Keyword rules tag every file; example lines are kept for ${m.quoteFiles.toLocaleString('en-GB')} of them. Claude read a random sample of ${m.sampleSize}${m.sampleSize?`. Counting only the labels at least one of them gave, keyword rules and Claude agree on ${a.tasks.overlap}% of task labels, ${a.rules.overlap}% of rule labels and ${a.bans.overlap}% of ban labels. Keyword rules mostly miss plain instructions such as "Use pnpm", so for rules and bans the Claude view is the better guide`:''}. Every quote links to its file.`;
+  $('nfiles').textContent=m.nFiles.toLocaleString('en-GB');
+  $('how').textContent=`Collected on ${m.runDate}: ${m.nFiles.toLocaleString('en-GB')} public CLAUDE.md and AGENTS.md files from GitHub code search, spread over ${m.bands.length} file-size bands so long and short files both appear. Search returns at most 1,000 files per query, so this is a large sample, not every file in existence. ${m.dupesDropped.toLocaleString('en-GB')} exact copies were dropped. Every file was sorted by keyword rules, and example lines were kept for ${m.quoteFiles.toLocaleString('en-GB')} of them. Claude also read a random sample of ${m.sampleSize}${m.sampleSize?` files line by line. Counting only labels at least one of them gave, the two agree on ${a.tasks.overlap}% of work labels, ${a.rules.overlap}% of rule labels and ${a.bans.overlap}% of ban labels. Keyword rules miss plain instructions such as "Use pnpm", so for rules and bans the Claude view (first dropdown) is the better guide, and the shares here are best read as rough sizes`:''}. Every quote links to its file.`;
   if(!m.sampleSize)$('src').options[1].disabled=true;
+  findings();
   render();
   if(window.d3){sky();window.skyUpdate(pool());}else document.querySelector('.sky').hidden=true;
 }
+
 function sky(){
-  const cv=$('sky'),ctx=cv.getContext('2d'),tip=$('skytip');
+  const cv=$('sky'),ctx=cv.getContext('2d'),tip=$('skytip'),call=$('skycall');
   const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const col={tasks:css('--sky-tasks'),rules:css('--sky-rules'),bans:css('--sky-bans')};
+  const col={tasks:css('--tasks'),rules:css('--rules'),bans:css('--bans')};
   const keys=[];for(const dim of Object.keys(DIMS))for(const c of D.cats[dim])keys.push({dim,c});
   let nodes=[],links=[],maxW=1,total=0,W=0,H=0,hover=null,lastKey='';
-  const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // selN: the star that is open; dots: its individual lines drawn as a cloud around it.
+  let selN=null,dots=[],hoverDot=null,inQ='',inShown=40,hlItem=-1;
+  const box=$('inside'),DOTS=180,drawerW=()=>W>=600&&selN?Math.min(380,W*.42):0;
   function size(){
-    const dpr=window.devicePixelRatio||1;W=cv.parentElement.clientWidth;H=W<600?Math.round(W*1.05):Math.min(560,Math.round(W*.52));
+    const dpr=window.devicePixelRatio||1;W=cv.parentElement.clientWidth;H=W<600?Math.round(W*1.25):Math.min(600,Math.round(W*.55));
     cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
   }
   size();
-  const stars=Array.from({length:140},()=>({x:Math.random(),y:Math.random(),a:Math.random()*.5+.1}));
-  const cx=()=>W<600?W/2:W*.6, cy=()=>W<600?H/2:H*.5;
-  const sim=d3.forceSimulation([]).force('collide',d3.forceCollide(d=>d.r+16)).on('tick',draw);
+  const stars=Array.from({length:160},()=>({x:Math.random(),y:Math.random(),a:Math.random()*.5+.1}));
+  const sim=d3.forceSimulation([]).on('tick',draw);
   function forces(){
     const k=Math.min(W,H)/520;
-    sim.force('link',d3.forceLink(links).distance(l=>(170-90*l.w/maxW)*k+20).strength(l=>.08+.4*l.w/maxW))
-       .force('charge',d3.forceManyBody().strength(-420*k))
-       .force('x',d3.forceX(cx).strength(.05)).force('y',d3.forceY(cy).strength(.08));
+    sim.force('link',d3.forceLink(links).distance(l=>(170-90*l.w/maxW)*k+24).strength(l=>.06+.35*l.w/maxW))
+       .force('charge',d3.forceManyBody().strength(-460*k))
+       .force('x',d3.forceX((W-drawerW())/2).strength(.06)).force('y',d3.forceY(H/2+10).strength(.09))
+       .force('collide',d3.forceCollide(d=>Math.max(d.r+(W<600?14:20),d.lw/2+8)).strength(1));
   }
-  // Rebuild stars and lines from whatever files the dropdowns currently select.
   window.skyUpdate=P=>{
     const key=['src','type','lang','stars'].map(id=>$(id).value).join('|');
     if(key===lastKey)return;lastKey=key;hover=null;tip.hidden=true;
@@ -163,7 +369,7 @@ function sky(){
     const count=new Array(keys.length).fill(0),pair=new Map(),ex=keys.map(()=>[]);
     for(const p of P){
       const on=[];
-      keys.forEach((k,i)=>{if(p.tags[k.dim].includes(k.c)){on.push(i);count[i]++;if(ex[i].length<60&&p.quotes[k.dim+':'+k.c])ex[i].push(p);}});
+      keys.forEach((k,i)=>{if(p.tags[k.dim].includes(k.c)){on.push(i);count[i]++;if(p.quotes[k.dim+':'+k.c])ex[i].push(p);}});
       for(let a=0;a<on.length;a++)for(let b=a+1;b<on.length;b++){const id=on[a]*100+on[b];pair.set(id,(pair.get(id)||0)+1);}
     }
     const old=new Map(nodes.map(n=>[n.dim+':'+n.c,n]));
@@ -172,7 +378,7 @@ function sky(){
       if(count[i]<2||count[i]/Math.max(total,1)<.01)return;
       const prev=old.get(k.dim+':'+k.c);
       idx.set(i,nodes.length);
-      nodes.push({...k,n:count[i],share:count[i]/total,ex:ex[i],r:5+Math.sqrt(100*count[i]/total)*3.1,
+      nodes.push({...k,n:count[i],share:count[i]/total,ex:ex[i],r:(W<600?4:6)+Math.sqrt(100*count[i]/total)*(W<600?2.4:3.1),
         tw:prev?prev.tw:Math.random()*6.28,x:prev?.x??W/2+(Math.random()-.5)*80,y:prev?.y??H/2+(Math.random()-.5)*80});
     });
     const all=[...pair].map(([id,w])=>({a:Math.floor(id/100),b:id%100,w})).filter(l=>idx.has(l.a)&&idx.has(l.b)).sort((x,y)=>y.w-x.w);
@@ -180,44 +386,142 @@ function sky(){
     for(const i of idx.keys()){const best=all.find(l=>l.a===i||l.b===i);if(best)pick.add(best);}
     links=[...pick].map(l=>({source:idx.get(l.a),target:idx.get(l.b),w:l.w}));
     maxW=Math.max(1,...links.map(l=>l.w));
-    sim.nodes(nodes);forces();sim.alpha(.7).restart();if(!still)sim.alphaTarget(.015);
-    $('skysub').textContent=`Each star is a kind of instruction, sized by how many of these ${total.toLocaleString('en-GB')} files contain it. Lines join the pairs that most often sit in the same file, plus each star's strongest partner. Hover to read one, click to see them all.`;
+    nodes.forEach(n=>{const k=n.dim+':'+n.c;n.ex.sort((a,b)=>(instr(b.quotes[k])-instr(a.quotes[k]))||b.f.stars-a.f.stars);});
+    if(selN){const k=selN.dim+':'+selN.c;selN=nodes.find(n=>n.dim+':'+n.c===k)||null;inShown=40;if(selN)renderInside();else closeInside();}
+    ctx.font=(W<600?10:12)+'px "IBM Plex Sans",sans-serif';nodes.forEach(n=>n.lw=ctx.measureText(short(n.c)).width);
+    // Settle the layout up front, so it is tidy at once on any device, then keep a gentle drift.
+    sim.nodes(nodes);forces();sim.stop();sim.alpha(1);for(let i=0;i<400;i++){sim.tick();for(const n of nodes){n.x=Math.max(n.r+30,Math.min(W-drawerW()-n.r-30,n.x));n.y=Math.max(n.r+34,Math.min(H-n.r-22,n.y));}}
+    sim.alpha(.05).restart();if(!still)sim.alphaTarget(.008);draw();
   };
-  const near=n=>hover&&(n===hover||links.some(l=>(l.source===hover&&l.target===n)||(l.target===hover&&l.source===n)));
+  const focus=()=>hover||selN;
+  const near=n=>{const h=focus();return h&&(n===h||links.some(l=>(l.source===h&&l.target===n)||(l.target===h&&l.source===n)));};
   function draw(){
-    const t=performance.now()/1000;
+    const t=performance.now()/1000,hover=focus();
     ctx.clearRect(0,0,W,H);
-    for(const s of stars){ctx.fillStyle=`rgba(220,228,255,${s.a*(.6+.4*Math.sin(t*1.3+s.x*40))})`;ctx.fillRect(s.x*W,s.y*H,1.2,1.2);}
-    for(const n of nodes){n.x=Math.max(n.r+4,Math.min(W-n.r-4,n.x));n.y=Math.max(n.r+4,Math.min(H-n.r-4,n.y));}
+    for(const s of stars){ctx.fillStyle=`rgba(225,220,255,${s.a*(.6+.4*Math.sin(t*1.3+s.x*40))})`;ctx.fillRect(s.x*W,s.y*H,1.2,1.2);}
+    for(const n of nodes){n.x=Math.max(n.r+30,Math.min(W-drawerW()-n.r-30,n.x));n.y=Math.max(n.r+34,Math.min(H-n.r-22,n.y));}
     for(const l of links){
       if(typeof l.source!=='object')continue;
       const on=hover&&(l.source===hover||l.target===hover);
-      ctx.strokeStyle=on?col[hover.dim]:'rgba(170,185,220,1)';
-      ctx.globalAlpha=hover?(on?.85:.04):.08+.32*l.w/maxW;ctx.lineWidth=on?1.2+2.5*l.w/maxW:.6+1.6*l.w/maxW;
+      ctx.strokeStyle=on?col[hover.dim]:'rgba(190,180,235,1)';
+      ctx.globalAlpha=hover?(on?.85:.04):.08+.3*l.w/maxW;ctx.lineWidth=on?1.2+2.5*l.w/maxW:.6+1.5*l.w/maxW;
       ctx.beginPath();ctx.moveTo(l.source.x,l.source.y);ctx.lineTo(l.target.x,l.target.y);ctx.stroke();
     }
     ctx.globalAlpha=1;
+    const fs=W<600?10:12;
     for(const n of nodes){
       const dim=hover&&!near(n),pulse=still?1:1+.06*Math.sin(t*2+n.tw);
-      ctx.globalAlpha=dim?.25:1;ctx.shadowColor=col[n.dim];ctx.shadowBlur=dim?0:n===hover?28:14;
+      ctx.globalAlpha=dim?.22:1;ctx.shadowColor=col[n.dim];ctx.shadowBlur=dim?0:n===hover?30:14;
       ctx.fillStyle=col[n.dim];ctx.beginPath();ctx.arc(n.x,n.y,n.r*pulse,0,6.283);ctx.fill();
       ctx.shadowBlur=0;ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.arc(n.x-n.r*.3,n.y-n.r*.3,Math.max(1.2,n.r*.22),0,6.283);ctx.fill();
-      if(!dim&&(hover?near(n):n.share>=(W<600?.3:.18))){ctx.font=`${n===hover?600:500} 11px "IBM Plex Mono",monospace`;ctx.fillStyle=n===hover?'#fff':'rgba(233,236,243,.8)';ctx.textAlign='center';ctx.fillText(nice(n.c),n.x,n.y+n.r+14);}
+      // Every star is labelled, in plain English.
+      ctx.font=`${n===hover?600:500} ${fs}px "IBM Plex Sans",sans-serif`;ctx.textAlign='center';
+      ctx.fillStyle=n===hover?'#fff':dim?'rgba(233,228,250,.35)':'rgba(233,228,250,.88)';
+      ctx.fillText(short(n.c),n.x,n.y+n.r+fs+3);
+      ctx.globalAlpha=1;
+    }
+    // The open star bursts into its individual lines: one dot per file with a real example line.
+    dots=[];
+    if(selN){
+      const list=inList(),n=Math.min(list.length,DOTS),grow=still?1:Math.min(1,(t-(selN.openAt||0))/.6);
+      for(let i=0;i<n;i++){
+        const a=i*2.39996+t*.05,rad=(selN.r+10+Math.sqrt(i)*(W<600?6:8.5))*grow;
+        const x=selN.x+Math.cos(a)*rad,y=selN.y+Math.sin(a)*rad;
+        if(x<3||x>W-drawerW()-3||y<3||y>H-3)continue;
+        // Skip dots that land on another star, so neighbours stay clickable and their labels stay readable.
+        // Skip a dot that lands on another star or inside its text label, so neighbours stay clickable and readable.
+        const lf=W<600?10:12;
+        if(nodes.some(m=>{if(m===selN)return false;if(Math.hypot(m.x-x,m.y-y)<m.r+6)return true;
+          const ly=m.y+m.r+lf+3;return Math.abs(x-m.x)<m.lw/2+4&&y>ly-lf+1&&y<ly+5;}))continue;
+        dots.push({x,y,i});
+        const on=hoverDot===i||hlItem===i;
+        ctx.globalAlpha=on?1:.85;ctx.fillStyle=on?'#fff':col[selN.dim];
+        ctx.beginPath();ctx.arc(x,y,on?5:(W<600?2.6:3.3),0,6.283);ctx.fill();
+      }
       ctx.globalAlpha=1;
     }
   }
-  function pick(e){const b=cv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;return {x,y,n:nodes.find(n=>Math.hypot(n.x-x,n.y-y)<n.r+8)};}
-  cv.addEventListener('pointermove',e=>{
-    const p=pick(e);hover=p.n||null;cv.style.cursor=hover?'pointer':'crosshair';
+  // Lines inside the open star, narrowed by the search box (matches the line or the project name).
+  function inList(){
+    if(!selN)return [];
+    const key=selN.dim+':'+selN.c,q=inQ.toLowerCase();
+    return q?selN.ex.filter(p=>(p.quotes[key]+' '+p.f.repo).toLowerCase().includes(q)):selN.ex;
+  }
+  function mark(s){const t=esc(s);if(!inQ)return t;const q=esc(inQ).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return t.replace(new RegExp(q,'gi'),m=>`<mark>${m}</mark>`);}
+  function renderInside(){
+    const key=selN.dim+':'+selN.c,list=inList(),part=list.slice(0,inShown);
+    box.style.setProperty('--c',col[selN.dim]);
+    if(!box.querySelector('.in-find')){
+      box.innerHTML=`<div class="in-head"><span class="dot"></span><h3 id="in-h"></h3><button type="button" class="in-x" id="in-x" aria-label="Close">&times;</button></div>
+        <input class="in-find" id="in-find" type="search" placeholder="Search inside this star" aria-label="Search inside this star">
+        <p class="in-note" id="in-note"></p><div class="in-list" id="in-list"></div>
+        <div class="in-foot"><button type="button" class="in-more" id="in-more"></button><button type="button" class="in-all" id="in-all"></button></div>`;
+      $('in-x').onclick=closeInside;
+      $('in-find').oninput=e=>{inQ=e.target.value.trim();inShown=40;hlItem=-1;renderInside();};
+      $('in-more').onclick=()=>{inShown+=40;renderInside();};
+      $('in-all').onclick=()=>openSel(selN.dim,selN.c);
+    }
+    $('in-h').innerHTML=`${esc(DIMS[selN.dim].t)}: ${esc(nice(selN.c))}<small>In ${Math.round(100*selN.share)}% of files (${selN.n.toLocaleString('en-GB')})</small>`;
+    $('in-note').textContent=inQ?`${list.length.toLocaleString('en-GB')} of ${selN.ex.length.toLocaleString('en-GB')} lines match.`
+      :`${selN.ex.length.toLocaleString('en-GB')} real lines kept from these files, clear instructions and popular projects first. Each dot on the map is one of them.`;
+    $('in-list').innerHTML=part.length?part.map((p,i)=>`<div class="in-item${i===hlItem?' hl':''}" data-i="${i}"><blockquote>${mark(p.quotes[key])}</blockquote><a href="${esc(p.f.url)}" target="_blank" rel="noopener">${mark(p.f.repo)} &middot; ${p.f.stars.toLocaleString('en-GB')} stars</a></div>`).join(''):'<p class="in-note">Nothing matches that search.</p>';
+    const left=list.length-part.length;
+    $('in-more').hidden=left<=0;$('in-more').textContent=`Show ${Math.min(40,left)} more`;
+    $('in-all').textContent=`All ${selN.n.toLocaleString('en-GB')} files below`;
+    box.hidden=false;
+  }
+  function openInside(n){
+    const again=selN===n;selN=n;n.openAt=performance.now()/1000;if(!again){inQ='';inShown=40;hlItem=-1;box.innerHTML='';}
+    renderInside();tip.hidden=true;hover=null;call.style.opacity=0;
+    forces();sim.alpha(.35).restart();
+    if(W<600)box.scrollIntoView({behavior:still?'auto':'smooth',block:'nearest'});
+  }
+  function closeInside(){selN=null;hoverDot=null;hlItem=-1;box.hidden=true;box.innerHTML='';forces();sim.alpha(.35).restart();}
+  function hitDot(x,y){let best=null,bd=(W<600?13:10);for(const d of dots){const h=Math.hypot(d.x-x,d.y-y);if(h<bd){bd=h;best=d.i;}}return best;}
+  // When a star is open, a dot wins over a star: dots are smaller, so test them first by nearest.
+  function pick(e){const b=cv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;
+    if(selN){const d=hitDot(x,y);if(d!=null)return {x,y,n:null,d};}
+    const n=nodes.find(n=>Math.hypot(n.x-x,n.y-y)<n.r+12);
+    return {x,y,n,d:null};}
+  function placeTip(p){const tw=tip.offsetWidth,th=tip.offsetHeight;
+    const n=p.n,above=(n?n.y-n.r:p.y)-th-12,below=(n?n.y+n.r+22:p.y+16);
+    tip.style.left=Math.max(8,Math.min(p.x-tw/2,W-tw-8))+'px';tip.style.top=((above>=8?above:Math.min(below,H-th-8))+cv.offsetTop)+'px';}
+  function showDot(i,p){
+    hoverDot=i;hover=null;cv.style.cursor='pointer';
+    const it=inList()[i],key=selN.dim+':'+selN.c;
+    const touch=matchMedia('(hover: none)').matches;
+    tip.innerHTML=`<q>${esc(it.quotes[key])}</q><small>${esc(it.f.repo)} &middot; ${it.f.stars.toLocaleString('en-GB')} stars. ${touch?'Tap again':'Click'} to find it in the list.</small>`;
+    tip.hidden=false;placeTip(p);if(still)draw();
+  }
+  function show(p){
+    if(selN&&p.d!=null){showDot(p.d,p);return;}
+    hoverDot=null;
+    hover=p.n||null;cv.style.cursor=hover?'pointer':'crosshair';
     if(!hover){tip.hidden=true;if(still)draw();return;}
+    call.style.opacity=0;
     const f=hover.ex.length?hover.ex[Math.floor((performance.now()/1500)%hover.ex.length)]:null;
-    tip.innerHTML=`<b>${DIMS[hover.dim].t}: ${nice(hover.c)}</b>${f?`<q>${esc(f.quotes[hover.dim+':'+hover.c])}</q>`:''}<small>${hover.n.toLocaleString('en-GB')} of ${total.toLocaleString('en-GB')} files (${Math.round(100*hover.share)}%)${f?' &middot; '+esc(f.f.repo):''}</small>`;
-    tip.hidden=false;const tw=tip.offsetWidth,th=tip.offsetHeight;
-    tip.style.left=Math.min(p.x+16,W-tw-8)+'px';tip.style.top=Math.max(8,Math.min(p.y+16,H-th-8)+cv.offsetTop)+'px';
+    const touch=matchMedia('(hover: none)').matches;
+    tip.innerHTML=`<b>${DIMS[hover.dim].t}: ${esc(nice(hover.c))}</b>${f?`<q>${esc(f.quotes[hover.dim+':'+hover.c])}</q>`:''}<small>In ${Math.round(100*hover.share)}% of files (${hover.n.toLocaleString('en-GB')})${f?' &middot; '+esc(f.f.repo):''}. ${touch?'Tap again':'Click'} to open it up.</small>`;
+    tip.hidden=false;placeTip(p);
     if(still)draw();
-  });
-  cv.addEventListener('pointerleave',()=>{hover=null;tip.hidden=true;if(still)draw();});
-  cv.addEventListener('click',e=>{const n=pick(e).n;if(!n)return;sel={dim:n.dim,c:n.c};render();$('quotes').scrollIntoView({behavior:'smooth',block:'start'});});
+  }
+  cv.addEventListener('pointermove',e=>{if(e.pointerType==='touch')return;show(pick(e));});
+  cv.addEventListener('pointerleave',e=>{if(e.pointerType==='touch')return;hover=null;hoverDot=null;tip.hidden=true;if(still)draw();});
+  // Click a star to open it up. On touch, the first tap previews and the second opens. Click a dot to find its line in the list.
+  cv.addEventListener('click',e=>{const p=pick(e);
+    if(p.d!=null&&selN){
+      const touch=matchMedia('(hover: none)').matches;
+      if(touch&&hoverDot!==p.d){showDot(p.d,p);return;}
+      if(p.d>=inShown)inShown=Math.ceil((p.d+1)/40)*40;
+      hlItem=p.d;renderInside();
+      const el=box.querySelector(`.in-item[data-i="${p.d}"]`),lst=$('in-list');
+      if(el&&lst){const er=el.getBoundingClientRect(),lr=lst.getBoundingClientRect();
+        lst.scrollTo({top:lst.scrollTop+(er.top-lr.top)-(lst.clientHeight-er.height)/2,behavior:still?'auto':'smooth'});}
+      return;}
+    if(!p.n){hover=null;hoverDot=null;tip.hidden=true;return;}
+    const touch=matchMedia('(hover: none)').matches;
+    if(touch&&hover!==p.n&&selN!==p.n){show(p);return;}
+    openInside(p.n);});
   new ResizeObserver(()=>{if(cv.parentElement.clientWidth!==W){size();forces();sim.alpha(.5).restart();}}).observe(cv.parentElement);
 }
 function pool(){
@@ -228,21 +532,21 @@ function pool(){
 function render(){
   const P=pool();
   if(window.skyUpdate)window.skyUpdate(P);
-  $('sub').innerHTML=`Patterns in <strong>${P.length.toLocaleString('en-GB')}</strong> instruction files people wrote for their AI agents. Click a bar to read the actual lines.`;
+  $('sub').innerHTML=`Showing <strong>${P.length.toLocaleString('en-GB')}</strong> instruction files. Every bar is clickable.`;
   $('charts').innerHTML=Object.entries(DIMS).map(([dim,o])=>{
     const rows=D.cats[dim].map(c=>({c,n:P.filter(p=>p.tags[dim].includes(c)).length})).sort((a,b)=>b.n-a.n);
-    return `<div class="chart" style="--c:${o.c}"><h2>${o.t}<span>share of files</span></h2><p>${o.d}</p>${rows.map(r=>{
+    return `<div class="chart" style="--c:${o.c}"><h3>${o.t}</h3><p>${o.d}</p>${rows.map(r=>{
       const pc=P.length?Math.round(100*r.n/P.length):0,on=!!(sel&&sel.dim===dim&&sel.c===r.c);
-      return `<button class="row${on?' on':''}" data-dim="${dim}" data-c="${r.c}" aria-pressed="${on}" title="${r.n} files"><span class="lbl">${nice(r.c)}</span><span class="track"><span class="fill" style="width:${pc}%"></span></span><span class="pct">${pc}%</span></button>`;}).join('')}</div>`;
+      return `<button class="row${on?' on':''}" data-dim="${dim}" data-c="${r.c}" aria-pressed="${on}" title="${esc(nice(r.c))}: ${r.n} files"><span class="lbl">${esc(nice(r.c))}</span><span class="track"><span class="fill" style="width:${pc}%"></span></span><span class="pct">${pc}%</span></button>`;}).join('')}</div>`;
   }).join('');
-  document.querySelectorAll('.row').forEach(b=>b.onclick=()=>{sel={dim:b.dataset.dim,c:b.dataset.c};render();$('quotes').scrollIntoView({behavior:'smooth',block:'nearest'});});
+  document.querySelectorAll('.row').forEach(b=>b.onclick=()=>{sel={dim:b.dataset.dim,c:b.dataset.c};render();$('quotes').scrollIntoView({behavior:still?'auto':'smooth',block:'nearest'});});
   const q=$('quotes');
   if(!sel){q.hidden=true;return;}
   const key=sel.dim+':'+sel.c;
   if(key!==lastSel){lastSel=key;shown=50;qtext='';}
   lastP=P;
   q.hidden=false;q.style.setProperty('--c',DIMS[sel.dim].c);
-  q.innerHTML=`<h2>${DIMS[sel.dim].t}: ${nice(sel.c)}</h2><p class="hint" id="qhint"></p>
+  q.innerHTML=`<h3>${DIMS[sel.dim].t}: ${esc(nice(sel.c))}</h3><p class="hint" id="qhint"></p>
     <input id="qfind" type="search" placeholder="Find a project by name" aria-label="Find a project by name" value="${esc(qtext)}">
     <div id="qlist"></div><button id="qmore" class="more" type="button"></button>`;
   $('qfind').oninput=e=>{qtext=e.target.value.trim().toLowerCase();shown=50;list();};
@@ -253,14 +557,13 @@ let lastSel='',shown=50,qtext='',lastP=[];
 function list(){
   const key=sel.dim+':'+sel.c;
   const all=lastP.filter(p=>p.tags[sel.dim].includes(sel.c)&&(!qtext||(p.f.repo+'/'+p.f.path).toLowerCase().includes(qtext)))
-    .sort((a,b)=>(!!b.quotes[key]-!!a.quotes[key])||b.f.stars-a.f.stars);
+    .sort((a,b)=>(instr(b.quotes[key])-instr(a.quotes[key]))||b.f.stars-a.f.stars);
   const part=all.slice(0,shown),n=all.length.toLocaleString('en-GB');
-  $('qhint').textContent=`${n} files${qtext?' match':''}. Showing ${part.length.toLocaleString('en-GB')}, the ones with a kept example line first, then by stars.`;
+  $('qhint').textContent=`${n} files${qtext?' match':''}. Showing ${part.length.toLocaleString('en-GB')}: files with an example line first, then the most popular.`;
   $('qlist').innerHTML=part.length?part.map(p=>`<div class="q">${p.quotes[key]?`<blockquote>${esc(p.quotes[key])}</blockquote>`:''}<a href="${esc(p.f.url)}" target="_blank" rel="noopener">${esc(p.f.repo)} / ${esc(p.f.path)} &middot; ${p.f.stars.toLocaleString('en-GB')} stars</a></div>`).join(''):'<p>No files here.</p>';
   const left=all.length-part.length;
   $('qmore').hidden=left<=0;$('qmore').textContent=`Show ${Math.min(50,left)} more (${left.toLocaleString('en-GB')} left)`;
 }
 </script>
-
 </body>
 </html>
