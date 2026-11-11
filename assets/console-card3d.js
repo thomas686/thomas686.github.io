@@ -76,12 +76,12 @@ if (BG === 'work' || BG === 'mix') {
   if (BG === 'work') scene.background = canvasBg(4, 512, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#050b09'); g.addColorStop(0.6, '#0b1a15'); g.addColorStop(1, '#10251f'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
   scene.fog = BG === 'mix' ? new THREE.Fog(0x2b1b46, 12, 38) : new THREE.Fog(0x0a1612, 12, 34);
   if (BG === 'work') { const floor = new THREE.GridHelper(80, 40, 0x1f6b55, 0x123a30); floor.position.y = -3.3; floor.material.transparent = true; floor.material.opacity = 0.35; scene.add(floor); }
-  workTick = bgTick = (t) => {
+  workTick = bgTick = (t, dt = 0.016) => {
     gallery.rotation.y = Math.sin(t * 0.06) * 0.12;
     for (const f of floating) {
       const u = f.userData, synced = u.id === window.__tsProject, hov = f === hoverScreen;
-      u.k += ((hov || synced ? 1 : 0) - u.k) * 0.08;
-      u.s += ((synced ? 1 : 0) - u.s) * 0.06;
+      u.k += ((hov || synced ? 1 : 0) - u.k) * Math.min(1, dt * 6);
+      u.s += ((synced ? 1 : 0) - u.s) * Math.min(1, dt * 4);
       const k = u.k, s = u.s, bob = Math.sin(t * 0.4 + u.p) * 0.18;
       // base spot on the arc, nudged forward on hover
       const bx = u.x, by = u.y + bob, bz = u.z + (hov ? 1.6 : 0) * k;
@@ -91,7 +91,7 @@ if (BG === 'work' || BG === 'mix') {
       f.rotation.y = u.ry * (1 - s) - gallery.rotation.y * s;
       f.scale.setScalar(1 + k * 0.12 + s * 0.1);
       u.edge.material.opacity = 0.35 + k * 0.65;
-      u.img.material.opacity = 0.62 + k * 0.38;
+      u.img.material.color.setScalar(0.62 + k * 0.38);
       f.renderOrder = synced ? 2 : 0;
     }
   };
@@ -516,16 +516,18 @@ function frame() {
 Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
   .then(([p, e]) => { projects = p; exp = e;
     if (BG !== 'work' && BG !== 'mix') return;
-    const N = p.length, R = 13;
+    const N = p.length, R = 12;
     p.forEach((proj, i) => {
       const row = i % 2, k = Math.floor(i / 2), cols = Math.ceil(N / 2);
-      const ang = THREE.MathUtils.degToRad(-62 + (124 * (k + (row ? 0.5 : 0))) / (cols - 0.5));
+      const ang = THREE.MathUtils.degToRad(-48 + (96 * (k + (row ? 0.5 : 0))) / (cols - 0.5));
       const g = new THREE.Group();
       const tx = loader.load(proj.image); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4;
-      const imgM = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.25), new THREE.MeshBasicMaterial({ map: tx, transparent: true, opacity: 0.62 }));
+      const imgM = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.25), new THREE.MeshBasicMaterial({ map: tx, color: 0x9e9e9e }));
+      const backing = new THREE.Mesh(new THREE.PlaneGeometry(3.86, 2.95), new THREE.MeshBasicMaterial({ color: 0x0b0a16 }));
+      backing.position.set(0, -0.3, -0.02);
       const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(3.7, 2.35)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.35 }));
       const lc = document.createElement('canvas'); lc.width = 512; lc.height = 48; const lx = lc.getContext('2d');
-      lx.fillStyle = '#ffd37a'; lx.textBaseline = 'middle';
+      lx.fillStyle = 'rgba(11,10,22,.92)'; lx.fillRect(0, 0, 512, 48); lx.fillStyle = '#ffd37a'; lx.textBaseline = 'middle';
       { const words = proj.title.toUpperCase().split(' '); let size = 16, lines;
         for (;;) { lx.font = size + 'px "Press Start 2P", monospace'; lines = ['']; for (const w of words) { const tryL = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + w : w; if (lx.measureText(tryL).width > 500 && lines[lines.length - 1]) lines.push(w); else lines[lines.length - 1] = tryL; }
           if (lines.length <= 2 && lines.every(l => lx.measureText(l).width <= 500)) break; size -= 1; if (size < 9) break; }
@@ -533,7 +535,7 @@ Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experi
       const lt = new THREE.CanvasTexture(lc); lt.colorSpace = THREE.SRGBColorSpace;
       const label = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 0.34), new THREE.MeshBasicMaterial({ map: lt, transparent: true }));
       label.position.y = -1.42;
-      g.add(imgM, edge, label);
+      g.add(backing, imgM, edge, label);
       const y = row ? -0.4 : 2.6, z = -Math.cos(ang) * R + 2;
       g.position.set(Math.sin(ang) * R, y, z); g.rotation.y = -ang;
       g.userData = { x: Math.sin(ang) * R, y, z, ry: -ang, p: i * 1.3, k: 0, s: 0, id: proj.id, edge, img: imgM };
