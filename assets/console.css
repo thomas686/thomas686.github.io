@@ -60,3 +60,12 @@
 .normal-view .play-mode{display:inline-flex;position:absolute;top:max(16px,env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));z-index:3;align-items:center;font:400 10px/1 var(--pixel);letter-spacing:.04em;color:#1b1408;background:#ffd37a;border:0;border-radius:6px;padding:10px 12px;cursor:pointer;box-shadow:0 4px 0 #7a5a1c}
 .normal-view .play-mode:active{transform:translateY(3px);box-shadow:0 1px 0 #7a5a1c}
 @media (max-width:600px){.normal-view .visits{top:16px;right:16px;left:auto;translate:none;flex-direction:column;align-items:flex-end}}
+
+/* Phone, console switched on: the section fills the screen, overlays step aside, the page stops scrolling */
+.play-exit{display:none}
+.play.playing{height:100vh;height:100dvh}
+.play.playing .play-top,.play.playing .play-bottom,.play.playing .power-callout{display:none}
+.play.playing .stage3d canvas{touch-action:none}
+html.play-lock,html.play-lock body{overflow:hidden;overscroll-behavior:none}
+html.play-lock .visits{display:none}
+.play.playing .play-exit{display:block;position:absolute;z-index:4;top:max(10px,env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));font:400 10px/1 var(--pixel);letter-spacing:.04em;color:#e9efe9;background:rgba(8,10,20,.6);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:9px 11px;cursor:pointer}

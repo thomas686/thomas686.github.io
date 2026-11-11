@@ -438,9 +438,24 @@ new IntersectionObserver(([en]) => { inView = en.intersectionRatio > 0.4; if (!i
 let bootTimer, zoomTarget = 0, zoom = 0, spin = 0, spinTarget = 0, pitch = 0, pitchTarget = 0;
 const showingBack = () => (Math.abs(Math.round(spinTarget / Math.PI)) + Math.abs(Math.round(pitchTarget / Math.PI))) % 2 === 1;
 const toFront = () => { spinTarget = Math.round(spinTarget / (Math.PI * 2)) * Math.PI * 2; pitchTarget = Math.round(pitchTarget / (Math.PI * 2)) * Math.PI * 2; };
+// On phones the console takes the whole screen while it is on: real fullscreen where the
+// browser allows it (Android), otherwise the section fills the viewport and the page stops scrolling.
+const exitBtn = document.getElementById('play-exit');
+function phoneMode(v) {
+  if (!coarse) return;
+  section.classList.toggle('playing', v);
+  document.documentElement.classList.toggle('play-lock', v);
+  if (v) {
+    section.scrollIntoView({ block: 'start' });
+    const el = document.documentElement;
+    if (el.requestFullscreen && !document.fullscreenElement) el.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+  } else if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+}
+if (exitBtn) exitBtn.addEventListener('click', () => setPower(false));
 function setPower(v) {
   if (v === on) return;
   on = v; clearTimeout(bootTimer); zoomTarget = on ? 1 : 0;
+  phoneMode(on);
   if (on) {
     view = 'boot'; idx = 0; bootAt = performance.now(); chime(); startMusic(0.6); toFront();
     hint.innerHTML = coarse ? 'Tap the d-pad, A to open, B to go back, or tap the screen'
@@ -561,12 +576,14 @@ addEventListener('keydown', e => {
 });
 
 // ---------- Layout and loop ----------
-let dist = 13;
+let dist = 13, distOn = 13;
 function fit() {
   const w = host.clientWidth, h = host.clientHeight;
   renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
   const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   dist = Math.max((H * 1.5) / (2 * t), (W * 1.5) / (2 * t * camera.aspect));
+  // Narrow (portrait) screens: when on, frame the console edge to edge with a thin margin.
+  distOn = camera.aspect < 0.9 ? Math.max((H * 1.06) / (2 * t), (W * 1.06) / (2 * t * camera.aspect)) + D / 2 : dist * 1.12;
 }
 new ResizeObserver(fit).observe(host); fit();
 const clock = new THREE.Clock();
@@ -574,11 +591,12 @@ function frame() {
   requestAnimationFrame(frame);
   if (document.hidden || !inView) { clock.getDelta(); return; }
   const raw = clock.getDelta(), dt = Math.min(raw, 0.05), rdt = Math.min(raw, 0.5), t = clock.elapsedTime;
-  zoom += (zoomTarget - zoom) * Math.min(1, dt * 1.8);
+  zoom += (zoomTarget - zoom) * Math.min(1, Math.min(raw, 0.2) * 1.8);
   spin += (spinTarget - spin) * Math.min(1, dt * 7);
   pitch += (pitchTarget - pitch) * Math.min(1, dt * 7);
   const z = zoom;
-  const rx = THREE.MathUtils.lerp(tiltX + 0.22, tiltX * 0.4, z), ry = THREE.MathUtils.lerp(tiltY - 0.35, tiltY * 0.4, z);
+  const flat = coarse && camera.aspect < 0.9 ? 0 : 0.4;
+  const rx = THREE.MathUtils.lerp(tiltX + 0.22, tiltX * flat, z), ry = THREE.MathUtils.lerp(tiltY - 0.35, tiltY * flat, z);
   dev.rotation.x += (rx + pitch - dev.rotation.x) * Math.min(1, dt * 5);
   dev.rotation.y += (ry + spin - dev.rotation.y) * Math.min(1, dt * 5);
   dev.position.y = still ? 0 : Math.sin(t * 1.1) * 0.06;
@@ -588,8 +606,9 @@ function frame() {
     particles.position.y = (t * 0.25) % 12; if (particles.position.y > 6) particles.position.y -= 12;
     grid.position.z = (t * 0.4) % 1;
   }
-  camera.position.set(0, THREE.MathUtils.lerp(1.4, 0.3, z), THREE.MathUtils.lerp(dist * 1.35, dist * 1.12, z));
-  camera.lookAt(0, THREE.MathUtils.lerp(-0.3, -0.1, z), 0);
+  const narrow = camera.aspect < 0.9;
+  camera.position.set(0, THREE.MathUtils.lerp(1.4, narrow ? 0 : 0.3, z), THREE.MathUtils.lerp(dist * 1.35, narrow ? distOn : dist * 1.12, z));
+  camera.lookAt(0, THREE.MathUtils.lerp(-0.3, narrow ? 0 : -0.1, z), 0);
   knob.position.y += ((on ? 1.2 : 1.6) - knob.position.y) * Math.min(1, dt * 10);
   knob.material.emissiveIntensity = on ? 0.15 : 0.45 + 0.35 * Math.sin(t * 4);
   if (callout) {
