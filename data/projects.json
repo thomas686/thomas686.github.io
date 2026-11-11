@@ -323,20 +323,20 @@
   },
   {
     "id": "pharma-optimizer",
-    "title": "Pharma flu logistics optimizer",
+    "title": "Pharma flu logistics optimizer, with Moonshot AI",
     "category": "academic",
     "year": "2026",
-    "summary": "Digital Innovation course, group project: a control-tower app that helps a pharmaceutical warehouse plan for flu season, from demand forecasts to picking waves and staffing.",
+    "summary": "Digital Innovation course, group project in collaboration with Moonshot AI, the company behind Kimi: a control-tower app that helps a pharmaceutical warehouse plan for flu season.",
     "problem": "Flu outbreaks make demand for medicine jump suddenly and unevenly across regions. A central warehouse that plans for a normal week ends up short-staffed, behind on next-day delivery and mixing cold-chain goods badly.",
-    "built": "A Python app with five pages: a dashboard comparing Normal, Peak and Flu Season scenarios; wave planning that groups orders with machine-learning clustering and keeps room-temperature, cold and frozen goods apart; a what-if simulator; a manager overview with KPIs; and a dictionary of terms. It scores flu risk for eight regions from public health data and forecasts demand per product for 7, 30 and 90 days.",
-    "result": "A working prototype that runs entirely in the browser. The first visit takes about a minute while Python loads.",
+    "built": "A Python app built together with Kimi, Moonshot AI's model, with five pages: a dashboard comparing Normal, Peak and Flu Season scenarios; wave planning that groups orders with machine-learning clustering and keeps room-temperature, cold and frozen goods apart; a what-if simulator; a manager overview with KPIs; and a dictionary of terms. It scores flu risk for eight regions from public health data and forecasts demand per product for 7, 30 and 90 days. We used AI for the code and added the pharma business rules ourselves.",
+    "result": "Presented at the course's Final Demo Day on 10 June 2026. It now runs entirely in the browser; the first visit takes about a minute while Python loads.",
     "tools": [
+      "Kimi (Moonshot AI)",
       "Python",
       "Streamlit",
       "scikit-learn",
       "Plotly",
-      "Forecasting",
-      "Pyodide"
+      "Forecasting"
     ],
     "demo": "pharma/",
     "image": "img/pharma-app.webp",
