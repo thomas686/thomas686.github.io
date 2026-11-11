@@ -70,29 +70,39 @@ const canvasBg = (w, h, paint, nearest = false) => {
 let bgTick = () => {}, workTick = () => {}, pixelTick = () => {};
 const floating = [];
 const gallery = new THREE.Group(); scene.add(gallery);
-let hoverScreen = null;
+let hoverScreen = null, galleryState = null;
 window.__tsProject = null;
 if (BG === 'work' || BG === 'mix') {
   if (BG === 'work') scene.background = canvasBg(4, 512, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#050b09'); g.addColorStop(0.6, '#0b1a15'); g.addColorStop(1, '#10251f'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
   scene.fog = BG === 'mix' ? new THREE.Fog(0x2b1b46, 12, 38) : new THREE.Fog(0x0a1612, 12, 34);
   if (BG === 'work') { const floor = new THREE.GridHelper(80, 40, 0x1f6b55, 0x123a30); floor.position.y = -3.3; floor.material.transparent = true; floor.material.opacity = 0.35; scene.add(floor); }
   workTick = bgTick = (t, dt = 0.016) => {
-    gallery.rotation.y = Math.sin(t * 0.06) * 0.12;
+    const st = galleryState; if (!st) return;
+    gallery.rotation.y = Math.sin(t * 0.06) * 0.04;
+    const shown = id => floating.find(f => (f.userData.pending != null ? st.p[f.userData.pending].id : f.userData.id) === id);
+    const want = window.__tsProject;
+    if (want && !shown(want)) { const f = floating.find(f => f !== hoverScreen && f.userData.pending == null) || floating[0]; f.userData.pending = st.p.findIndex(q => q.id === want); }
+    st.timer += dt;
+    if (st.timer > 4.5) {
+      st.timer = 0;
+      for (let n = 0; n < floating.length; n++) {
+        st.rr = (st.rr + 1) % floating.length; const f = floating[st.rr];
+        if (f === hoverScreen || f.userData.id === want || f.userData.pending != null) continue;
+        for (let m = 0; m < st.p.length; m++) { st.next = (st.next + 1) % st.p.length; if (!shown(st.p[st.next].id)) { f.userData.pending = st.next; break; } }
+        break;
+      }
+    }
     for (const f of floating) {
-      const u = f.userData, synced = u.id === window.__tsProject, hov = f === hoverScreen;
-      u.k += ((hov || synced ? 1 : 0) - u.k) * Math.min(1, dt * 6);
-      u.s += ((synced ? 1 : 0) - u.s) * Math.min(1, dt * 4);
-      const k = u.k, s = u.s, bob = Math.sin(t * 0.4 + u.p) * 0.18;
-      // base spot on the arc, nudged forward on hover
-      const bx = u.x, by = u.y + bob, bz = u.z + (hov ? 1.6 : 0) * k;
-      // featured spot: to the right of the console, facing the camera (in gallery space)
-      const fx = 8.4, fy = 0.6, fz = -2;
-      f.position.set(bx + (fx - bx) * s, by + (fy - by) * s, bz + (fz - bz) * s);
-      f.rotation.y = u.ry * (1 - s) - gallery.rotation.y * s;
-      f.scale.setScalar(1 + k * 0.12 + s * 0.1);
-      u.edge.material.opacity = 0.35 + k * 0.65;
-      u.img.material.color.setScalar(0.62 + k * 0.38);
-      f.renderOrder = synced ? 2 : 0;
+      const u = f.userData;
+      if (u.pending != null) { u.fade -= dt * 3; if (u.fade <= 0) { u.fade = 0; const q = st.p[u.pending]; u.img.material.map = st.texs[u.pending]; u.label.material.map = st.labels[u.pending]; u.img.material.needsUpdate = true; u.label.material.needsUpdate = true; u.id = q.id; u.pending = null; } }
+      else if (u.fade < 1) u.fade = Math.min(1, u.fade + dt * 2.5);
+      const hot = f === hoverScreen || u.id === want;
+      u.k += ((hot ? 1 : 0) - u.k) * Math.min(1, dt * 6);
+      f.position.y = u.y + Math.sin(t * 0.5 + u.p) * 0.08;
+      f.scale.setScalar(1 + u.k * 0.1);
+      u.edge.material.opacity = (0.3 + u.k * 0.7) * u.fade;
+      u.img.material.color.setScalar((0.6 + u.k * 0.4) * u.fade);
+      u.label.material.opacity = u.fade;
     }
   };
 } else if (BG === 'studio') {
@@ -153,7 +163,7 @@ if (BG === 'pixel' || BG === 'mix') {
     for (const [sx0, sy0, ph, sz] of stars) if (Math.sin(t * 2.2 + ph * 3) > -0.2) { x.fillStyle = sz > 1 ? '#fff4d8' : '#c9c2ff'; x.fillRect(Math.round(sx0 - par * 0.05), Math.round(sy0), sz, sz); }
     if (!shoot && Math.random() < 0.004) shoot = { x: 60 + Math.random() * 300, y: 10 + Math.random() * 40, life: 0 };
     if (shoot) { shoot.life++; for (let k = 0; k < 10; k++) { x.fillStyle = 'rgba(255,255,255,' + (1 - k / 10) + ')'; x.fillRect(Math.round(shoot.x + shoot.life * 4 - k * 3), Math.round(shoot.y + shoot.life * 1.5 - k), 2, 1); } if (shoot.life > 24) shoot = null; }
-    const sunX = 372 - par * 0.15, sunY = 150;
+    const sunX = 372 - par * 0.15, sunY = 178;
     for (let y = -46; y <= 0; y++) { const w = Math.round(Math.sqrt(46 * 46 - y * y)); if (y > -20 && Math.floor((y + 46) / 3) % 3 === 2) continue;
       x.fillStyle = y < -30 ? '#ffe28a' : y < -14 ? '#ffc061' : '#ff9a4d'; x.fillRect(Math.round(sunX - w), sunY + y, w * 2, 1); }
     for (const c of clouds) { const cx = ((c[0] + t * c[3] * 4 - par * 0.2) % (PW + 80)) - 40; x.fillStyle = 'rgba(255,190,200,.55)';
@@ -516,33 +526,37 @@ function frame() {
 Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
   .then(([p, e]) => { projects = p; exp = e;
     if (BG !== 'work' && BG !== 'mix') return;
-    const N = p.length, R = 12;
-    p.forEach((proj, i) => {
-      const row = i % 2, k = Math.floor(i / 2), cols = Math.ceil(N / 2);
-      const ang = THREE.MathUtils.degToRad(-48 + (96 * (k + (row ? 0.5 : 0))) / (cols - 0.5));
+    const texs = p.map(q => { const t = loader.load(q.image); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; });
+    const labelTex = title => {
+      const lc = document.createElement('canvas'); lc.width = 512; lc.height = 64; const lx = lc.getContext('2d');
+      lx.fillStyle = 'rgba(11,10,22,.94)'; lx.fillRect(0, 0, 512, 64); lx.fillStyle = '#ffd37a'; lx.textBaseline = 'middle';
+      const words = title.toUpperCase().split(' '); let size = 18, lines;
+      for (;;) { lx.font = size + 'px "Press Start 2P", monospace'; lines = [''];
+        for (const w of words) { const tl = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + w : w; if (lx.measureText(tl).width > 492 && lines[lines.length - 1]) lines.push(w); else lines[lines.length - 1] = tl; }
+        if (lines.length <= 2 && lines.every(l => lx.measureText(l).width <= 492)) break; if (--size < 9) break; }
+      lines.forEach((l, n) => lx.fillText(l, 10, lines.length === 1 ? 32 : 18 + n * 28));
+      const t = new THREE.CanvasTexture(lc); t.colorSpace = THREE.SRGBColorSpace; return t;
+    };
+    const labels = p.map(q => labelTex(q.title));
+    const SW = 2.4, SH = SW * 0.625;
+    const slots = [];
+    for (const side of [-1, 1]) for (const r of [0, 1]) for (const c of [0, 1]) slots.push([side * (4.1 + c * 2.9), r ? 0.7 : 3.35, -7 - c * 0.5, side]);
+    slots.forEach((s, i) => {
       const g = new THREE.Group();
-      const tx = loader.load(proj.image); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4;
-      const imgM = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.25), new THREE.MeshBasicMaterial({ map: tx, color: 0x9e9e9e }));
-      const backing = new THREE.Mesh(new THREE.PlaneGeometry(3.86, 2.95), new THREE.MeshBasicMaterial({ color: 0x0b0a16 }));
-      backing.position.set(0, -0.3, -0.02);
-      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(3.7, 2.35)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.35 }));
-      const lc = document.createElement('canvas'); lc.width = 512; lc.height = 48; const lx = lc.getContext('2d');
-      lx.fillStyle = 'rgba(11,10,22,.92)'; lx.fillRect(0, 0, 512, 48); lx.fillStyle = '#ffd37a'; lx.textBaseline = 'middle';
-      { const words = proj.title.toUpperCase().split(' '); let size = 16, lines;
-        for (;;) { lx.font = size + 'px "Press Start 2P", monospace'; lines = ['']; for (const w of words) { const tryL = lines[lines.length - 1] ? lines[lines.length - 1] + ' ' + w : w; if (lx.measureText(tryL).width > 500 && lines[lines.length - 1]) lines.push(w); else lines[lines.length - 1] = tryL; }
-          if (lines.length <= 2 && lines.every(l => lx.measureText(l).width <= 500)) break; size -= 1; if (size < 9) break; }
-        lines.forEach((l, n) => lx.fillText(l, 4, lines.length === 1 ? 24 : 13 + n * 22)); }
-      const lt = new THREE.CanvasTexture(lc); lt.colorSpace = THREE.SRGBColorSpace;
-      const label = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 0.34), new THREE.MeshBasicMaterial({ map: lt, transparent: true }));
-      label.position.y = -1.42;
+      const backing = new THREE.Mesh(new THREE.PlaneGeometry(SW + 0.16, SH + 0.62), new THREE.MeshBasicMaterial({ color: 0x0b0a16 }));
+      backing.position.set(0, -0.23, -0.02);
+      const imgM = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), new THREE.MeshBasicMaterial({ map: texs[i], color: 0x999999 }));
+      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(SW + 0.16, SH + 0.62)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.3 }));
+      edge.position.y = -0.23;
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(SW, SW / 8), new THREE.MeshBasicMaterial({ map: labels[i], transparent: true }));
+      label.position.y = -SH / 2 - 0.2;
       g.add(backing, imgM, edge, label);
-      const y = row ? -0.4 : 2.6, z = -Math.cos(ang) * R + 2;
-      g.position.set(Math.sin(ang) * R, y, z); g.rotation.y = -ang;
-      g.userData = { x: Math.sin(ang) * R, y, z, ry: -ang, p: i * 1.3, k: 0, s: 0, id: proj.id, edge, img: imgM };
+      g.position.set(s[0], s[1], s[2]); g.rotation.y = -s[3] * 0.2;
+      g.userData = { y: s[1], p: i * 1.1, k: 0, fade: 1, pending: null, id: p[i].id, img: imgM, label, edge };
       imgM.userData.screen = g;
       gallery.add(g); floating.push(g);
     });
-    document.fonts.load('16px "Press Start 2P"').then(() => { /* labels drawn before the font loaded are redrawn on next build */ });
+    galleryState = { p, texs, labels, timer: 0, rr: -1, next: slots.length - 1 };
   })
   .catch(() => {});
 document.fonts.load(`16px ${PX}`).finally(() => draw());
