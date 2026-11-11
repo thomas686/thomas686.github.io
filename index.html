@@ -17,8 +17,8 @@
   try { if (q) localStorage.setItem('ts26-view', q); else v = localStorage.getItem('ts26-view'); } catch { }
   if (v === 'normal') document.documentElement.classList.add('normal-view'); })();
 </script>
-<link rel="stylesheet" href="assets/style.css?v=1794367168">
-<link rel="stylesheet" href="assets/console.css?v=1794367168">
+<link rel="stylesheet" href="assets/style.css?v=1794367225">
+<link rel="stylesheet" href="assets/console.css?v=1794367225">
 </head>
 <body>
 <a class="skip" href="#about">Skip to the normal portfolio</a>
@@ -135,9 +135,9 @@
   <a class="btn primary" id="d-demo" href="#" hidden>Try it live</a>
 </dialog>
 
-<script src="assets/app.js?v=1794367168"></script>
+<script src="assets/app.js?v=1794367225"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
-<script type="module">if (!document.documentElement.classList.contains('normal-view')) import('./assets/console-card3d.js?v=1794367168');</script>
+<script type="module">if (!document.documentElement.classList.contains('normal-view')) import('./assets/console-card3d.js?v=1794367225');</script>
 <script>
 document.getElementById('to-normal').addEventListener('click', e => { e.preventDefault(); try { localStorage.setItem('ts26-view', 'normal'); } catch { }
   document.documentElement.classList.add('normal-view'); history.replaceState(null, '', '?view=normal'); scrollTo(0, 0); });

@@ -611,7 +611,7 @@ function frame() {
   renderer.render(scene, camera);
 }
 
-Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
+Promise.all([fetch('data/projects.json?t=' + Date.now()).then(r => r.json()), fetch('data/experience.json?t=' + Date.now()).then(r => r.json())])
   .then(([p, e]) => { projects = p; exp = e;
     if (BG !== 'work' && BG !== 'mix') return;
     const texs = p.map(q => { const t = loader.load(q.image); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; });

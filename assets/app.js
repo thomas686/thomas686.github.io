@@ -69,7 +69,7 @@ function tick() {
 tick();
 setInterval(tick, 30000);
 
-Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
+Promise.all([fetch('data/projects.json?t=' + Date.now()).then(r => r.json()), fetch('data/experience.json?t=' + Date.now()).then(r => r.json())])
   .then(([p, e]) => {
     projects = p;
     renderCards('all');
