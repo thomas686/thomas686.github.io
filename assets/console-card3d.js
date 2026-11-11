@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
-const BG = new URLSearchParams(location.search).get('bg') || 'work';
+const BG = new URLSearchParams(location.search).get('bg') || 'mix';
 
 const section = document.getElementById('play');
 const host = document.getElementById('stage3d');
@@ -67,16 +67,16 @@ const canvasBg = (w, h, paint, nearest = false) => {
   if (nearest) { t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; }
   return { tex: t, ctx: x, c };
 };
-let bgTick = () => {};
+let bgTick = () => {}, workTick = () => {}, pixelTick = () => {};
 const floating = [];
 const gallery = new THREE.Group(); scene.add(gallery);
 let hoverScreen = null;
 window.__tsProject = null;
-if (BG === 'work') {
-  scene.background = canvasBg(4, 512, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#050b09'); g.addColorStop(0.6, '#0b1a15'); g.addColorStop(1, '#10251f'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
-  scene.fog = new THREE.Fog(0x0a1612, 12, 34);
-  const floor = new THREE.GridHelper(80, 40, 0x1f6b55, 0x123a30); floor.position.y = -3.3; floor.material.transparent = true; floor.material.opacity = 0.35; scene.add(floor);
-  bgTick = (t) => {
+if (BG === 'work' || BG === 'mix') {
+  if (BG === 'work') scene.background = canvasBg(4, 512, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#050b09'); g.addColorStop(0.6, '#0b1a15'); g.addColorStop(1, '#10251f'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
+  scene.fog = BG === 'mix' ? new THREE.Fog(0x2b1b46, 12, 38) : new THREE.Fog(0x0a1612, 12, 34);
+  if (BG === 'work') { const floor = new THREE.GridHelper(80, 40, 0x1f6b55, 0x123a30); floor.position.y = -3.3; floor.material.transparent = true; floor.material.opacity = 0.35; scene.add(floor); }
+  workTick = bgTick = (t) => {
     gallery.rotation.y = Math.sin(t * 0.06) * 0.12;
     for (const f of floating) {
       const u = f.userData, synced = u.id === window.__tsProject, hov = f === hoverScreen;
@@ -120,10 +120,11 @@ if (BG === 'work') {
     x.filter = 'none';
   });
   scene.background = b.tex; scene.fog = null; shadow.material.opacity = 0.5;
-} else if (BG === 'pixel') {
+}
+if (BG === 'pixel' || BG === 'mix') {
   const PW = 480, PH = 270;
   const P = canvasBg(PW, PH, () => {}, true);
-  scene.background = P.tex; scene.fog = null; shadow.material.opacity = 0.55;
+  scene.background = P.tex; if (BG === 'pixel') scene.fog = null; shadow.material.opacity = 0.55;
   const rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(7);
   const stars = Array.from({ length: 110 }, () => [rnd() * PW, rnd() * 120, rnd() * 6, rnd() < 0.15 ? 2 : 1]);
   const clouds = Array.from({ length: 6 }, (_, i) => [rnd() * PW, 30 + rnd() * 60, 14 + rnd() * 26, 0.6 + rnd() * 1.2]);
@@ -136,10 +137,15 @@ if (BG === 'work') {
     const tiers = [[18, 6], [14, 8], [11, 9], [8, 10], [5, 12], [3, 10], [1, 10]];
     let y = by; for (const [hw, hgt] of tiers) { x.fillRect(Math.round(bx - hw * s), Math.round(y - hgt * s), Math.round(hw * 2 * s), Math.round(hgt * s)); y -= hgt * s; }
   };
-  const palm = (x, px0, py0, h, sw) => { x.fillRect(px0, py0 - h, 2, h);
-    for (const [dx, dy] of [[-8, -2], [-5, -5], [0, -6], [5, -5], [8, -2], [-10, 1], [10, 1]]) { const ex = px0 + dx + Math.round(sw), ey = py0 - h + dy; x.fillRect(Math.min(px0, ex), ey, Math.abs(ex - px0) + 2, 2); } };
+  const palm = (x, px0, py0, h, sw, lean = 1) => {
+    let tx = px0, ty = py0;
+    for (let i = 0; i < h; i++) { tx = px0 + Math.round(lean * 6 * (i / h) * (i / h)); ty = py0 - i; x.fillRect(tx, ty, i < h * 0.3 ? 3 : 2, 1); }
+    const fronds = [[-1, -0.5], [-0.8, -0.9], [-0.3, -1], [0.3, -1], [0.8, -0.9], [1, -0.5], [-1.1, 0.1], [1.1, 0.1]];
+    for (const [fx, fy] of fronds) { for (let s = 0; s < 14; s++) { const k = s / 14, ox = tx + Math.round(fx * s + sw * k), oy = ty + Math.round(fy * s * 0.6 + k * k * 9);
+      x.fillRect(ox, oy, 2, 1); if (s % 3 === 1) x.fillRect(ox, oy + 1, 1, 2); } }
+    x.fillRect(tx - 1, ty - 1, 4, 3); };
   let shoot = null;
-  bgTick = (t) => {
+  pixelTick = (t) => {
     const x = P.ctx, par = tiltY * 40;
     const band = 150 / sky.length;
     for (let i = 0; i < sky.length; i++) { x.fillStyle = sky[i]; x.fillRect(0, Math.round(i * band), PW, Math.ceil(band) + 1); }
@@ -147,7 +153,7 @@ if (BG === 'work') {
     for (const [sx0, sy0, ph, sz] of stars) if (Math.sin(t * 2.2 + ph * 3) > -0.2) { x.fillStyle = sz > 1 ? '#fff4d8' : '#c9c2ff'; x.fillRect(Math.round(sx0 - par * 0.05), Math.round(sy0), sz, sz); }
     if (!shoot && Math.random() < 0.004) shoot = { x: 60 + Math.random() * 300, y: 10 + Math.random() * 40, life: 0 };
     if (shoot) { shoot.life++; for (let k = 0; k < 10; k++) { x.fillStyle = 'rgba(255,255,255,' + (1 - k / 10) + ')'; x.fillRect(Math.round(shoot.x + shoot.life * 4 - k * 3), Math.round(shoot.y + shoot.life * 1.5 - k), 2, 1); } if (shoot.life > 24) shoot = null; }
-    const sunX = 240 - par * 0.15, sunY = 150;
+    const sunX = 372 - par * 0.15, sunY = 150;
     for (let y = -46; y <= 0; y++) { const w = Math.round(Math.sqrt(46 * 46 - y * y)); if (y > -20 && Math.floor((y + 46) / 3) % 3 === 2) continue;
       x.fillStyle = y < -30 ? '#ffe28a' : y < -14 ? '#ffc061' : '#ff9a4d'; x.fillRect(Math.round(sunX - w), sunY + y, w * 2, 1); }
     for (const c of clouds) { const cx = ((c[0] + t * c[3] * 4 - par * 0.2) % (PW + 80)) - 40; x.fillStyle = 'rgba(255,190,200,.55)';
@@ -165,6 +171,7 @@ if (BG === 'work') {
     palm(x, Math.round(420 - par * 1.2), 202, 40, Math.sin(t * 1.2 + 2) * 1.5);
     P.tex.needsUpdate = true;
   };
+  bgTick = BG === 'mix' ? (t, dt) => { pixelTick(t, dt); workTick(t, dt); } : pixelTick;
 }
 // ---------- The body: rounded slab with the render on its face ----------
 const IMG_W = 457, IMG_H = 612, FACE = { x: 43, y: 28, w: 370, h: 562 };   // face crop inside the full render
@@ -508,7 +515,7 @@ function frame() {
 
 Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
   .then(([p, e]) => { projects = p; exp = e;
-    if (BG !== 'work') return;
+    if (BG !== 'work' && BG !== 'mix') return;
     const N = p.length, R = 13;
     p.forEach((proj, i) => {
       const row = i % 2, k = Math.floor(i / 2), cols = Math.ceil(N / 2);
