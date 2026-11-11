@@ -157,12 +157,13 @@ if (BG === 'pixel' || BG === 'mix') {
     for (const [fx, fy] of fronds) { for (let s = 0; s < 14; s++) { const k = s / 14, ox = tx + Math.round(fx * s + sw * k), oy = ty + Math.round(fy * s * 0.6 + k * k * 9);
       x.fillRect(ox, oy, 2, 1); if (s % 3 === 1) x.fillRect(ox, oy + 1, 1, 2); } }
     x.fillRect(tx - 1, ty - 1, 4, 3); };
-  let shoot = null;
+  let shoot = null, skyCache = null;
   pixelTick = (t) => {
     const x = P.ctx, par = tiltY * 40;
-    const band = 150 / sky.length;
-    for (let i = 0; i < sky.length; i++) { x.fillStyle = sky[i]; x.fillRect(0, Math.round(i * band), PW, Math.ceil(band) + 1); }
-    for (let i = 0; i < sky.length - 1; i++) dither(x, Math.round((i + 1) * band) - 2, Math.round((i + 1) * band) + 2, sky[i], sky[i + 1]);
+    if (!skyCache) { skyCache = document.createElement('canvas'); skyCache.width = PW; skyCache.height = 152; const sc2 = skyCache.getContext('2d'); const band = 150 / sky.length;
+      for (let i = 0; i < sky.length; i++) { sc2.fillStyle = sky[i]; sc2.fillRect(0, Math.round(i * band), PW, Math.ceil(band) + 1); }
+      for (let i = 0; i < sky.length - 1; i++) dither(sc2, Math.round((i + 1) * band) - 2, Math.round((i + 1) * band) + 2, sky[i], sky[i + 1]); }
+    x.drawImage(skyCache, 0, 0);
     for (const [sx0, sy0, ph, sz] of stars) if (Math.sin(t * 2.2 + ph * 3) > -0.2) { x.fillStyle = sz > 1 ? '#fff4d8' : '#c9c2ff'; x.fillRect(Math.round(sx0 - par * 0.05), Math.round(sy0), sz, sz); }
     if (!shoot && Math.random() < 0.004) shoot = { x: 60 + Math.random() * 300, y: 10 + Math.random() * 40, life: 0 };
     if (shoot) { shoot.life++; for (let k = 0; k < 10; k++) { x.fillStyle = 'rgba(255,255,255,' + (1 - k / 10) + ')'; x.fillRect(Math.round(shoot.x + shoot.life * 4 - k * 3), Math.round(shoot.y + shoot.life * 1.5 - k), 2, 1); } if (shoot.life > 24) shoot = null; }
@@ -598,10 +599,13 @@ function frame() {
   if (callout) {
     if (on) callout.classList.add('gone');
     else {
-      callout.classList.remove('gone');
       knob.getWorldPosition(knobWorld); knobWorld.project(camera);
-      const r = renderer.domElement.getBoundingClientRect();
-      callout.style.transform = `translate(${(knobWorld.x * 0.5 + 0.5) * r.width + 26}px, ${(-knobWorld.y * 0.5 + 0.5) * r.height - 18}px)`;
+      const r = renderer.domElement.getBoundingClientRect(), kx = (knobWorld.x * 0.5 + 0.5) * r.width, ky = (-knobWorld.y * 0.5 + 0.5) * r.height, cw = callout.offsetWidth;
+      const below = kx + 26 + cw > r.width - 8;
+      const px = below ? Math.max(8, Math.min(r.width - cw - 8, kx - cw + 20)) : kx + 26, py = below ? ky + 30 : ky - 18;
+      callout.style.transform = `translate(${px}px, ${py}px)`;
+      const arrow = callout.querySelector('.pc-arrow'); if (arrow) arrow.textContent = below ? '▲' : '◀';
+      callout.classList.toggle('below', below); callout.classList.remove('gone');
     }
   }
   if (on && view === 'snake') snakeTick(rdt);
