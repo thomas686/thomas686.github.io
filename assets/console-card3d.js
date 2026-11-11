@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
-const BG = new URLSearchParams(location.search).get('bg') || 'mix';
+const BG = new URLSearchParams(location.search).get('bg') || 'pixel';
 
 const section = document.getElementById('play');
 const host = document.getElementById('stage3d');
