@@ -601,11 +601,14 @@ function frame() {
     else {
       knob.getWorldPosition(knobWorld); knobWorld.project(camera);
       const r = renderer.domElement.getBoundingClientRect(), kx = (knobWorld.x * 0.5 + 0.5) * r.width, ky = (-knobWorld.y * 0.5 + 0.5) * r.height, cw = callout.offsetWidth;
-      const below = kx + 26 + cw > r.width - 8;
-      const px = below ? Math.max(8, Math.min(r.width - cw - 8, kx - cw + 20)) : kx + 26, py = below ? ky + 30 : ky - 18;
-      callout.style.transform = `translate(${px}px, ${py}px)`;
-      const arrow = callout.querySelector('.pc-arrow'); if (arrow) arrow.textContent = below ? '▲' : '◀';
-      callout.classList.toggle('below', below); callout.classList.remove('gone');
+      const narrow = kx + 26 + cw > r.width - 8;
+      if (callout.dataset.mode !== (narrow ? 'tap' : 'switch')) {
+        callout.dataset.mode = narrow ? 'tap' : 'switch';
+        callout.innerHTML = narrow ? 'TAP THE SCREEN TO START' : '<span class="pc-arrow" aria-hidden="true">&#9664;</span> FLIP THE SWITCH';
+      }
+      const px = narrow ? (r.width - callout.offsetWidth) / 2 : kx + 26, py = narrow ? r.height * 0.8 : ky - 18;
+      callout.style.transform = 'translate(' + px + 'px, ' + py + 'px)';
+      callout.classList.remove('gone');
     }
   }
   if (on && view === 'snake') snakeTick(rdt);
