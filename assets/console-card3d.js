@@ -69,11 +69,26 @@ const canvasBg = (w, h, paint, nearest = false) => {
 };
 let bgTick = () => {};
 const floating = [];
+const gallery = new THREE.Group(); scene.add(gallery);
+let hoverScreen = null;
+window.__tsProject = null;
 if (BG === 'work') {
-  scene.background = canvasBg(4, 512, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#060c0a'); g.addColorStop(0.6, '#0d1d18'); g.addColorStop(1, '#122a23'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
-  scene.fog = new THREE.Fog(0x0b1914, 10, 30);
-  bgTick = (t, dt) => { for (const f of floating) { f.position.y = f.userData.y + Math.sin(t * 0.35 + f.userData.p) * 0.35; f.rotation.y = f.userData.ry + Math.sin(t * 0.2 + f.userData.p) * 0.08; } };
-  window.addEventListener('portfolio-data', () => {}, { once: true });
+  scene.background = canvasBg(4, 512, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#050b09'); g.addColorStop(0.6, '#0b1a15'); g.addColorStop(1, '#10251f'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
+  scene.fog = new THREE.Fog(0x0a1612, 12, 34);
+  const floor = new THREE.GridHelper(80, 40, 0x1f6b55, 0x123a30); floor.position.y = -3.3; floor.material.transparent = true; floor.material.opacity = 0.35; scene.add(floor);
+  bgTick = (t) => {
+    gallery.rotation.y = Math.sin(t * 0.06) * 0.12;
+    for (const f of floating) {
+      const hot = f === hoverScreen || f.userData.id === window.__tsProject;
+      f.userData.k += ((hot ? 1 : 0) - f.userData.k) * 0.08;
+      const k = f.userData.k;
+      f.position.y = f.userData.y + Math.sin(t * 0.4 + f.userData.p) * 0.18;
+      f.position.z = f.userData.z + k * 1.6;
+      f.scale.setScalar(1 + k * 0.12);
+      f.userData.edge.material.opacity = 0.35 + k * 0.65;
+      f.userData.img.material.opacity = 0.62 + k * 0.38;
+    }
+  };
 } else if (BG === 'studio') {
   scene.background = canvasBg(512, 512, (x, w, h) => { const g = x.createRadialGradient(w / 2, h * 0.45, 10, w / 2, h * 0.45, w * 0.7); g.addColorStop(0, '#2a2e2c'); g.addColorStop(1, '#070908'); x.fillStyle = g; x.fillRect(0, 0, w, h); }).tex;
   scene.fog = new THREE.Fog(0x0b0d0c, 12, 34);
@@ -100,25 +115,51 @@ if (BG === 'work') {
   });
   scene.background = b.tex; scene.fog = null; shadow.material.opacity = 0.5;
 } else if (BG === 'pixel') {
-  const P = canvasBg(320, 180, () => {}, true);
-  const stars = Array.from({ length: 70 }, () => [Math.random() * 320, Math.random() * 80, Math.random() * 6]);
-  const ridge = (seed, amp, base) => Array.from({ length: 330 }, (_, i) => Math.round(base - amp * (0.5 + 0.5 * Math.sin(i * 0.035 + seed) * Math.cos(i * 0.011 + seed * 2))));
-  const layers = [[ridge(1, 30, 120), '#3b2752', 0.06], [ridge(4, 26, 138), '#29203f', 0.12], [ridge(7, 18, 156), '#1b1730', 0.22]];
+  const PW = 480, PH = 270;
+  const P = canvasBg(PW, PH, () => {}, true);
   scene.background = P.tex; scene.fog = null; shadow.material.opacity = 0.55;
+  const rnd = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(7);
+  const stars = Array.from({ length: 110 }, () => [rnd() * PW, rnd() * 120, rnd() * 6, rnd() < 0.15 ? 2 : 1]);
+  const clouds = Array.from({ length: 6 }, (_, i) => [rnd() * PW, 30 + rnd() * 60, 14 + rnd() * 26, 0.6 + rnd() * 1.2]);
+  const birds = Array.from({ length: 4 }, () => [rnd() * PW, 60 + rnd() * 40, 0.6 + rnd() * 0.5]);
+  const ridge = (seed, amp, base, len) => Array.from({ length: len }, (_, i) => Math.round(base - amp * (0.55 + 0.45 * Math.sin(i * 0.03 + seed) * Math.cos(i * 0.013 + seed * 1.7))));
+  const far = ridge(1.3, 34, 170, 900), mid = ridge(4.1, 26, 188, 900);
+  const sky = ['#120d33', '#1e1446', '#33195a', '#4f1f66', '#74265f', '#a3335a', '#d04c4f', '#ef7a4c', '#f8a65a'];
+  const dither = (x, y0, y1, c1, c2) => { for (let y = y0; y < y1; y++) for (let xx = (y % 2); xx < PW; xx += 2) { x.fillStyle = (y - y0) / (y1 - y0) > 0.5 ? c2 : c1; x.fillRect(xx, y, 1, 1); } };
+  const temple = (x, bx, by, s) => { // a stylised prang silhouette
+    const tiers = [[18, 6], [14, 8], [11, 9], [8, 10], [5, 12], [3, 10], [1, 10]];
+    let y = by; for (const [hw, hgt] of tiers) { x.fillRect(Math.round(bx - hw * s), Math.round(y - hgt * s), Math.round(hw * 2 * s), Math.round(hgt * s)); y -= hgt * s; }
+  };
+  const palm = (x, px0, py0, h, sw) => { x.fillRect(px0, py0 - h, 2, h);
+    for (const [dx, dy] of [[-8, -2], [-5, -5], [0, -6], [5, -5], [8, -2], [-10, 1], [10, 1]]) { const ex = px0 + dx + Math.round(sw), ey = py0 - h + dy; x.fillRect(Math.min(px0, ex), ey, Math.abs(ex - px0) + 2, 2); } };
+  let shoot = null;
   bgTick = (t) => {
-    const x = P.ctx;
-    const sky = [['#1b1440', 0], ['#3d1f5c', 40], ['#7a2f62', 80], ['#d0584e', 110], ['#f59a4f', 128]];
-    for (let i = 0; i < sky.length; i++) { x.fillStyle = sky[i][0]; x.fillRect(0, sky[i][1], 320, (sky[i + 1] ? sky[i + 1][1] : 180) - sky[i][1]); }
-    x.fillStyle = '#ffd37a'; for (let r = 22; r > 0; r -= 2) { if (r % 4 === 0) x.fillRect(160 - r, 118 - Math.round(Math.sqrt(22 * 22 - r * r)), r * 2, 2); }
-    x.beginPath(); x.fillStyle = '#ffd37a'; x.arc(160, 118, 20, Math.PI, 0); x.fill();
-    for (const [sx0, sy0, ph] of stars) { if (Math.sin(t * 2 + ph) > -0.3) { x.fillStyle = '#fff2d6'; x.fillRect(Math.round(sx0), Math.round(sy0), 1, 1); } }
-    layers.forEach(([pts, col, sp]) => { x.fillStyle = col; const off = Math.floor(t * sp * 10) % 10;
-      for (let i = 0; i < 320; i++) { const y = pts[(i + off) % pts.length]; x.fillRect(i, y, 1, 180 - y); } });
-    x.fillStyle = '#120f22'; x.fillRect(0, 168, 320, 12);
+    const x = P.ctx, par = tiltY * 40;
+    const band = 150 / sky.length;
+    for (let i = 0; i < sky.length; i++) { x.fillStyle = sky[i]; x.fillRect(0, Math.round(i * band), PW, Math.ceil(band) + 1); }
+    for (let i = 0; i < sky.length - 1; i++) dither(x, Math.round((i + 1) * band) - 2, Math.round((i + 1) * band) + 2, sky[i], sky[i + 1]);
+    for (const [sx0, sy0, ph, sz] of stars) if (Math.sin(t * 2.2 + ph * 3) > -0.2) { x.fillStyle = sz > 1 ? '#fff4d8' : '#c9c2ff'; x.fillRect(Math.round(sx0 - par * 0.05), Math.round(sy0), sz, sz); }
+    if (!shoot && Math.random() < 0.004) shoot = { x: 60 + Math.random() * 300, y: 10 + Math.random() * 40, life: 0 };
+    if (shoot) { shoot.life++; for (let k = 0; k < 10; k++) { x.fillStyle = 'rgba(255,255,255,' + (1 - k / 10) + ')'; x.fillRect(Math.round(shoot.x + shoot.life * 4 - k * 3), Math.round(shoot.y + shoot.life * 1.5 - k), 2, 1); } if (shoot.life > 24) shoot = null; }
+    const sunX = 240 - par * 0.15, sunY = 150;
+    for (let y = -46; y <= 0; y++) { const w = Math.round(Math.sqrt(46 * 46 - y * y)); if (y > -20 && Math.floor((y + 46) / 3) % 3 === 2) continue;
+      x.fillStyle = y < -30 ? '#ffe28a' : y < -14 ? '#ffc061' : '#ff9a4d'; x.fillRect(Math.round(sunX - w), sunY + y, w * 2, 1); }
+    for (const c of clouds) { const cx = ((c[0] + t * c[3] * 4 - par * 0.2) % (PW + 80)) - 40; x.fillStyle = 'rgba(255,190,200,.55)';
+      x.fillRect(Math.round(cx), Math.round(c[1]), Math.round(c[2]), 3); x.fillRect(Math.round(cx + 4), Math.round(c[1] - 2), Math.round(c[2] * 0.6), 2); }
+    const drawRidge = (pts, col, speed, shift) => { x.fillStyle = col; const off = Math.floor(t * speed + shift);
+      for (let i = 0; i < PW; i++) { const y = pts[((i + off) % pts.length + pts.length) % pts.length]; x.fillRect(i, y, 1, 200 - y); } };
+    drawRidge(far, '#3a2150', 2, -par * 0.3); drawRidge(mid, '#271a3d', 4, -par * 0.6);
+    x.fillStyle = '#1a1230'; temple(x, 330 - par * 0.8, 200, 1.1); temple(x, 300 - par * 0.8, 200, 0.7); temple(x, 362 - par * 0.8, 200, 0.6);
+    x.fillStyle = '#1a1230'; x.fillRect(0, 196, PW, 6);
+    for (let y = 202; y < PH; y++) { x.fillStyle = y % 3 === 0 ? '#2b1b46' : '#1e1536'; x.fillRect(0, y, PW, 1); }
+    for (let y = 204; y < PH; y += 3) { const w = Math.max(2, 46 - (y - 204) * 0.5) * (0.7 + 0.3 * Math.sin(t * 3 + y)); x.fillStyle = 'rgba(255,170,90,.55)'; x.fillRect(Math.round(sunX - w), y, Math.round(w * 2), 1); }
+    for (const b of birds) { const bx = ((b[0] + t * 14 * b[2]) % (PW + 20)) - 10, by = b[1] + Math.sin(t * 2 + b[0]) * 3, f = Math.sin(t * 9 + b[0]) > 0 ? 1 : 0;
+      x.fillStyle = '#1a1230'; x.fillRect(Math.round(bx - 2), Math.round(by - f), 2, 1); x.fillRect(Math.round(bx), Math.round(by), 1, 1); x.fillRect(Math.round(bx + 1), Math.round(by - f), 2, 1); }
+    x.fillStyle = '#0f0b1f'; palm(x, Math.round(60 - par * 1.2), 202, 46, Math.sin(t * 1.3) * 1.5); palm(x, Math.round(88 - par * 1.2), 202, 34, Math.sin(t * 1.1 + 1) * 1.5);
+    palm(x, Math.round(420 - par * 1.2), 202, 40, Math.sin(t * 1.2 + 2) * 1.5);
     P.tex.needsUpdate = true;
   };
 }
-
 // ---------- The body: rounded slab with the render on its face ----------
 const IMG_W = 457, IMG_H = 612, FACE = { x: 43, y: 28, w: 370, h: 562 };   // face crop inside the full render
 const W = 3.2, H = W * FACE.h / FACE.w, D = 0.78, R = 46 / FACE.w * W;
@@ -242,7 +283,7 @@ function draw() {
     });
     foot('SELF-RATED', 'B BACK'); say.push('About me. Sales and marketing person who builds with AI, Bangkok.');
   } else if (view === 'project') {
-    const p = projects[idx];
+    const p = projects[idx]; window.__tsProject = p.id;
     if (p.image) drawContain(img(p.image), 0, 0, 640, 400);
     { const tag = `${idx + 1}/${projects.length}`; sx.font = `12px ${PX}`; const w = sx.measureText(tag).width + 20;
       sx.fillStyle = 'rgba(5,10,16,.85)'; sx.fillRect(640 - w - 14, 14, w, 30); txt(tag, 640 - w - 4, 35, C.amber, 12); }
@@ -266,6 +307,7 @@ function draw() {
     list(CONTACT, idx, 290); if (msg) txt(msg, 62, 380, C.amber, 14);
     foot('A DO IT', 'B BACK'); say.push('Contact. Email thomas.s686@gmail.com. LinkedIn in slash ts0kolowski.');
   }
+  if (view !== 'project') window.__tsProject = null;
   if (!sound && view !== 'project') txt('MUTED', 532, 60, C.dim, 12);
   scanlines(); screenTex.needsUpdate = true; srText.textContent = say.join(' ') + (sound ? '' : ' Sound is muted.');
 }
@@ -391,13 +433,18 @@ const cv = renderer.domElement;
 cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, spin: spinTarget, hit: hitAt(e) }; moved = false; cv.setPointerCapture(e.pointerId); });
 cv.addEventListener('pointermove', e => {
   if (drag) { const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) moved = true; if (moved) { spinTarget = drag.spin + dx * 0.012; cv.style.cursor = 'grabbing'; } return; }
-  const h = hitAt(e); cv.style.cursor = h && h.k !== 'body' ? 'pointer' : h ? 'grab' : 'default';
+  const h = hitAt(e);
+  hoverScreen = null;
+  if (!h && floating.length) { const s = ray.intersectObjects(floating.map(f => f.userData.img), false)[0]; if (s) hoverScreen = s.object.userData.screen; }
+  cv.style.cursor = (h && h.k !== 'body') || hoverScreen ? 'pointer' : h ? 'grab' : 'default';
 });
 cv.addEventListener('pointerup', () => {
   if (!drag) return;
   const d = drag; drag = null;
   if (moved) { spinTarget = Math.round(spinTarget / Math.PI) * Math.PI; return; }
-  const h = d.hit; if (!h || h.k === 'body') return;
+  const h = d.hit;
+  if (!h && hoverScreen && window.openProject) { window.openProject(hoverScreen.userData.id); return; }
+  if (!h || h.k === 'body') return;
   if (h.k === 'screen') {
     if (showingBack()) { toFront(); return; }
     if (!on) { setPower(true); return; }
@@ -456,13 +503,28 @@ function frame() {
 Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experience.json').then(r => r.json())])
   .then(([p, e]) => { projects = p; exp = e;
     if (BG !== 'work') return;
-    const slots = [[-7.5, 3, -6], [7.8, 2.6, -7], [-9.5, -0.6, -10], [9.8, -0.4, -11], [-5.6, -2.2, -5], [6, -2.4, -6], [-12, 3.6, -15], [12.5, 3.4, -16], [0, 5.4, -18], [-3.8, 4.6, -12], [4.2, 4.8, -13], [-14, -1.5, -19], [14, -1.2, -20]];
-    p.forEach((proj, i) => { const s = slots[i % slots.length]; const tx = loader.load(proj.image); tx.colorSpace = THREE.SRGBColorSpace;
+    const N = p.length, R = 13;
+    p.forEach((proj, i) => {
+      const row = i % 2, k = Math.floor(i / 2), cols = Math.ceil(N / 2);
+      const ang = THREE.MathUtils.degToRad(-62 + (124 * (k + (row ? 0.5 : 0))) / (cols - 0.5));
       const g = new THREE.Group();
-      g.add(new THREE.Mesh(new THREE.PlaneGeometry(4, 2.5), new THREE.MeshBasicMaterial({ map: tx, transparent: true, opacity: 0.85 })));
-      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(4.08, 2.58)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.5 })); g.add(edge);
-      g.position.set(s[0], s[1], s[2]); g.userData = { y: s[1], ry: -Math.sign(s[0]) * 0.35, p: i * 1.7 }; g.rotation.y = g.userData.ry;
-      scene.add(g); floating.push(g); }); })
+      const tx = loader.load(proj.image); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 4;
+      const imgM = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.25), new THREE.MeshBasicMaterial({ map: tx, transparent: true, opacity: 0.62 }));
+      const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(3.7, 2.35)), new THREE.LineBasicMaterial({ color: 0x7dffb0, transparent: true, opacity: 0.35 }));
+      const lc = document.createElement('canvas'); lc.width = 512; lc.height = 48; const lx = lc.getContext('2d');
+      lx.fillStyle = '#ffd37a'; lx.font = '16px "Press Start 2P", monospace'; lx.textBaseline = 'middle'; lx.fillText(proj.title.toUpperCase().slice(0, 28), 4, 24);
+      const lt = new THREE.CanvasTexture(lc); lt.colorSpace = THREE.SRGBColorSpace;
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 0.34), new THREE.MeshBasicMaterial({ map: lt, transparent: true }));
+      label.position.y = -1.42;
+      g.add(imgM, edge, label);
+      const y = row ? -0.4 : 2.6, z = -Math.cos(ang) * R + 2;
+      g.position.set(Math.sin(ang) * R, y, z); g.rotation.y = -ang;
+      g.userData = { y, z, p: i * 1.3, k: 0, id: proj.id, edge, img: imgM };
+      imgM.userData.screen = g;
+      gallery.add(g); floating.push(g);
+    });
+    document.fonts.load('16px "Press Start 2P"').then(() => { /* labels drawn before the font loaded are redrawn on next build */ });
+  })
   .catch(() => {});
 document.fonts.load(`16px ${PX}`).finally(() => draw());
 draw(); frame();
