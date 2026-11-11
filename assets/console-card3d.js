@@ -250,12 +250,14 @@ back.position.z = -D / 2 - 0.003; back.rotation.y = Math.PI; dev.add(back);
 const C = { bg: '#0c1620', mint: '#bff5d6', amber: '#ffd37a', dim: '#6f9a87', white: '#ffffff', sel: 'rgba(125,255,176,.14)' };
 const PX = '"Press Start 2P", monospace';
 let hits = [];
-const txt = (s, x, y, col = C.mint, size = 18) => { sx.fillStyle = col; sx.font = `${size}px ${PX}`; sx.fillText(s, x, y); };
-function wrapText(s, x, y, maxW, size, col, lh, maxLines = 99) {
-  sx.font = `${size}px ${PX}`; const words = s.split(' '); let line = '', n = 0;
+const SANS = '600 {s}px Geist, "Segoe UI", Arial, sans-serif';
+const fontOf = (size, fam) => fam === 'sans' ? SANS.replace('{s}', size) : `${size}px ${PX}`;
+const txt = (s, x, y, col = C.mint, size = 18, fam) => { sx.fillStyle = col; sx.font = fontOf(size, fam); sx.fillText(s, x, y); };
+function wrapText(s, x, y, maxW, size, col, lh, maxLines = 99, fam) {
+  sx.font = fontOf(size, fam); const words = s.split(' '); let line = '', n = 0;
   for (const w of words) { const t = line ? line + ' ' + w : w;
-    if (sx.measureText(t).width > maxW && line) { txt(line, x, y + n * lh, col, size); line = w; if (++n >= maxLines) return n; } else line = t; }
-  if (line) txt(line, x, y + n * lh, col, size);
+    if (sx.measureText(t).width > maxW && line) { txt(line, x, y + n * lh, col, size, fam); line = w; if (++n >= maxLines) return n; } else line = t; }
+  if (line) txt(line, x, y + n * lh, col, size, fam);
   return n + 1;
 }
 function scanlines() {
@@ -275,7 +277,7 @@ function list(items, sel, y0, lh = 34, size = 17) {
     if (i === sel) { sx.fillStyle = C.sel; sx.fillRect(24, y - lh + 10, 592, lh); if (blink) txt('▶', 30, y, C.amber, size); }
     txt(t, 62, y, i === sel ? C.white : C.mint, size); hits.push({ i, x: 24, y: y - lh + 10, w: 592, h: lh }); });
 }
-const foot = (l, r) => { txt(l, 30, 458, C.dim, 12); sx.font = `12px ${PX}`; txt(r, 610 - sx.measureText(r).width, 458, C.dim, 12); };
+const foot = (l, r) => { txt(l, 30, 456, C.dim, 15); sx.font = `15px ${PX}`; txt(r, 610 - sx.measureText(r).width, 456, C.dim, 15); };
 
 const MENU = ['ABOUT ME', 'PROJECTS', 'EXPERIENCE', 'CONTACT', 'SNAKE', 'NORMAL VIEW', 'TURN OFF'];
 // ---- Snake: an original take on the classic, played on the TS-26 screen ----
@@ -322,7 +324,7 @@ function draw() {
   if (!on) {
     sx.fillStyle = '#050807'; sx.fillRect(0, 0, 640, 480);
     if (offAt && performance.now() - offAt < 350) { const k = 1 - (performance.now() - offAt) / 350; sx.fillStyle = '#e9fff2'; sx.fillRect(320 - 300 * k, 238, 600 * k, 4); }
-    else if (blink) { sx.font = `16px ${PX}`; const s = coarse ? 'TAP TO START' : 'PRESS A TO START'; txt(s, 320 - sx.measureText(s).width / 2, 250, '#4f7766', 16); }
+    else if (blink) { sx.font = `16px ${PX}`; sx.font = `20px ${PX}`; const s = coarse ? 'TAP TO START' : 'PRESS A TO START'; txt(s, 320 - sx.measureText(s).width / 2, 250, '#6f9a87', 20); }
     screenTex.needsUpdate = true; srText.textContent = 'The console is off. Press A, any key, or tap the screen to start.'; return;
   }
   if (view === 'boot') {
@@ -333,29 +335,29 @@ function draw() {
     if (t > 0.8) { sx.font = `16px ${PX}`; const n = 'THOMAS SOKOLOWSKI'; txt(n, 320 - sx.measureText(n).width / 2, 300, C.amber, 16); }
     say.push('TS-26. Thomas Sokolowski.');
   } else if (view === 'menu') {
-    txt('MAIN MENU', 30, 60, C.amber, 20); list(MENU, idx, 118, 38, 17);
+    txt('MAIN MENU', 30, 62, C.amber, 24); list(MENU, idx, 112, 42, 20);
     foot('▲▼ MOVE', 'A OPEN'); say.push('Main menu. Selected: ' + MENU[idx]);
   } else if (view === 'about') {
-    txt('ABOUT ME', 30, 60, C.amber, 20);
-    txt('THOMAS SOKOLOWSKI', 30, 108, C.white, 15);
+    txt('ABOUT ME', 30, 62, C.amber, 24);
+    txt('THOMAS SOKOLOWSKI', 30, 112, C.white, 19);
     const about = ['A sales and marketing person who builds with AI. I turn messy business problems into working tools, and then I help sell them.',
       'Based in Bangkok. Studying an MSc in Innovation Management. I speak Danish, English, Thai and some Mandarin.'];
-    let ay = 150; for (const para of about) ay += wrapText(para, 30, ay, 580, 12, C.mint, 24) * 24 + 16;
+    let ay = 162; for (const para of about) ay += wrapText(para, 30, ay, 580, 25, C.mint, 33, 99, 'sans') * 33 + 14;
     foot('', 'B BACK'); say.push('About me. ' + about.join(' '));
   } else if (view === 'project') {
     const p = projects[idx]; window.__tsProject = p.id;
     if (p.image) drawContain(img(p.image), 0, 0, 640, 400);
-    { const tag = `${idx + 1}/${projects.length}`; sx.font = `12px ${PX}`; const w = sx.measureText(tag).width + 20;
-      sx.fillStyle = 'rgba(5,10,16,.85)'; sx.fillRect(640 - w - 14, 14, w, 30); txt(tag, 640 - w - 4, 35, C.amber, 12); }
-    const g = sx.createLinearGradient(0, 330, 0, 480); g.addColorStop(0, 'rgba(5,10,16,0)'); g.addColorStop(0.45, 'rgba(5,10,16,.94)');
-    sx.fillStyle = g; sx.fillRect(0, 330, 640, 150);
-    wrapText(p.title.toUpperCase(), 24, 418, 592, 15, C.amber, 24, 2);
-    txt('A: FULL STORY  ◀▶ NEXT  B: MENU', 24, 464, C.dim, 11);
+    { const tag = `${idx + 1}/${projects.length}`; sx.font = `15px ${PX}`; const w = sx.measureText(tag).width + 20;
+      sx.fillStyle = 'rgba(5,10,16,.85)'; sx.fillRect(640 - w - 14, 12, w, 36); txt(tag, 640 - w - 4, 37, C.amber, 15); }
+    const g = sx.createLinearGradient(0, 330, 0, 480); g.addColorStop(0, 'rgba(5,10,16,0)'); g.addColorStop(0.35, 'rgba(5,10,16,.95)');
+    sx.fillStyle = g; sx.fillRect(0, 320, 640, 160);
+    wrapText(p.title, 24, 410, 592, 27, '#ffffff', 32, 2, 'sans');
+    txt('A: FULL STORY  ◀▶ NEXT', 24, 464, C.amber, 14);
     hits.push({ i: -1, x: 0, y: 0, w: 640, h: 480 }); say.push(`${p.title}. ${p.summary} Press A for the full story.`);
   } else if (view === 'snake') {
     const s = snake;
-    txt('SNAKE', 20, 40, C.amber, 16);
-    sx.font = `14px ${PX}`; const sc = `SCORE ${s.score}   HI ${Math.max(s.hi, s.score)}`; txt(sc, 620 - sx.measureText(sc).width, 40, C.mint, 14);
+    txt('SNAKE', 20, 40, C.amber, 18);
+    sx.font = `16px ${PX}`; const sc = `SCORE ${s.score}   HI ${Math.max(s.hi, s.score)}`; txt(sc, 620 - sx.measureText(sc).width, 40, C.mint, 16);
     sx.fillStyle = '#081018'; sx.fillRect(SN.x0, SN.y0, SN.cols * SN.cell, SN.rows * SN.cell);
     sx.strokeStyle = 'rgba(125,255,176,.06)'; sx.lineWidth = 1;
     for (let c = 1; c < SN.cols; c++) { sx.beginPath(); sx.moveTo(SN.x0 + c * SN.cell, SN.y0); sx.lineTo(SN.x0 + c * SN.cell, SN.y0 + SN.rows * SN.cell); sx.stroke(); }
@@ -365,30 +367,30 @@ function draw() {
     if (s.food) { cellAt(s.food[0], s.food[1], '#ff8f6b', 6); sx.fillStyle = '#7dffb0'; sx.fillRect(SN.x0 + s.food[0] * SN.cell + 13, SN.y0 + s.food[1] * SN.cell + 2, 4, 6); }
     s.body.forEach(([x, y], i) => cellAt(x, y, i === 0 ? '#ffd37a' : (i % 2 ? '#7dffb0' : '#5fe39b')));
     if (!s.started) { sx.fillStyle = 'rgba(5,10,16,.7)'; sx.fillRect(SN.x0, 200, SN.cols * SN.cell, 90); sx.font = `16px ${PX}`;
-      const a = 'PRESS A TO PLAY'; txt(a, 320 - sx.measureText(a).width / 2, 240, C.amber, 16); sx.font = `11px ${PX}`; const b = 'STEER WITH THE D-PAD'; txt(b, 320 - sx.measureText(b).width / 2, 272, C.mint, 11); }
+      const a = 'PRESS A TO PLAY'; txt(a, 320 - sx.measureText(a).width / 2, 240, C.amber, 16); sx.font = `14px ${PX}`; const b = 'STEER WITH THE D-PAD'; txt(b, 320 - sx.measureText(b).width / 2, 274, C.mint, 14); }
     if (!s.alive) { sx.fillStyle = 'rgba(5,10,16,.8)'; sx.fillRect(SN.x0, 180, SN.cols * SN.cell, 130); sx.font = `22px ${PX}`;
-      const g = 'GAME OVER'; txt(g, 320 - sx.measureText(g).width / 2, 225, '#ff8f6b', 22); sx.font = `12px ${PX}`;
-      const r = s.score >= s.hi && s.score > 0 ? 'NEW HIGH SCORE!' : `SCORE ${s.score}`; txt(r, 320 - sx.measureText(r).width / 2, 258, C.amber, 12);
-      const h = 'A: AGAIN   B: MENU'; txt(h, 320 - sx.measureText(h).width / 2, 288, C.mint, 12); }
+      const g = 'GAME OVER'; txt(g, 320 - sx.measureText(g).width / 2, 225, '#ff8f6b', 22); sx.font = `15px ${PX}`;
+      const r = s.score >= s.hi && s.score > 0 ? 'NEW HIGH SCORE!' : `SCORE ${s.score}`; txt(r, 320 - sx.measureText(r).width / 2, 260, C.amber, 15);
+      const h = 'A: AGAIN   B: MENU'; txt(h, 320 - sx.measureText(h).width / 2, 292, C.mint, 15); }
     foot('\u25B2\u25BC\u25C0\u25B6 STEER', 'B MENU');
     say.push(s.alive ? `Snake. Score ${s.score}. Steer with the arrow keys.` : `Game over. Score ${s.score}. Press A to play again or B for the menu.`);
   } else if (view === 'exp') {
     const all = [...exp.work, ...exp.education], e = all[sub];
-    txt(`EXPERIENCE ${sub + 1}/${all.length}`, 30, 60, C.amber, 20);
-    txt(e.when.toUpperCase(), 30, 112, C.amber, 13);
-    const n = wrapText(e.role.toUpperCase(), 30, 150, 580, 15, C.white, 26, 2);
-    wrapText(`${e.org} · ${e.place}`.toUpperCase(), 30, 150 + n * 26 + 10, 580, 12, C.mint, 22, 2);
-    wrapText(e.text, 30, 270, 580, 12, '#9fd8bb', 24, 6);
+    txt(`EXPERIENCE ${sub + 1}/${all.length}`, 30, 62, C.amber, 22);
+    txt(e.when, 30, 108, C.amber, 22, 'sans');
+    let ey = 146; ey += wrapText(e.role, 30, ey, 580, 26, C.white, 31, 2, 'sans') * 31;
+    ey += wrapText(`${e.org} · ${e.place}`, 30, ey, 580, 21, C.mint, 27, 2, 'sans') * 27 + 14;
+    wrapText(e.text, 30, ey, 580, 21, '#c5e6d4', 28, 5, 'sans');
     foot('◀▶ FLIP', 'B BACK'); say.push(`${e.role}, ${e.org}, ${e.when}. ${e.text}`);
   } else if (view === 'contact') {
-    txt('CONTACT', 30, 60, C.amber, 20);
-    txt('EMAIL', 30, 112, C.dim, 12); txt('thomas.s686@gmail.com', 30, 142, C.white, 15);
-    txt('LINKEDIN', 30, 184, C.dim, 12); txt('in/ts0kolowski', 30, 214, C.white, 15);
-    list(CONTACT, idx, 290); if (msg) txt(msg, 62, 380, C.amber, 14);
+    txt('CONTACT', 30, 62, C.amber, 24);
+    txt('EMAIL', 30, 108, C.dim, 15); txt('thomas.s686@gmail.com', 30, 142, C.white, 28, 'sans');
+    txt('LINKEDIN', 30, 188, C.dim, 15); txt('linkedin.com/in/ts0kolowski', 30, 222, C.white, 26, 'sans');
+    list(CONTACT, idx, 300, 42, 20); if (msg) txt(msg, 62, 400, C.amber, 18);
     foot('A DO IT', 'B BACK'); say.push('Contact. Email thomas.s686@gmail.com. LinkedIn in slash ts0kolowski.');
   }
   if (view !== 'project') window.__tsProject = null;
-  if (!sound && view !== 'project') txt('MUTED', 532, 60, C.dim, 12);
+  if (!sound && view !== 'project') txt('MUTED', 520, 62, C.dim, 15);
   scanlines(); screenTex.needsUpdate = true; srText.textContent = say.join(' ') + (sound ? '' : ' Sound is muted.');
 }
 setInterval(() => { blink = !blink; if (view !== 'boot' && !(view === 'snake' && snake && snake.alive && snake.started)) draw(); }, 500);
