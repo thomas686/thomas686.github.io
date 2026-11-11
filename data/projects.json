@@ -323,21 +323,23 @@
   },
   {
     "id": "pharma-optimizer",
-    "title": "Pharma flu logistics optimizer",
+    "title": "Flu Season Survival: smart warehouse sorting",
     "category": "academic",
     "year": "2026",
-    "summary": "Digital Innovation course, group project: a dashboard that helps a pharmaceutical warehouse prepare for flu season, from forecasting demand to planning picking and shipments.",
-    "problem": "Flu outbreaks make demand for medicine jump suddenly and unevenly across regions, and a distribution centre that plans for a normal week ends up short-staffed, slow to pick and shipping cold-chain goods badly.",
-    "built": "A web app in Python: it scores flu outbreak risk for eight Chinese regions from public health data, forecasts demand per product for 7, 30 and 90 days with confidence ranges, groups orders with machine-learning clustering to shorten picking routes, and plans shipment waves that keep room-temperature, cold and frozen goods apart. Eight dashboard tabs, KPIs and CSV export.",
-    "result": "A working prototype a warehouse manager can play with, built by our group for the MSc course in Digital Innovation.",
+    "summary": "Digital Innovation course, group project: an interactive app showing how AI can save a pharmaceutical warehouse when flu season makes orders explode, and where it stops helping.",
+    "problem": "In flu season, a pharma distribution warehouse can go from 90,000 to 250,000 orders. Manual sorting cannot keep up: picking gets fragmented, labour hours run far over capacity and mis-picks rise.",
+    "built": "A web app in three acts. The crisis: what manual sorting costs at the flu peak. The AI rescue: wave allocation that batches orders by temperature zone and route to cut picking work. The limit: where the AI breaks down and people are still needed. It runs on small and large datasets, and the full tool adds demand forecasting and machine-learning clustering.",
+    "result": "A live prototype anyone can try, built by our group with AI coding tools for the MSc in Innovation Management.",
     "tools": [
       "Python",
       "Streamlit",
-      "scikit-learn",
-      "HDBSCAN",
-      "Plotly",
-      "Forecasting"
-    ]
+      "Machine learning",
+      "Data simulation",
+      "AI-assisted coding"
+    ],
+    "demo": "https://sokodank1-digital-innovation-test.hf.space/",
+    "image": "img/pharma-app.webp",
+    "imageKind": "screenshot"
   },
   {
     "id": "semester2-china",
