@@ -77,3 +77,25 @@ Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experi
     renderTimeline('edu-list', e.education);
   })
   .catch(() => { $('cards').innerHTML = '<p>The projects did not load. Reload the page to try again.</p>'; });
+
+// "Players visited": a public visit counter (abacus.jasoncameron.dev). Each browser counts once;
+// local testing only reads the number. The badge stays hidden if the service does not answer.
+(() => {
+  const box = document.getElementById('visits'), num = document.getElementById('v-num');
+  if (!box || !num) return;
+  const API = 'https://abacus.jasoncameron.dev', NS = 'thomas686-portfolio', KEY = 'players';
+  const local = /^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname);
+  let counted = false;
+  try { counted = localStorage.getItem('ts26-counted') === '1'; } catch { /* storage blocked */ }
+  const url = `${API}/${local || counted ? 'get' : 'hit'}/${NS}/${KEY}`;
+  fetch(url).then(r => r.ok ? r.json() : r.status === 404 ? { value: 0 } : Promise.reject())
+    .then(({ value }) => {
+      if (!local && !counted) { try { localStorage.setItem('ts26-counted', '1'); } catch { } }
+      box.hidden = false;
+      const end = Number(value) || 0, t0 = performance.now(), dur = 1200;
+      const step = now => { const k = Math.min(1, (now - t0) / dur), v = Math.round(end * (1 - Math.pow(1 - k, 3)));
+        num.textContent = String(v).padStart(6, '0'); if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    })
+    .catch(() => { box.hidden = true; });
+})();

@@ -45,3 +45,9 @@
 @keyframes pc-pulse{0%,100%{box-shadow:0 0 0 3px rgba(255,211,122,.25),0 0 20px rgba(255,211,122,.35)}50%{box-shadow:0 0 0 7px rgba(255,211,122,.12),0 0 42px rgba(255,211,122,.6)}}
 @keyframes pc-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(-5px)}}
 @media (max-width:600px){.power-callout{font-size:10px;padding:9px 11px}}
+
+/* Arcade-style visit counter, top right */
+.visits{position:absolute;top:max(16px,env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));z-index:3;display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding:9px 12px;border-radius:6px;background:rgba(8,10,20,.72);border:2px solid rgba(255,211,122,.55);box-shadow:0 0 18px rgba(255,211,122,.18);backdrop-filter:blur(3px)}
+.v-label{font:400 8px/1 var(--pixel);letter-spacing:.06em;color:#9fd8bb}
+.v-num{font:400 16px/1 var(--pixel);color:#ffd37a;text-shadow:0 0 10px rgba(255,211,122,.5);font-variant-numeric:tabular-nums}
+@media (max-width:600px){.visits{padding:7px 9px}.v-num{font-size:12px}.v-label{font-size:7px}}
