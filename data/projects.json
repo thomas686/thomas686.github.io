@@ -91,17 +91,73 @@
     "imageKind": "screenshot"
   },
   {
+    "id": "website",
+    "title": "Lead forms and pages on the agency website",
+    "category": "web",
+    "year": "2026",
+    "summary": "Landing pages, lead forms and the CRM product pages on the agency's own site, in Danish, English and Swedish.",
+    "problem": "The website is where leads arrive, and the forms decide what lands in the email system afterwards. Broken phone numbers or missing consent make a lead useless.",
+    "built": "Landing pages for a split test between two wordings, lead forms with an industry dropdown, phone numbers cleaned into one format and a proper consent checkbox, an add-ons section on the CRM page in three languages, and contact forms on the case pages.",
+    "result": "Live on the agency's site. Leads now arrive clean, with consent recorded, straight into the email system.",
+    "tools": [
+      "Astro",
+      "Klaviyo",
+      "HTML/CSS",
+      "Claude Code"
+    ],
+    "image": "img/website.webp",
+    "imageKind": "screenshot"
+  },
+  {
+    "id": "deck-hub",
+    "title": "Sales deck hub",
+    "category": "web",
+    "year": "2026",
+    "summary": "One place for every sales deck, which the salespeople can edit themselves without asking anyone.",
+    "problem": "Sales decks lived as files that went out of date, and every change had to go through the person who made them.",
+    "built": "A small site that lists every sales deck. Each deck runs in the browser, and adding ?rediger to its address opens an edit mode, so the salespeople update the text themselves. Linked from the company's internal system.",
+    "result": "Used by the sales team in customer meetings and kept current by the people who present them.",
+    "tools": [
+      "HTML/CSS/JS",
+      "Cloudflare Pages",
+      "Workers KV",
+      "Claude Code"
+    ],
+    "image": "img/deck-hub.webp",
+    "imageKind": "screenshot"
+  },
+  {
+    "id": "crm-tour",
+    "title": "AlphaCRM guided product tour",
+    "category": "alphacrm",
+    "year": "2026",
+    "summary": "A clickable demo of the CRM with a step-by-step tour, so prospects can try it before a meeting.",
+    "problem": "A prospect could not try the CRM without a meeting, and an empty system says little on its own.",
+    "built": "A public demo version of the CRM with no real data, a ten-step guided tour of the menu, and a getting-started checklist that shows a new customer what to do first.",
+    "result": "Live and open to anyone. Try it yourself.",
+    "tools": [
+      "React",
+      "TypeScript",
+      "Cloudflare Pages",
+      "Claude Code"
+    ],
+    "demo": "https://alphacrm-rundvisning.pages.dev/",
+    "image": "img/crm-tour.webp",
+    "imageKind": "screenshot"
+  },
+  {
     "id": "post-generator",
-    "title": "Social post generator for a franchise",
+    "title": "AI post generators for a franchise and a clinic",
     "category": "ai",
     "year": "2026",
-    "summary": "AI that drafts local social media posts for every branch of a franchise, with a human check before anything is posted.",
-    "problem": "A franchise with many local branches needs regular, local posts for each one. Writing them by hand does not scale, and fully automatic posting is a risk.",
-    "built": "A generator inside Alpha's social media platform that drafts posts and images for each branch, and a review queue where a person approves, edits or rejects each post. Scheduled agents fill the queue over the weekend.",
-    "result": "Posts are ready for review every Monday. A person still gives every post the go-ahead before it is published.",
+    "summary": "AI tools that draft on-brand social posts for every branch of a franchise, and for a chiropractic clinic, with a person approving each one.",
+    "problem": "Local businesses need regular, on-brand posts. Writing them by hand does not scale, a designer opening Illustrator for every post is slow, and fully automatic posting is a risk.",
+    "built": "For a franchise with many branches: a generator inside the agency's social media platform that drafts posts and images for each branch, with a review queue where a person approves, edits or rejects each one, filled by scheduled agents over the weekend. For a chiropractic clinic: a web tool where the team picks one of the designer's templates, gets AI-suggested text with a named source for every figure, swaps the photo and downloads a finished post in minutes.",
+    "result": "Posts are ready for review every Monday, and a clinic post that used to need a designer now takes a few minutes. A person still approves everything before it goes out.",
     "tools": [
       "Claude",
       "Supabase",
+      "Cloudflare Pages",
       "Scheduled agents",
       "Lovable"
     ],

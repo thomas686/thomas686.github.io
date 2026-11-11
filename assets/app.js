@@ -1,4 +1,4 @@
-const CATS = { ai: 'AI and automation', alphacrm: 'AlphaCRM', email: 'Email', side: 'Side project', academic: 'Academic' };
+const CATS = { ai: 'AI and automation', alphacrm: 'AlphaCRM', email: 'Email', side: 'Side project', academic: 'Academic', web: 'Web' };
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let projects = [];
@@ -33,7 +33,7 @@ function openProject(id) {
   $('d-tools').innerHTML = p.tools.map(t => `<li>${esc(t)}</li>`).join('');
   const demo = $('d-demo');
   demo.hidden = !p.demo;
-  if (p.demo) demo.href = p.demo;
+  if (p.demo) { demo.href = p.demo; const ext = /^https?:/.test(p.demo); demo.target = ext ? '_blank' : ''; demo.rel = ext ? 'noopener' : ''; }
   d.showModal();
   d.scrollTop = 0;
 }
