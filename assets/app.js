@@ -87,8 +87,8 @@ Promise.all([fetch('data/projects.json').then(r => r.json()), fetch('data/experi
   const local = /^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname);
   let counted = false;
   try { counted = localStorage.getItem('ts26-counted') === '1'; } catch { /* storage blocked */ }
-  const url = `${API}/${local || counted ? 'get' : 'hit'}/${NS}/${KEY}`;
-  fetch(url).then(r => r.ok ? r.json() : r.status === 404 ? { value: 0 } : Promise.reject())
+  const url = `${API}/${counted ? 'get' : 'hit'}/${NS}/${KEY}`;
+  (local ? Promise.resolve({ ok: true, json: () => ({ value: 0 }) }) : fetch(url)).then(r => r.ok ? r.json() : r.status === 404 ? { value: 0 } : Promise.reject())
     .then(({ value }) => {
       if (!local && !counted) { try { localStorage.setItem('ts26-counted', '1'); } catch { } }
       box.hidden = false;

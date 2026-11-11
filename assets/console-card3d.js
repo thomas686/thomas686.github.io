@@ -223,6 +223,7 @@ groove.position.set(W / 2 + 0.003, 1.35, 0); dev.add(groove);
 const knob = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.26, 0.18), new THREE.MeshStandardMaterial({ color: 0xffd37a, roughness: 0.35, emissive: 0xffb84a, emissiveIntensity: 0.6 }));
 knob.position.set(W / 2 + 0.03, 1.6, 0); dev.add(knob);
 const callout = document.getElementById('power-callout');
+if (coarse && hint) hint.textContent = 'Tap the screen to start';
 if (callout) callout.addEventListener('click', () => setPower(true));
 const knobWorld = new THREE.Vector3();
 
@@ -454,7 +455,7 @@ function setPower(v) {
     bootTimer = setTimeout(() => { view = 'menu'; draw(); }, still ? 300 : 1900);
   } else {
     stopMusic(); beep(220, 0.15, 'sawtooth'); offAt = performance.now(); view = 'off';
-    hint.innerHTML = coarse ? 'Flip the switch on the right side to start, or tap the screen' : 'Flip the switch on the right side to start, or press any key';
+    hint.innerHTML = coarse ? 'Tap the screen to start' : 'Flip the switch on the right side to start, or press any key';
   }
 }
 function flash(k) {
