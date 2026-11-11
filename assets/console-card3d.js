@@ -435,16 +435,16 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) stopM
 new IntersectionObserver(([en]) => { inView = en.intersectionRatio > 0.4; if (!inView) stopMusic(); else if (on) startMusic(); }, { threshold: [0, 0.4, 1] }).observe(section);
 
 // ---------- Behaviour ----------
-let bootTimer, zoomTarget = 0, zoom = 0, spin = 0, spinTarget = 0;
-const showingBack = () => Math.abs(Math.round(spinTarget / Math.PI)) % 2 === 1;
-const toFront = () => { spinTarget = Math.round(spinTarget / (Math.PI * 2)) * Math.PI * 2; };
+let bootTimer, zoomTarget = 0, zoom = 0, spin = 0, spinTarget = 0, pitch = 0, pitchTarget = 0;
+const showingBack = () => (Math.abs(Math.round(spinTarget / Math.PI)) + Math.abs(Math.round(pitchTarget / Math.PI))) % 2 === 1;
+const toFront = () => { spinTarget = Math.round(spinTarget / (Math.PI * 2)) * Math.PI * 2; pitchTarget = Math.round(pitchTarget / (Math.PI * 2)) * Math.PI * 2; };
 function setPower(v) {
   if (v === on) return;
   on = v; clearTimeout(bootTimer); zoomTarget = on ? 1 : 0;
   if (on) {
     view = 'boot'; idx = 0; bootAt = performance.now(); chime(); startMusic(0.6); toFront();
     hint.innerHTML = coarse ? 'Tap the d-pad, A to open, B to go back, or tap the screen'
-      : 'Click the buttons or the screen, or use <kbd>&#8593;</kbd><kbd>&#8595;</kbd> <kbd>Enter</kbd> <kbd>Backspace</kbd> <kbd>M</kbd> mute. Drag to spin it.';
+      : 'Click the buttons or the screen, or use <kbd>&#8593;</kbd><kbd>&#8595;</kbd> <kbd>Enter</kbd> <kbd>Backspace</kbd> <kbd>M</kbd> mute. Drag to spin it any way.';
     bootTimer = setTimeout(() => { view = 'menu'; draw(); }, still ? 300 : 1900);
   } else {
     stopMusic(); beep(220, 0.15, 'sawtooth'); offAt = performance.now(); view = 'off';
@@ -521,9 +521,10 @@ function hitAt(e) {
 }
 let tiltX = 0, tiltY = 0, drag = null, moved = false;
 const cv = renderer.domElement;
-cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, spin: spinTarget, hit: hitAt(e) }; moved = false; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, spin: spinTarget, pitch: pitchTarget, hit: hitAt(e) }; moved = false; cv.setPointerCapture(e.pointerId); });
 cv.addEventListener('pointermove', e => {
-  if (drag) { const dx = e.clientX - drag.x; if (Math.abs(dx) > 6) moved = true; if (moved) { spinTarget = drag.spin + dx * 0.012; cv.style.cursor = 'grabbing'; } return; }
+  if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) > 6 || (!coarse && Math.abs(dy) > 6)) moved = true;
+    if (moved) { spinTarget = drag.spin + dx * 0.012; if (!coarse) pitchTarget = drag.pitch + dy * 0.012; cv.style.cursor = 'grabbing'; } return; }
   const h = hitAt(e);
   hoverScreen = null;
   if (!h && floating.length) { const s = ray.intersectObjects(floating.map(f => f.userData.img), false)[0]; if (s) hoverScreen = s.object.userData.screen; }
@@ -532,7 +533,7 @@ cv.addEventListener('pointermove', e => {
 cv.addEventListener('pointerup', () => {
   if (!drag) return;
   const d = drag; drag = null;
-  if (moved) { spinTarget = Math.round(spinTarget / Math.PI) * Math.PI; return; }
+  if (moved) { spinTarget = Math.round(spinTarget / Math.PI) * Math.PI; pitchTarget = Math.round(pitchTarget / Math.PI) * Math.PI; return; }
   const h = d.hit;
   if (h && h.k === 'power') { setPower(!on); return; }
   if (!h && hoverScreen && window.openProject) { window.openProject(hoverScreen.userData.id); return; }
@@ -575,9 +576,10 @@ function frame() {
   const raw = clock.getDelta(), dt = Math.min(raw, 0.05), rdt = Math.min(raw, 0.5), t = clock.elapsedTime;
   zoom += (zoomTarget - zoom) * Math.min(1, dt * 1.8);
   spin += (spinTarget - spin) * Math.min(1, dt * 7);
+  pitch += (pitchTarget - pitch) * Math.min(1, dt * 7);
   const z = zoom;
   const rx = THREE.MathUtils.lerp(tiltX + 0.22, tiltX * 0.4, z), ry = THREE.MathUtils.lerp(tiltY - 0.35, tiltY * 0.4, z);
-  dev.rotation.x += (rx - dev.rotation.x) * Math.min(1, dt * 5);
+  dev.rotation.x += (rx + pitch - dev.rotation.x) * Math.min(1, dt * 5);
   dev.rotation.y += (ry + spin - dev.rotation.y) * Math.min(1, dt * 5);
   dev.position.y = still ? 0 : Math.sin(t * 1.1) * 0.06;
   shadow.scale.setScalar(1 - dev.position.y * 0.3);
